@@ -8,7 +8,7 @@ no abstract
 no for..in Iterable requres GObject
 subclasses, like derived structs, cannot declare instance members
 limited generics - only primitive types except for builtins (List)
-
+many string methods lack runtime support, and crash.
 
 
 

@@ -10,12 +10,14 @@ Initially, this works with classic (stable) SDL.
 work in progress
 uses https://github.com/radare/posixvala as a starting point. 
 
-the posix implementation is sparse, I'm adding to it as I run into missing stuff, 
-so the emscripten.vapi and posix header files are copied locally into this projet while I'm adding to them.
+it appears that vala treats glib as it's builtin runtime library, so for example instead of calling strdup, it calls g_strdup which calls strdup. That is pretty much how proprietary languages enforce vendor lockin. So much for moral superiority.
+
+In any case, the fix is in some cases to copy back in the missing glib functions as they break. I don't see a license conflict in doing so, as it is done to support vala, a product covered by the same license as glib. 
+
+## licenses
 
 
-## license
+LGPL3 - posixvala glib replacement (C) 2013 - pancake@nopcode.org
+LPGL2 - some misc functions from glib (C) 1991 Free Software Foundation, Inc.
 
-this work copyright 2017 darkoverlordofdata - Apache 2.0 License
-
-LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org
+Remainder of this work copyright 2017 darkoverlordofdata - Apache 2.0 License

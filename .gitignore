@@ -5,6 +5,7 @@ sdx/
 entitas/
 web/
 bin/
+c/
 *~
 *.AppImage
 install/
