@@ -240,11 +240,10 @@ static inline gchar *g_utf8_strreverse (const gchar *str, gssize len)
 
   	g_return_val_if_fail (str != NULL, NULL);
 
-  	if (len < 0)
-    	len = strlen (str);
-  	result = g_strndup (str, len);
-	s = result;
-	t = result + strlen (result) - 1;
+  	if (len < 0) len = strlen (str);
+		result = g_strndup (str, len);
+		s = result;
+		t = result + strlen (result) - 1;
 
     while (s < t)
     {
@@ -255,9 +254,7 @@ static inline gchar *g_utf8_strreverse (const gchar *str, gssize len)
           s++;
           *t = c;
           t--;
-        
     }
-
   return result;
 }
 

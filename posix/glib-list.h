@@ -189,6 +189,74 @@ static inline guint g_list_length (GList *list)
   return length;
 }
 
+/**
+ * g_list_nth:
+ * @list: a #GList, this must point to the top of the list
+ * @n: the position of the element, counting from 0
+ *
+ * Gets the element at the given position in a #GList.
+ *
+ * This iterates over the list until it reaches the @n-th position. If you
+ * intend to iterate over every element, it is better to use a for-loop as
+ * described in the #GList introduction.
+ *
+ * Returns: the element, or %NULL if the position is off 
+ *     the end of the #GList
+ */
+static inline GList *g_list_nth (GList *list, guint  n)
+{
+  while ((n-- > 0) && list)
+    list = list->next;
+  
+  return list;
+}
+/**
+ * g_list_nth_data:
+ * @list: a #GList, this must point to the top of the list
+ * @n: the position of the element
+ *
+ * Gets the data of the element at the given position.
+ *
+ * This iterates over the list until it reaches the @n-th position. If you
+ * intend to iterate over every element, it is better to use a for-loop as
+ * described in the #GList introduction.
+ *
+ * Returns: the element's data, or %NULL if the position 
+ *     is off the end of the #GList
+ */
+static inline gpointer g_list_nth_data (GList *list, guint  n)
+{
+  while ((n-- > 0) && list)
+    list = list->next;
+  
+  return list ? list->data : NULL;
+}
+
+/**
+ * g_list_remove_link:
+ * @list: a #GList, this must point to the top of the list
+ * @llink: an element in the #GList
+ *
+ * Removes an element from a #GList, without freeing the element.
+ * The removed element's prev and next links are set to %NULL, so 
+ * that it becomes a self-contained list with one element.
+ *
+ * This function is for example used to move an element in the list
+ * (see the example for g_list_concat()) or to remove an element in
+ * the list before freeing its data:
+ * |[<!-- language="C" --> 
+ * list = g_list_remove_link (list, llink);
+ * free_some_data_that_may_access_the_list_again (llink->data);
+ * g_list_free (llink);
+ * ]|
+ *
+ * Returns: the (possibly changed) start of the #GList
+ */
+static inline GList *g_list_remove_link (GList *list, GList *llink)
+{
+  return _g_list_remove_link (list, llink);
+}
+
 
 /* slist */
 #define GSList GList

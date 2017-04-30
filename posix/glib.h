@@ -57,7 +57,6 @@ G_BEGIN_DECLS
 #define g_return_if_fail(x) if(!(x)) return;
 #define g_return_val_if_fail(x,y) if (!(x)) return y;
 #define g_slice_free(x,y) free(y)
-//#define g_enum_register_static(x,y) (int)(size_t)(y),0
 #define g_enum_register_static(x,y) 0
 
 #define g_critical printf
@@ -65,8 +64,8 @@ G_BEGIN_DECLS
 #define FALSE 0
 #define G_GNUC_CONST
 #define GType int
-/* Define min and max constants for the fixed size numerical types */
 
+/* Define min and max constants for the fixed size numerical types */
 
 #define G_MININT8	((gint8) -0x80)
 #define G_MAXINT8	((gint8)  0x7f)

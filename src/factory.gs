@@ -23,8 +23,7 @@ enum Pool
 [Compact]
 class Factory
 
-	cache	   : array of List of Entity* 
-	//pool: Entity[20]
+	cache: array of List of Entity* 
 	id:int = 0
 	images: array of Surface = {
 		new Surface.load("assets/images/background.png"),
@@ -38,6 +37,9 @@ class Factory
 		new Surface.load("assets/images/particle.png")
 	}
 		
+	def deleteEntity(entity:Entity*)
+		entity.setActive(false)
+		cache[entity.pool].append(entity)
 
 	def createCore(name:string, pool:int, active:bool = false):Entity*
 		var id = this.id++
@@ -60,21 +62,91 @@ class Factory
 		return createEntity("player", Pool.PLAYER, images[Pool.PLAYER], true)
 
 	def createBullet():Entity*
-		return (
-			createEntity("bullet", Pool.BULLET, images[Pool.BULLET])
+		var entity = (createEntity("bullet", Pool.BULLET, images[Pool.BULLET])
 			.addTint(0xd2, 0xfa, 0, 0xfa)
 			.addExpires(1.0)
 			.addHealth(2, 2)
 			.addVelocity(0, -800)
 			.setBullet(true))
+		cache[Pool.BULLET].append(entity)
+		return entity
 
-	// def newBullet(x:int, y:int)
-	// 	if cache[Pool.BULLET].is_empty 
-	// 		cache[Pool.BULLET].add(createBullet())
-			
-	// 	var entity = world.cache[Pool.BULLET].remove_at(0)
-	// 	listener.entityAdded(entity
-	// 		.setPosition(x, y)
-	// 		.setExpires(1.0)
-	// 		.setActive(true))
+	def createEnemy1():Entity*
+		var entity = (
+			createEntity("enemy1", Pool.ENEMY1, images[Pool.ENEMY1])
+			.addHealth(10, 10)
+			.addVelocity(0, 40)
+			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
+			.setEnemy1(true))
+		cache[Pool.ENEMY1].append(entity)
+		return entity
+
+	def createEnemy2():Entity*
+		var entity = (
+			createEntity("enemy2", Pool.ENEMY2, images[Pool.ENEMY2])
+			.addHealth(20, 20)
+			.addVelocity(0, 30)
+			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
+			.setEnemy2(true))
+		cache[Pool.ENEMY2].append(entity)
+		return entity
+
+	def createEnemy3():Entity*
+		var entity = (
+			createEntity("enemy3", Pool.ENEMY3, images[Pool.ENEMY3])
+			.addHealth(60, 60)
+			.addVelocity(0, 20)
+			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
+			.setEnemy3(true))
+		cache[Pool.ENEMY3].append(entity)
+		return entity
+
+	def newBullet(x:int, y:int)
+		if cache[Pool.BULLET].length() == 0 
+			print "out of bullets"
+			return
+
+		var entity = cache[Pool.BULLET].nth_data(0)
+		cache[Pool.BULLET].remove_link(cache[Pool.BULLET].nth(0))
+		(entity
+			.setPosition(x, y)
+			.setExpires(1.0)
+			.setActive(true))
+
+	def newEnemy1(x:int, y:int) 
+		if cache[Pool.ENEMY1].length() == 0
+			print "out of enemy1"
+			return
+
+		var entity = cache[Pool.ENEMY1].nth_data(0)
+		cache[Pool.ENEMY1].remove_link(cache[Pool.ENEMY1].nth(0))
+		(entity
+			.setPosition(x, y)
+			.setHealth(10, 10)
+			.setActive(true))
+
+	def newEnemy2(x:int, y:int) 
+		if cache[Pool.ENEMY2].length() == 0
+			print "out of enemy2"
+			return
+
+		var entity = cache[Pool.ENEMY2].nth_data(0)
+		cache[Pool.ENEMY2].remove_link(cache[Pool.ENEMY2].nth(0))
+		(entity
+			.setPosition(x, y)
+			.setHealth(20, 20) 
+			.setActive(true))
+
+	def newEnemy3(x:int, y:int) 
+		if cache[Pool.ENEMY3].length() == 0
+			print "out of enemy3"
+			return
+
+		var entity = cache[Pool.ENEMY3].nth_data(0)
+		cache[Pool.ENEMY3].remove_link(cache[Pool.ENEMY3].nth(0))
+		(entity
+			.setPosition(x, y)
+			.setHealth(60, 60)
+			.setActive(true))
+
 

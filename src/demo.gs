@@ -1,18 +1,13 @@
 uses SDL
 uses Emscripten
 
-
-struct Item
-	name:string
-	value:int
-
 init
 
 	if SDL.init(SDL.InitFlag.VIDEO) < 0
 		print "Unable to init SDL %s", SDL.get_error()
 		return
 
-	var game = new Game()
+	var game = new Game(600, 480)
 	game.surface = Screen.set_video_mode(600, 480, 32, SurfaceFlag.HWSURFACE | SurfaceFlag.DOUBLEBUF)
 
 	if game.surface == null	

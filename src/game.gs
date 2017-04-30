@@ -10,6 +10,8 @@ POOL: Entity[100]
 [Compact]
 class Game
 
+	width		: int
+	height		: int
 	mark1		: double
 	mark2		: double
 	delta		: double
@@ -23,6 +25,17 @@ class Game
 	factory		: Factory
 	systems		: Systems
 	sprites		: List of Entity* = new List of Entity*
+
+	k           : int
+	t           : double
+	t1          : double = 0.0
+	t2          : double = 0.0
+	t3          : double = 0.0
+	
+
+	construct(width:int, height:int)
+		this.width = width
+		this.height = height
 
 	def initialize()
 		factory = new Factory()
@@ -63,7 +76,18 @@ class Game
 		mark1 = mark2
 
 		processEvents()
+
+		t1 = emscripten_get_now()/1000
 		systems.update(delta)
+		t2 = emscripten_get_now()/1000
+		t3 = t2 - t1
+		t = t + t3
+		k += 1
+		if k == 1000
+			k = 0
+			t = t / 1000.0
+			print "%f", t
+			t = 0
 
 
 		surface.fill(null, surface.format.map_rgb(255, 0, 0))
