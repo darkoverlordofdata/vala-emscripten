@@ -11,7 +11,7 @@
         {
             "isBuildCommand": true,
             "taskName": "build",
-            "args": ["posixvalac -C --vapidir ./vapis --pkg sdl --pkg emscripten --save-temps --disable-warnings src/demo.gs src/game.gs src/components.gs src/factory.gs src/hashmap.gs && emcc -Iposix -O2 -s WASM=1 --use-preload-plugins --preload-file assets -o web/index.html src/demo.c src/game.c src/components.c src/factory.c src/hashmap.c"]
+            "args": ["posixvalac -C --vapidir ./vapis --pkg sdl --pkg emscripten --save-temps --disable-warnings src/demo.gs src/game.gs src/components.gs src/factory.gs && emcc -Iposix -O2 -s WASM=1 --use-preload-plugins --preload-file assets -o web/index.html src/demo.c src/game.c src/components.c src/factory.c"]
         }
     ]
 }
