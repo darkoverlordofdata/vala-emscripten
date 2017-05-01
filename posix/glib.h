@@ -235,6 +235,31 @@ static inline gpointer g_malloc_n (gsize n_blocks, gsize n_block_bytes)
 
 #define GLIB_CHECK_VERSION(m,n,o) TRUE
 
+static inline gint
+(g_atomic_int_add) (volatile gint *atomic, gint val)
+{
+  gint oldval;
+
+  // pthread_mutex_lock (&g_atomic_lock);
+  oldval = *atomic;
+  *atomic = oldval + val;
+  // pthread_mutex_unlock (&g_atomic_lock);
+
+  return oldval;
+}
+
+static inline gboolean (g_atomic_int_dec_and_test) (volatile gint *atomic)
+{
+  gboolean is_zero;
+
+  // pthread_mutex_lock (&g_atomic_lock);
+  is_zero = --(*atomic) == 0;
+  // pthread_mutex_unlock (&g_atomic_lock);
+
+  return is_zero;
+}
+
+
 #include "glib-list.h"
 #include "glib-string.h"
 #include "glib-error.h"

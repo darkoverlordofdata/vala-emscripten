@@ -9,8 +9,6 @@ namespace entitas
 		SingleEntity
 		WorldDoesNotContainEntity
 
-
-
 	[Compact]
 	class World
 		instance	: static unowned World
@@ -51,11 +49,16 @@ namespace entitas
 				.setActive(active))
 
 		def getGroup(matcher : Matcher) : Group*
-
 			if groups.length() > matcher.id 
 				return groups.nth_data(matcher.id)
 			else
 				groups.prepend(new Group(matcher))
+				/**
+				 * according to the docs, GLib.List doesn't referece count
+				 * switching from Gee.ArrayList go GLib.List means that we need
+				 * to manually bump the refCount
+				 */
+				matcher.addRef()
 				for var i = 0 to (this.id-1) do groups.nth_data(0)->handleEntitySilently(&POOL[i])
 				return groups.nth_data(0)
 
@@ -69,7 +72,7 @@ namespace entitas
 		entities:List of Entity* = new List of Entity*
 		singleEntityCache: Entity*
 		
-		construct(matcher:Matcher)
+		construct(matcher: Matcher)
 			this.matcher = matcher
 
 		/** Add entity to group */
@@ -98,14 +101,23 @@ namespace entitas
 	/**
 	 * Match entities by component
 	 * complile list of components to bit array for fast comparison
+	 *
+	 * modules that call this code need to add these forward declarations:
+	 * 
+	 *	void entitas_matcher_release (entitasMatcher* self);
+	 *	void entitas_matcher_free (entitasMatcher* self);
+	 *
 	 */
-	[Compact]
+	[Compact, CCode (
+		ref_function = "entitas_matcher_addRef", 
+		unref_function = "entitas_matcher_release"
+	)]
 	class Matcher
-
 		/**
 		 * A unique sequential index number assigned to each ,atch
 		 * @type number */
 		uniqueId : static int
+		refCount: int = 1
 		/**
 		 * Get the matcher id
 		 * @type number
@@ -159,7 +171,15 @@ namespace entitas
 				anyOfIndices = Matcher.distinctIndices(anyOf)
 				noneOfIndices = Matcher.distinctIndices(noneOf)
 
-
+			
+		def addRef() : unowned Matcher 
+			GLib.AtomicInt.add (ref refCount, 1)
+			return this
+		def release() // dis-allow gc
+			if GLib.AtomicInt.dec_and_test (ref refCount)
+				this.free ()
+			pass
+		def extern free()
 		/**
 		 * A list of the component ordinals that this matches
 		 * @type Array<number>
@@ -234,7 +254,6 @@ namespace entitas
 				if anyOfIndices != null
 					if allOfIndices != null
 						sb += "."
-
 					sb += "AnyOf("
 					sb += componentstoString(anyOfIndices)
 					sb += ")"

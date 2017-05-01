@@ -38,6 +38,7 @@ class Game
 	def initialize()
 		factory = new Factory()
 		systems = new Systems(this, factory)
+		systems.initialize()
 		// list the entities in the console
 		// for var i=0 to (POOL.length-1)
 		// 	// if !POOL[i].isActive() do continue

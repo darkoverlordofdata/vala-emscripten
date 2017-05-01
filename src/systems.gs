@@ -11,8 +11,8 @@ class Systems
 
 	FireRate	: double = 0.1
 	timeToFire  : double = 0.0
-	shoot	   : bool
-	scale	   : double = 1.0
+	shoot	   	: bool
+	scale	   	: double = 1.0
 	game		: unowned Game
 	factory		: unowned Factory
 	player		: Entity*
@@ -23,6 +23,8 @@ class Systems
 	construct(game:Game, factory:Factory)
 		this.game = game
 		this.factory = factory
+
+	def initialize()
 		factory.createBackground(0)
 		factory.createBackground(1)
 		player = factory.createPlayer()
@@ -30,9 +32,13 @@ class Systems
 		for var i=1 to 15 do factory.createEnemy1()
 		for var i=1 to 10 do factory.createEnemy2()
 		for var i=1 to  5 do factory.createEnemy3()
+
+		print "Init"
 		physicsGroup = factory.getGroup(Matcher.AllOf({Components.VelocityComponent}))
 		print physicsGroup->matcher.toString()
-
+		//#define _entitas_matcher_release0
+		// void entitas_matcher_release (entitasMatcher* self);
+		// void entitas_matcher_free (entitasMatcher* self);
 
 
 	/**

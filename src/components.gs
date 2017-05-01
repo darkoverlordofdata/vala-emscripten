@@ -582,6 +582,9 @@ namespace entitas
 	const __TWEEN__:uint64 = 0x20000
 	const __VELOCITY__:uint64 = 0x40000
 	const __ACTIVE__:uint64 = 0x8000000000000000
+
+
+	
 	/**
 	* Component names
 	*/

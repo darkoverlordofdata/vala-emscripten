@@ -1,0 +1,30 @@
+#!/usr/bin/env coffee
+###
+##
+## fix forward references to 
+##      entitas_matcher_release
+##      entitas_matcher_free
+##
+##  CCode atrribute forward referenes are not propogated to other outputs
+##  in the same compilation unit. This fixes it.
+##
+###
+fs = require 'fs'
+
+for file in fs.readdirSync("./c/src")
+    if file is 'entitas.c' then continue
+    src = fs.readFileSync("./c/src/#{file}", 'utf8').split('\n')
+    dst = []
+    flag = false
+    for line in src 
+        if /^\#define _entitas_matcher_release0/.test line
+            flag = true
+            dst.push "void entitas_matcher_release (entitasMatcher* self);"
+            dst.push "void entitas_matcher_free (entitasMatcher* self);"
+
+        dst.push line
+    if flag
+        console.log "patching ./c/src/#{file}"
+        fs.writeFileSync("./c/src/#{file}", dst.join('\n'))
+
+

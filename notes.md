@@ -6,6 +6,7 @@ no virtual or override
 no interface
 no abstract
 no for..in Iterable requres GObject
+no [Flags] enum
 subclasses, like derived structs, cannot declare instance members
 limited generics - only primitive types except for builtins (List)
 many string methods lack runtime support, and crash.
@@ -22,10 +23,13 @@ string funcs (ascii only):
     .down()
     .reverse()
 
+string comparison
 string.join
 string.joinv
 string.split
 
 varoius list methods
+
+
 
 Rebel Alliance logo By User:Tkgd2007 [Public domain], via Wikimedia Commons
