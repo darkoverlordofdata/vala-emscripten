@@ -23,6 +23,7 @@ string funcs (ascii only):
     .down()
     .reverse()
 
+reference counting
 string comparison
 string.join
 string.joinv

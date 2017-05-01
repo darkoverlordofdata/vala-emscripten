@@ -8,11 +8,8 @@ Initially, this works with classic (stable) SDL.
 
 ## status
 work in progress
-uses https://github.com/radare/posixvala as a starting point. 
+uses https://github.com/radare/posixvala + custom posix runtime for enscriptem
 
-it appears that vala treats glib as it's builtin runtime library, so for example instead of calling strdup, it calls g_strdup which calls strdup. That is pretty much how proprietary languages enforce vendor lockin. So much for moral superiority.
-
-In any case, the fix is in some cases to copy back in the missing glib functions as they break. I don't see a license conflict in doing so, as it is done to support vala, a product covered by the same license as glib. 
 
 ## licenses
 

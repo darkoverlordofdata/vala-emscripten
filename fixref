@@ -2,8 +2,8 @@
 ###
 ##
 ## fix forward references to 
-##      entitas_matcher_release
-##      entitas_matcher_free
+##      entitas_<class_name>_release
+##      entitas_<class_name>_free
 ##
 ##  CCode atrribute forward referenes are not propogated to other outputs
 ##  in the same compilation unit. This fixes it.
@@ -17,6 +17,16 @@ for file in fs.readdirSync("./c/src")
     dst = []
     flag = false
     for line in src 
+        if /^\#define _entitas_group_release0/.test line
+            flag = true
+            dst.push "void entitas_group_release (entitasGroup* self);"
+            dst.push "void entitas_group_free (entitasGroup* self);"
+
+        if /^\#define _entitas_world_release0/.test line
+            flag = true
+            dst.push "void entitas_world_release (entitasWorld* self);"
+            dst.push "void entitas_world_free (entitasWorld* self);"
+
         if /^\#define _entitas_matcher_release0/.test line
             flag = true
             dst.push "void entitas_matcher_release (entitasMatcher* self);"

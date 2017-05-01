@@ -9,16 +9,28 @@ namespace entitas
 		SingleEntity
 		WorldDoesNotContainEntity
 
-	[Compact]
+	[Compact, CCode (
+		ref_function = "entitas_world_addRef", 
+		unref_function = "entitas_world_release"
+	)]
 	class World
 		instance	: static unowned World
 		groups		: List of Group*
 		cache		: array of List of Entity* 
 		images		: array of SDL.Surface
 		id			: int = 0
+		refCount	: int=1
 
 		construct()
 			instance = this
+
+		def addRef() : unowned World
+			GLib.AtomicInt.add (ref refCount, 1)
+			return this
+		def release() 
+			if GLib.AtomicInt.dec_and_test (ref refCount)
+				this.free ()
+		def extern free()
 
 		def static onComponentAdded(e:Entity*, c:Components)
 			instance.componentAddedOrRemoved(e, c)
@@ -48,14 +60,14 @@ namespace entitas
 				.setPool(pool)
 				.setActive(active))
 
-		def getGroup(matcher : Matcher) : Group*
+		def getGroup(matcher : Matcher) : Group
 			if groups.length() > matcher.id 
 				return groups.nth_data(matcher.id)
 			else
 				groups.prepend(new Group(matcher))
 				/**
-				 * according to the docs, GLib.List doesn't referece count
-				 * switching from Gee.ArrayList go GLib.List means that we need
+				 * according to the docs, GLib.List doesn't referece count, therefore
+				 * due to switching from Gee.ArrayList go GLib.List, we are required
 				 * to manually bump the refCount
 				 */
 				matcher.addRef()
@@ -66,15 +78,26 @@ namespace entitas
 	/**
 	 * A Group is a set of entities defined by a Matcher
 	 */
-	[Compact]
+	[Compact, CCode (
+		ref_function = "entitas_group_addRef", 
+		unref_function = "entitas_group_release"
+	)]
 	class Group
-		matcher:unowned Matcher
-		entities:List of Entity* = new List of Entity*
+		matcher		: unowned Matcher
+		entities	: List of Entity* = new List of Entity*
+		refCount	: int=1
 		singleEntityCache: Entity*
 		
 		construct(matcher: Matcher)
 			this.matcher = matcher
 
+		def addRef() : unowned Group 
+			GLib.AtomicInt.add (ref refCount, 1)
+			return this
+		def release() 
+			if GLib.AtomicInt.dec_and_test (ref refCount)
+				this.free ()
+		def extern free()
 		/** Add entity to group */
 		def handleEntitySilently(entity : Entity*)
 			if matcher.matches(entity) do entities.append(entity)
@@ -171,14 +194,12 @@ namespace entitas
 				anyOfIndices = Matcher.distinctIndices(anyOf)
 				noneOfIndices = Matcher.distinctIndices(noneOf)
 
-			
 		def addRef() : unowned Matcher 
 			GLib.AtomicInt.add (ref refCount, 1)
 			return this
-		def release() // dis-allow gc
+		def release() 
 			if GLib.AtomicInt.dec_and_test (ref refCount)
 				this.free ()
-			pass
 		def extern free()
 		/**
 		 * A list of the component ordinals that this matches

@@ -16,9 +16,9 @@ class Systems
 	game		: unowned Game
 	factory		: unowned Factory
 	player		: Entity*
-
-	physicsGroup : Group*
-
+	physics		: Group
+	expiring	: Group
+	movable		: Group	
 
 	construct(game:Game, factory:Factory)
 		this.game = game
@@ -33,29 +33,21 @@ class Systems
 		for var i=1 to 10 do factory.createEnemy2()
 		for var i=1 to  5 do factory.createEnemy3()
 
-		print "Init"
-		physicsGroup = factory.getGroup(Matcher.AllOf({Components.VelocityComponent}))
-		print physicsGroup->matcher.toString()
-		//#define _entitas_matcher_release0
-		// void entitas_matcher_release (entitasMatcher* self);
-		// void entitas_matcher_free (entitasMatcher* self);
+		physics 	= factory.getGroup(Matcher.AllOf({Components.VelocityComponent}))
+		expiring 	= factory.getGroup(Matcher.AllOf({Components.ExpiresComponent}))
+		movable 	= factory.getGroup(Matcher.AllOf({Components.PositionComponent}))
 
 
 	/**
 	 *	update each game frame
 	 */
 	def update(delta:double)
-
-		var entities = new List of Entity*
-		for var i=0 to (POOL.length-1) do if POOL[i].isActive() do entities.append(&POOL[i])
-
 		spawnSystem(delta)
+		inputSystem(player, delta) 
 		collisionSystem(delta)
-		inputSystem(delta)
-		for var entity in entities do physicsSystem(entity, delta)
-		for var entity in entities do expireSystem(entity, delta)
-		for var entity in entities do removeSystem(entity, delta)
-
+		for var entity in physics.entities 	do physicsSystem(entity, delta)
+		for var entity in expiring.entities do expireSystem(entity, delta)
+		for var entity in movable.entities 	do removeSystem(entity, delta)
 
 
 	/**
@@ -69,16 +61,15 @@ class Systems
 	 */
 	def expireSystem(entity:Entity*, delta:double)
 		if entity.isActive() 
-			if entity.hasExpires()
-				var exp = entity.expires.value - delta
-				entity.expires.value = exp
-				if entity.expires.value < 0 do factory.deleteEntity(entity)
+			var exp = entity.expires.value - delta
+			entity.expires.value = exp
+			if entity.expires.value < 0 do factory.deleteEntity(entity)
 
 	/**
 	 * input system
 	 * process user input
 	 */
-	def inputSystem(delta:double)
+	def inputSystem(player:Entity*, delta:double)
 		var x = (int)game.mouseX
 		var y = (int)game.mouseY
 		var x1 = x-player.bounds.w/2
@@ -100,34 +91,32 @@ class Systems
 	 */
 	def physicsSystem(entity:Entity*, delta:double)
 		if entity.isActive() 
-			if entity.hasVelocity()
 
-				var x = entity.position.x + entity.velocity.x * delta
-				var y = entity.position.y + entity.velocity.y * delta
+			var x = entity.position.x + entity.velocity.x * delta
+			var y = entity.position.y + entity.velocity.y * delta
 
-				entity.setPosition(x, y)
-				entity.bounds.x = (int)x
-				entity.bounds.y = (int)y
+			entity.setPosition(x, y)
+			entity.bounds.x = (int)x
+			entity.bounds.y = (int)y
 		
 	/**
 	 * remove system
 	 */
 	def removeSystem(entity:Entity*, delta:double)
 		if entity.isActive() 
-			if entity.hasPosition()
-				case entity.pool
-					when Pool.ENEMY1
-						if entity.position.y > game.height do factory.deleteEntity(entity)
-						
-					when Pool.ENEMY2
-						if entity.position.y > game.height do factory.deleteEntity(entity)
-						
-					when Pool.ENEMY3
-						if entity.position.y > game.height do factory.deleteEntity(entity)
-						
-					when Pool.BULLET
-						if entity.position.y < 0 do factory.deleteEntity(entity)
-						
+			case entity.pool
+				when Pool.ENEMY1
+					if entity.position.y > game.height do factory.deleteEntity(entity)
+					
+				when Pool.ENEMY2
+					if entity.position.y > game.height do factory.deleteEntity(entity)
+					
+				when Pool.ENEMY3
+					if entity.position.y > game.height do factory.deleteEntity(entity)
+					
+				when Pool.BULLET
+					if entity.position.y < 0 do factory.deleteEntity(entity)
+					
 	/**
 	 * spawn system
 	 */
