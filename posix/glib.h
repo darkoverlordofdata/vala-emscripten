@@ -19,7 +19,21 @@ G_BEGIN_DECLS
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <limits.h>
 
+#define G_MINFLOAT	FLT_MIN
+#define G_MAXFLOAT	FLT_MAX
+#define G_MINDOUBLE	DBL_MIN
+#define G_MAXDOUBLE	DBL_MAX
+#define G_MINSHORT	SHRT_MIN
+#define G_MAXSHORT	SHRT_MAX
+#define G_MAXUSHORT	USHRT_MAX
+#define G_MININT	INT_MIN
+#define G_MAXINT	INT_MAX
+#define G_MAXUINT	UINT_MAX
+#define G_MINLONG	LONG_MIN
+#define G_MAXLONG	LONG_MAX
+#define G_MAXULONG	ULONG_MAX
 
 #define GTypeInterface void*
 #define GQuark uintptr_t
@@ -52,6 +66,8 @@ G_BEGIN_DECLS
 #define gssize ssize_t
 #define g_new0(x,y) (x*)calloc (y, sizeof(x));
 #define g_new(x, y)	(x*)malloc (sizeof(x)*y);	
+#define g_renew(x,m,y) (x*)realloc (m, sizeof(x)*y); 
+
 
 #define g_slice_new0(x) (x*)calloc (1, sizeof(x));
 #define g_return_if_fail(x) if(!(x)) return;
@@ -219,8 +235,8 @@ static inline gpointer g_malloc_n (gsize n_blocks, gsize n_block_bytes)
 
 #define GLIB_CHECK_VERSION(m,n,o) TRUE
 
-#include "glib-string.h"
 #include "glib-list.h"
+#include "glib-string.h"
 #include "glib-error.h"
 
 G_END_DECLS

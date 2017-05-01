@@ -10,6 +10,22 @@ subclasses, like derived structs, cannot declare instance members
 limited generics - only primitive types except for builtins (List)
 many string methods lack runtime support, and crash.
 
+### fixed
+array concat:
 
+    var x = array of int[0]
+    x += 42
+
+string funcs (ascii only):
+
+    .up()
+    .down()
+    .reverse()
+
+string.join
+string.joinv
+string.split
+
+varoius list methods
 
 Rebel Alliance logo By User:Tkgd2007 [Public domain], via Wikimedia Commons

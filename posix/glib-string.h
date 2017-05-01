@@ -257,6 +257,185 @@ static inline gchar *g_utf8_strreverse (const gchar *str, gssize len)
     }
   return result;
 }
+/**
+ * g_stpcpy:
+ * @dest: destination buffer.
+ * @src: source string.
+ *
+ * Copies a nul-terminated string into the dest buffer, include the
+ * trailing nul, and return a pointer to the trailing nul byte.
+ * This is useful for concatenating multiple strings together
+ * without having to repeatedly scan for the end.
+ *
+ * Returns: a pointer to trailing nul byte.
+ **/
+static inline gchar *g_stpcpy (gchar *dest, const gchar *src)
+{
+#ifdef HAVE_STPCPY
+  g_return_val_if_fail (dest != NULL, NULL);
+  g_return_val_if_fail (src != NULL, NULL);
+  return stpcpy (dest, src);
+#else
+  gchar *d = dest;
+  const gchar *s = src;
+
+  g_return_val_if_fail (dest != NULL, NULL);
+  g_return_val_if_fail (src != NULL, NULL);
+  do
+    *d++ = *s;
+  while (*s++ != '\0');
+
+  return d - 1;
+#endif
+}
+
+/**
+ * g_strjoin:
+ * @separator: (nullable): a string to insert between each of the
+ *     strings, or %NULL
+ * @...: a %NULL-terminated list of strings to join
+ *
+ * Joins a number of strings together to form one long string, with the
+ * optional @separator inserted between each of them. The returned string
+ * should be freed with g_free().
+ *
+ * Returns: a newly-allocated string containing all of the strings joined
+ *     together, with @separator between them
+ */
+static inline gchar *g_strjoin (const gchar *separator, ...)
+{
+  gchar *string, *s;
+  va_list args;
+  gsize len;
+  gsize separator_len;
+  gchar *ptr;
+
+  if (separator == NULL)
+    separator = "";
+
+  separator_len = strlen (separator);
+
+  va_start (args, separator);
+
+  s = va_arg (args, gchar*);
+
+  if (s)
+    {
+      /* First part, getting length */
+      len = 1 + strlen (s);
+
+      s = va_arg (args, gchar*);
+      while (s)
+        {
+          len += separator_len + strlen (s);
+          s = va_arg (args, gchar*);
+        }
+      va_end (args);
+
+      /* Second part, building string */
+      string = g_new (gchar, len);
+
+      va_start (args, separator);
+
+      s = va_arg (args, gchar*);
+      ptr = g_stpcpy (string, s);
+
+      s = va_arg (args, gchar*);
+      while (s)
+        {
+          ptr = g_stpcpy (ptr, separator);
+          ptr = g_stpcpy (ptr, s);
+          s = va_arg (args, gchar*);
+        }
+    }
+  else
+    string = g_strdup ("");
+
+  va_end (args);
+
+  return string;
+}
+
+
+/**
+ * g_strsplit:
+ * @string: a string to split
+ * @delimiter: a string which specifies the places at which to split
+ *     the string. The delimiter is not included in any of the resulting
+ *     strings, unless @max_tokens is reached.
+ * @max_tokens: the maximum number of pieces to split @string into.
+ *     If this is less than 1, the string is split completely.
+ *
+ * Splits a string into a maximum of @max_tokens pieces, using the given
+ * @delimiter. If @max_tokens is reached, the remainder of @string is
+ * appended to the last token.
+ *
+ * As an example, the result of g_strsplit (":a:bc::d:", ":", -1) is a
+ * %NULL-terminated vector containing the six strings "", "a", "bc", "", "d"
+ * and "".
+ *
+ * As a special case, the result of splitting the empty string "" is an empty
+ * vector, not a vector containing a single string. The reason for this
+ * special case is that being able to represent a empty vector is typically
+ * more useful than consistent handling of empty elements. If you do need
+ * to represent empty elements, you'll need to check for the empty string
+ * before calling g_strsplit().
+ *
+ * Returns: a newly-allocated %NULL-terminated array of strings. Use
+ *    g_strfreev() to free it.
+ */
+static inline gchar**
+g_strsplit (const gchar *string,
+            const gchar *delimiter,
+            gint         max_tokens)
+{
+  GSList *string_list = NULL, *slist;
+  gchar **str_array, *s;
+  guint n = 0;
+  const gchar *remainder;
+
+  g_return_val_if_fail (string != NULL, NULL);
+  g_return_val_if_fail (delimiter != NULL, NULL);
+  g_return_val_if_fail (delimiter[0] != '\0', NULL);
+
+  if (max_tokens < 1)
+    max_tokens = G_MAXINT;
+
+  remainder = string;
+  s = strstr (remainder, delimiter);
+  if (s)
+    {
+      gsize delimiter_len = strlen (delimiter);
+
+      while (--max_tokens && s)
+        {
+          gsize len;
+
+          len = s - remainder;
+          string_list = g_slist_prepend (string_list,
+                                         g_strndup (remainder, len));
+          n++;
+          remainder = s + delimiter_len;
+          s = strstr (remainder, delimiter);
+        }
+    }
+  if (*string)
+    {
+      n++;
+      string_list = g_slist_prepend (string_list, g_strdup (remainder));
+    }
+
+  str_array = g_new (gchar*, n + 1);
+
+  str_array[n--] = NULL;
+  for (slist = string_list; slist; slist = slist->next)
+    str_array[n--] = slist->data;
+
+  g_slist_free (string_list);
+
+  return str_array;
+}
+
 
 #endif /* _GLIB_STRING_H_ */
 

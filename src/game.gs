@@ -5,8 +5,6 @@ uses SDL
 uses Emscripten
 uses entitas
 	
-POOL: Entity[100]
-
 [Compact]
 class Game
 

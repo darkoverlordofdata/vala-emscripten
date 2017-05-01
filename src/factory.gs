@@ -20,49 +20,45 @@ enum Pool
 	Count
 
  
+/**
+ * fabricate specialized entities
+ */
 [Compact]
-class Factory
+class Factory : World
 
-	cache: array of List of Entity* 
-	id:int = 0
-	images: array of Surface = {
-		new Surface.load("assets/images/background.png"),
-		new Surface.load("assets/images/enemy1.png"),
-		new Surface.load("assets/images/enemy2.png"),
-		new Surface.load("assets/images/enemy3.png"),
-		new Surface.load("assets/images/spaceshipspr.png"),
-		new Surface.load("assets/images/bullet.png"),
-		new Surface.load("assets/images/explosion.png"),
-		new Surface.load("assets/images/explosion.png"),
-		new Surface.load("assets/images/particle.png")
-	}
+	construct()
+		images =  {
+			new Surface.load("assets/images/background.png"),
+			new Surface.load("assets/images/enemy1.png"),
+			new Surface.load("assets/images/enemy2.png"),
+			new Surface.load("assets/images/enemy3.png"),
+			new Surface.load("assets/images/spaceshipspr.png"),
+			new Surface.load("assets/images/bullet.png"),
+			new Surface.load("assets/images/explosion.png"),
+			new Surface.load("assets/images/explosion.png"),
+			new Surface.load("assets/images/particle.png")
+		}
 		
-	def deleteEntity(entity:Entity*)
-		entity.setActive(false)
-		cache[entity.pool].append(entity)
-
-	def createCore(name:string, pool:int, active:bool = false):Entity*
-		var id = this.id++
-		return POOL[id].setId(id).setName(name).setPool(pool).setActive(active)
-
-	def createEntity(name:string, pool:int, s:Surface, active:bool = false):Entity*
-		return (createCore(name, pool, active)
+	def createBase(name:string, pool:int, s:Surface, active:bool = false):Entity*
+		return (createEntity(name, pool, active)
 			.addPosition(0, 0)
 			.addLayer(pool)
 			.addBounds(0, 0, s.w, s.h)
 			.addSprite(s))
-
+	/**
+	 * specialize background
+	 */
 	def createBackground(tile:int):Entity*
-		var e = (createEntity("background", Pool.BACKGROUND, images[Pool.BACKGROUND], true)
+		var e = (createBase("background", Pool.BACKGROUND, images[Pool.BACKGROUND], true)
 			.setBackground(true))
 		e.bounds.x = e.bounds.w * tile
 		return e
 
 	def createPlayer():Entity*
-		return createEntity("player", Pool.PLAYER, images[Pool.PLAYER], true)
+		return createBase("player", Pool.PLAYER, images[Pool.PLAYER], true)
 
 	def createBullet():Entity*
-		var entity = (createEntity("bullet", Pool.BULLET, images[Pool.BULLET])
+		var entity = (createBase("bullet", Pool.BULLET, images[Pool.BULLET])
 			.addTint(0xd2, 0xfa, 0, 0xfa)
 			.addExpires(1.0)
 			.addHealth(2, 2)
@@ -73,7 +69,7 @@ class Factory
 
 	def createEnemy1():Entity*
 		var entity = (
-			createEntity("enemy1", Pool.ENEMY1, images[Pool.ENEMY1])
+			createBase("enemy1", Pool.ENEMY1, images[Pool.ENEMY1])
 			.addHealth(10, 10)
 			.addVelocity(0, 40)
 			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
@@ -83,7 +79,7 @@ class Factory
 
 	def createEnemy2():Entity*
 		var entity = (
-			createEntity("enemy2", Pool.ENEMY2, images[Pool.ENEMY2])
+			createBase("enemy2", Pool.ENEMY2, images[Pool.ENEMY2])
 			.addHealth(20, 20)
 			.addVelocity(0, 30)
 			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
@@ -93,7 +89,7 @@ class Factory
 
 	def createEnemy3():Entity*
 		var entity = (
-			createEntity("enemy3", Pool.ENEMY3, images[Pool.ENEMY3])
+			createBase("enemy3", Pool.ENEMY3, images[Pool.ENEMY3])
 			.addHealth(60, 60)
 			.addVelocity(0, 20)
 			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
