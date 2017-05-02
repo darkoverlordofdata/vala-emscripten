@@ -5,7 +5,10 @@ uses SDL
 uses Emscripten
 uses entitas
 	
-[Compact]
+[Compact, CCode ( /** reference counting */
+	ref_function = "game_addRef", 
+	unref_function = "game_release"
+)]
 class Game
 
 	width		: int
@@ -103,3 +106,13 @@ class Game
 		surface.flip()
 
 
+	/**
+	* Implement reference counting
+	*/
+	refCount: int = 1
+	def addRef() : unowned Game
+		GLib.AtomicInt.add (ref refCount, 1)
+		return this
+	def release() 
+		if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
+	def extern free()

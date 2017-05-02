@@ -26,8 +26,11 @@ enum Pool
 [Compact]
 class Factory : World
 
+	/**
+	 * Load all the surface resources
+	 */
 	construct()
-		images =  {
+		surface =  {
 			new Surface.load("assets/images/background.png"),
 			new Surface.load("assets/images/enemy1.png"),
 			new Surface.load("assets/images/enemy2.png"),
@@ -39,6 +42,9 @@ class Factory : World
 			new Surface.load("assets/images/particle.png")
 		}
 		
+	/**
+	 * The stuff that all entities have
+	 */
 	def createBase(name:string, pool:int, s:Surface, active:bool = false):Entity*
 		return (createEntity(name, pool, active)
 			.addPosition(0, 0)
@@ -49,16 +55,16 @@ class Factory : World
 	 * specialize background
 	 */
 	def createBackground(tile:int):Entity*
-		var e = (createBase("background", Pool.BACKGROUND, images[Pool.BACKGROUND], true)
+		var e = (createBase("background", Pool.BACKGROUND, surface[Pool.BACKGROUND], true)
 			.setBackground(true))
 		e.bounds.x = e.bounds.w * tile
 		return e
 
 	def createPlayer():Entity*
-		return createBase("player", Pool.PLAYER, images[Pool.PLAYER], true)
+		return createBase("player", Pool.PLAYER, surface[Pool.PLAYER], true)
 
 	def createBullet():Entity*
-		var entity = (createBase("bullet", Pool.BULLET, images[Pool.BULLET])
+		var entity = (createBase("bullet", Pool.BULLET, surface[Pool.BULLET])
 			.addTint(0xd2, 0xfa, 0, 0xfa)
 			.addExpires(1.0)
 			.addHealth(2, 2)
@@ -69,7 +75,7 @@ class Factory : World
 
 	def createEnemy1():Entity*
 		var entity = (
-			createBase("enemy1", Pool.ENEMY1, images[Pool.ENEMY1])
+			createBase("enemy1", Pool.ENEMY1, surface[Pool.ENEMY1])
 			.addHealth(10, 10)
 			.addVelocity(0, 40)
 			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
@@ -79,7 +85,7 @@ class Factory : World
 
 	def createEnemy2():Entity*
 		var entity = (
-			createBase("enemy2", Pool.ENEMY2, images[Pool.ENEMY2])
+			createBase("enemy2", Pool.ENEMY2, surface[Pool.ENEMY2])
 			.addHealth(20, 20)
 			.addVelocity(0, 30)
 			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
@@ -89,7 +95,7 @@ class Factory : World
 
 	def createEnemy3():Entity*
 		var entity = (
-			createBase("enemy3", Pool.ENEMY3, images[Pool.ENEMY3])
+			createBase("enemy3", Pool.ENEMY3, surface[Pool.ENEMY3])
 			.addHealth(60, 60)
 			.addVelocity(0, 20)
 			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))

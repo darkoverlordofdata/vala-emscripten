@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+posixvalac -C \
+    --vapidir ./vapis \
+    --pkg sdl \
+    --pkg emscripten \
+    --save-temps \
+    --disable-warnings \
+    --directory=c \
+    src/main.gs \
+    src/Game.gs \
+    src/components.gs \
+    src/Systems.gs \
+    src/Factory.gs \
+    src/entitas/entitas.gs \
+    src/entitas/World.gs \
+    src/entitas/Group.gs \
+    src/entitas/Matcher.gs 
+    
+./fixref.coffee
+
+emcc -s WASM=1 \
+    -Iposix \
+    -O2 \
+    --use-preload-plugins \
+    --preload-file assets \
+    -o web/index.html \
+    c/src/main.c \
+    c/src/Game.c \
+    c/src/components.c \
+    c/src/Systems.c \
+    c/src/Factory.c \
+    c/src/entitas/entitas.c \
+    c/src/entitas/World.c \
+    c/src/entitas/Group.c \
+    c/src/entitas/Matcher.c
+

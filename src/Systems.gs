@@ -9,16 +9,21 @@ uses entitas
 [Compact]
 class Systems
 
+	enemyT1     : double = 1.0
+	enemyT2     : double = 4.0
+	enemyT3     : double = 6.0
 	FireRate	: double = 0.1
 	timeToFire  : double = 0.0
 	shoot	   	: bool
 	scale	   	: double = 1.0
-	game		: unowned Game
-	factory		: unowned Factory
+	game		: Game
+	factory		: Factory
 	player		: Entity*
 	physics		: Group
 	expiring	: Group
 	movable		: Group	
+	enemies		: Group
+	bullets		: Group
 
 	construct(game:Game, factory:Factory)
 		this.game = game
@@ -36,6 +41,12 @@ class Systems
 		physics 	= factory.getGroup(Matcher.AllOf({Components.VelocityComponent}))
 		expiring 	= factory.getGroup(Matcher.AllOf({Components.ExpiresComponent}))
 		movable 	= factory.getGroup(Matcher.AllOf({Components.PositionComponent}))
+		enemies 	= factory.getGroup(Matcher.AnyOf({
+						Components.Enemy1Component,
+						Components.Enemy2Component,
+						Components.Enemy3Component
+					}))
+		bullets 	= factory.getGroup(Matcher.AllOf({Components.BulletComponent}))
 
 
 	/**
@@ -121,5 +132,28 @@ class Systems
 	 * spawn system
 	 */
 	def spawnSystem(delta:double)
-		pass
+		enemyT1 = spawnEnemy(delta, enemyT1, 1)
+		enemyT2 = spawnEnemy(delta, enemyT2, 2)
+		enemyT3 = spawnEnemy(delta, enemyT3, 3)
 
+	def spawnEnemy(delta:double , t:double , enemy:int):double 
+		var d1 = t-delta
+		if (d1 < 0.0) 
+			case enemy
+				when 1
+					var x = (int)(emscripten_random() * (game.width-70)) + 35
+					factory.newEnemy1(x, -35)
+					return 1.0
+				when 2
+					var x = (int)(emscripten_random() * (game.width-172)) + 85
+					factory.newEnemy2(x, -85)
+					return 4.0
+				when 3
+					var x = (int)(emscripten_random() * (game.width-320)) + 160
+					factory.newEnemy3(x, -160)
+					return 6.0
+				default
+					return 0.0
+			
+		else 
+			return d1    
