@@ -16,8 +16,13 @@
 ##      there is one such class per file
 ###
 fs = require 'fs'
+path = require 'path'
 list = []
 options = {}
+
+lcfirst = (str) -> str.charAt(0).toLowerCase() + str.substr(1)
+snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
+
 
 ##
 ## add missing references
@@ -40,15 +45,19 @@ patch = (file, options) ->
 ## walk the folder, gather list of files, and load mangle options
 ##
 walk = (namespace = '') ->
-    path = if namespace is "" then "./c/src" else "./c/src/#{namespace}"
-    for file in fs.readdirSync(path)
-        if file.indexOf('.c') is -1 then walk(file)
+    source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
+    for file in fs.readdirSync(source)
+        if path.extname(file) is '.gs' then continue
+        if path.extname(file) isnt '.c' then walk(file)
         else
-            list.push "#{path}/#{file}"
+            list.push "#{source}/#{file}"
             klass = file.replace('.c','')
             if klass[0] >='A' && klass[0] <= 'Z'
+                # name = snakeCase(lcfirst(klass))
                 name = klass.toLowerCase()
+                name1 = snakeCase(lcfirst(klass))
                 mangled = if namespace is "" then name else "#{namespace}_#{name}"
+                mangled1 = if namespace is "" then name1 else "#{namespace}_#{name1}"
                 options[mangled] = namespace+klass
 
 ##

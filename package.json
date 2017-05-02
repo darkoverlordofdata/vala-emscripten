@@ -1,23 +1,21 @@
 {
-  "name": "better-mousetrap",
+  "name": "emvc",
   "version": "1.0.0",
-  "description": "Building a better mousetrap",
+  "description": "valac+emcc",
   "main": "index.js",
   "scripts": {
-    "entitas": "entitas"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/darkoverlordofdata/better-mousetrap.git"
+    "url": "git+https://github.com/darkoverlordofdata/emvc.git"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "Apache2.0",
   "bugs": {
-    "url": "https://github.com/darkoverlordofdata/better-mousetrap/issues"
+    "url": "https://github.com/darkoverlordofdata/emvc/issues"
   },
-  "homepage": "https://github.com/darkoverlordofdata/better-mousetrap#readme",
+  "homepage": "https://github.com/darkoverlordofdata/emvc#readme",
   "devDependencies": {
-    "entitas-cli": "^0.2.0"
   }
 }

@@ -6,8 +6,18 @@ uses systems
 /**
  * game systems
  */
-[Pseudo]
+[Compact, CCode ( /** reference counting */
+	ref_function = "systems_addRef", 
+	unref_function = "systems_release"
+)]
 class Systems
+	refCount: int = 1
+	def addRef() : unowned Systems
+		GLib.AtomicInt.add (ref refCount, 1)
+		return this
+	def release() 
+		if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
+	def extern free()
 
 	collision	: Collision
 	expire		: Expire

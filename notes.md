@@ -13,22 +13,8 @@ limited generics - only primitive types except for builtins (List)
 Basically, anything that relies on GTypeInfo or GObject is broken. 
 Other stuff might work, and should be fixable by suplying missing runtime 
 
-classes should implement ref counting for sane behaviour.
-this requires some biolerplate:
-
-	[Compact, CCode ( /** reference counting */
-		ref_function = "entitas_<className>_addRef", 
-		unref_function = "entitas_<className>_release"
-	)]
-	class <ClassName>
-        ...
-		def addRef() : unowned <ClassName>
-			GLib.AtomicInt.add (ref refCount, 1)
-			return this
-		def release() 
-			if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
-		def extern free()
-		refCount: int = 1
+For sanity, I'm preprocessing a class attribute [Pseudo] to provide reference counting.
+post-process files are in build/src
 
 ### fixed
 
@@ -51,7 +37,6 @@ string.split
 
 varoius list methods
 
-convert +append bubble_explo*.png ../bubble_explo.png
 
 
 

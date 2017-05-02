@@ -5,6 +5,12 @@ uses SDL
 uses Emscripten
 uses entitas
 	
+// [Compact, CCode ( /** reference counting */
+// 	ref_function = "game_addRef", 
+// 	unref_function = "game_release"
+// )]
+// class Game
+
 [Pseudo]
 class Game
 	width		: int
@@ -28,8 +34,6 @@ class Game
 	t1          : double = 0.0
 	t2          : double = 0.0
 	t3          : double = 0.0
-
-	player : Entity*
 	
 
 	construct(width:int, height:int)
@@ -38,15 +42,13 @@ class Game
 
 	def initialize()
 		factory = new Factory()
-		factory.createBackground(0)
-		factory.createBackground(1)
-		player = factory.createPlayer()
-		for var i=1 to 10 do factory.createBullet()
-		for var i=1 to 15 do factory.createEnemy1()
-		for var i=1 to 10 do factory.createEnemy2()
-		for var i=1 to  5 do factory.createEnemy3()
-		systems = new Systems()
-		systems.initialize(this, factory)
+		systems = new Systems(this, factory)
+		systems.initialize()
+		// list the entities in the console
+		// for var i=0 to (POOL.length-1)
+		// 	// if !POOL[i].isActive() do continue
+		// 	if POOL[i].name == null do continue
+		// 	print POOL[i].toString()
 		
 
 	def start()
@@ -106,3 +108,13 @@ class Game
 		surface.flip()
 
 
+	// /**
+	// * Implement reference counting
+	// */
+	// refCount: int = 1
+	// def addRef() : unowned Game
+	// 	GLib.AtomicInt.add (ref refCount, 1)
+	// 	return this
+	// def release() 
+	// 	if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
+	// def extern free()
