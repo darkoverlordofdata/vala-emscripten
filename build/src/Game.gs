@@ -32,8 +32,8 @@ class Game
 	keys		: uint8[256]
 	evt			: SDL.Event
 	surface		: unowned Surface
-	factory		: Factory
-	systems		: Systems
+	world		: Factory
+	//systems		: Systems
 	sprites		: List of Entity* = new List of Entity*
 
 	collision	: Collision
@@ -59,41 +59,32 @@ class Game
 		this.height = height
 
 	def initialize()
-		factory = new Factory()
-		factory.setEntityRemovedListener(entityRemoved)
-		factory.createBackground(0)
-		factory.createBackground(1)
-		player = factory.createPlayer()
-		for var i=1 to 10 do factory.createBullet()
-		for var i=1 to 15 do factory.createEnemy1()
-		for var i=1 to 10 do factory.createEnemy2()
-		for var i=1 to  5 do factory.createEnemy3()
-		for var i=1 to 90 do factory.createParticle()
-		// systems = new Systems()
-		// systems.initialize(this, factory)
+		world = new Factory()
+		world.setEntityRemovedListener(entityRemoved)
+		world.createBackground(0)
+		world.createBackground(1)
+		player = world.createPlayer()
+		for var i=1 to 10 do world.createBullet()
+		for var i=1 to 15 do world.createEnemy1()
+		for var i=1 to 10 do world.createEnemy2()
+		for var i=1 to  5 do world.createEnemy3()
+		for var i=1 to 90 do world.createParticle()
 
-		spawn = new Spawn(this, factory)
-		input = new Input(this, factory)
-		collision = new Collision(this, factory)
-		physics = new Physics(this, factory)
-		expire = new Expire(this, factory)
-		remove = new Remove(this, factory)
+		spawn = new Spawn(this, world)
+		input = new Input(this, world)
+		collision = new Collision(this, world)
+		physics = new Physics(this, world)
+		expire = new Expire(this, world)
+		remove = new Remove(this, world)
 
-		// spawn.initialize()
-		// input.initialize() 
-		// collision.initialize()
-		// physics.initialize()
-		// expire.initialize()
-		// remove.initialize()
-
-		factory.addSystem(spawn.initialize, spawn.execute)
-		factory.addSystem(input.initialize, input.execute)
-		factory.addSystem(collision.initialize, collision.execute)
-		factory.addSystem(physics.initialize, physics.execute)
-		factory.addSystem(expire.initialize, expire.execute)
-		factory.addSystem(remove.initialize, remove.execute)
+		world.addSystem(spawn.initialize, spawn.execute)
+		world.addSystem(input.initialize, input.execute)
+		world.addSystem(collision.initialize, collision.execute)
+		world.addSystem(physics.initialize, physics.execute)
+		world.addSystem(expire.initialize, expire.execute)
+		world.addSystem(remove.initialize, remove.execute)
 		
-		factory.initialize()
+		world.initialize()
 			
 	def start()
 		running = true
@@ -126,14 +117,7 @@ class Game
 		processEvents()
 
 		t1 = emscripten_get_now()/1000
-		// systems.update(delta)
-		factory.execute(delta)
-		// spawn.execute(delta)
-		// input.execute(delta) 
-		// collision.execute(delta)
-		// physics.execute(delta)
-		// expire.execute(delta)
-		// remove.execute(delta)
+		world.execute(delta)
 		t2 = emscripten_get_now()/1000
 		t3 = t2 - t1
 		t = t + t3

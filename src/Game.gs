@@ -23,7 +23,7 @@ class Game
 	evt			: SDL.Event
 	surface		: unowned Surface
 	world		: Factory
-	systems		: Systems
+	//systems		: Systems
 	sprites		: List of Entity* = new List of Entity*
 
 	collision	: Collision
@@ -60,12 +60,12 @@ class Game
 		for var i=1 to  5 do world.createEnemy3()
 		for var i=1 to 90 do world.createParticle()
 
-		spawn = new Spawn(this, factory)
-		input = new Input(this, factory)
-		collision = new Collision(this, factory)
-		physics = new Physics(this, factory)
-		expire = new Expire(this, factory)
-		remove = new Remove(this, factory)
+		spawn = new Spawn(this, world)
+		input = new Input(this, world)
+		collision = new Collision(this, world)
+		physics = new Physics(this, world)
+		expire = new Expire(this, world)
+		remove = new Remove(this, world)
 
 		world.addSystem(spawn.initialize, spawn.execute)
 		world.addSystem(input.initialize, input.execute)

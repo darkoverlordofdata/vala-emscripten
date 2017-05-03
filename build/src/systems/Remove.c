@@ -93,7 +93,6 @@ typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
 
 #define TYPE_POOL (pool_get_type ())
-typedef struct _Systems Systems;
 typedef struct _systemsCollision systemsCollision;
 typedef struct _systemsExpire systemsExpire;
 typedef struct _systemsInput systemsInput;
@@ -278,8 +277,7 @@ struct _Game {
 	guint8 keys[256];
 	SDL_Event evt;
 	SDL_Surface* surface;
-	Factory* factory;
-	Systems* systems;
+	Factory* world;
 	GList* sprites;
 	systemsCollision* collision;
 	systemsExpire* expire;
@@ -375,7 +373,6 @@ void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
 gboolean entitas_entity_isActive (entitasEntity *self);
 GType pool_get_type (void) G_GNUC_CONST;
-void systems_free (Systems* self);
 void systems_collision_free (systemsCollision* self);
 void systems_expire_free (systemsExpire* self);
 void systems_input_free (systemsInput* self);

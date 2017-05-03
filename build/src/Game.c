@@ -14,7 +14,6 @@
 typedef struct _Game Game;
 typedef struct _entitasWorld entitasWorld;
 typedef entitasWorld Factory;
-typedef struct _Systems Systems;
 
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
 
@@ -82,10 +81,6 @@ void entitas_world_release (entitasWorld* self);
 void entitas_world_free (entitasWorld* self);
 entitasWorld* entitas_world_addRef (entitasWorld* self);
 #define _entitas_world_release0(var) ((var == NULL) ? NULL : (var = (entitas_world_release (var), NULL)))
-void systems_release (Systems* self);
-void systems_free (Systems* self);
-Systems* systems_addRef (Systems* self);
-#define _systems_release0(var) ((var == NULL) ? NULL : (var = (systems_release (var), NULL)))
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
 void systems_collision_release (systemsCollision* self);
 void systems_collision_free (systemsCollision* self);
@@ -248,8 +243,7 @@ struct _Game {
 	guint8 keys[256];
 	SDL_Event evt;
 	SDL_Surface* surface;
-	Factory* factory;
-	Systems* systems;
+	Factory* world;
 	GList* sprites;
 	systemsCollision* collision;
 	systemsExpire* expire;
@@ -274,7 +268,6 @@ Game* game_instance = NULL;
 
 void game_free (Game* self);
 void entitas_world_free (entitasWorld* self);
-void systems_free (Systems* self);
 GType entitas_entity_get_type (void) G_GNUC_CONST;
 GType entitas_background_get_type (void) G_GNUC_CONST;
 entitasBackground* entitas_background_dup (const entitasBackground* self);
@@ -548,15 +541,15 @@ void game_initialize (Game* self) {
 	Factory* _tmp51_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = factory_new ();
-	_entitas_world_release0 (self->factory);
-	self->factory = _tmp0_;
-	_tmp1_ = self->factory;
+	_entitas_world_release0 (self->world);
+	self->world = _tmp0_;
+	_tmp1_ = self->world;
 	entitas_world_setEntityRemovedListener ((entitasWorld*) _tmp1_, _entityRemoved_entitas_entity_removed_listener, NULL);
-	_tmp2_ = self->factory;
+	_tmp2_ = self->world;
 	factory_createBackground (_tmp2_, 0);
-	_tmp3_ = self->factory;
+	_tmp3_ = self->world;
 	factory_createBackground (_tmp3_, 1);
-	_tmp4_ = self->factory;
+	_tmp4_ = self->world;
 	_tmp5_ = factory_createPlayer (_tmp4_);
 	self->player = _tmp5_;
 	{
@@ -576,7 +569,7 @@ void game_initialize (Game* self) {
 				if (!(i <= 10)) {
 					break;
 				}
-				_tmp8_ = self->factory;
+				_tmp8_ = self->world;
 				factory_createBullet (_tmp8_);
 			}
 		}
@@ -598,7 +591,7 @@ void game_initialize (Game* self) {
 				if (!(i <= 15)) {
 					break;
 				}
-				_tmp11_ = self->factory;
+				_tmp11_ = self->world;
 				factory_createEnemy1 (_tmp11_);
 			}
 		}
@@ -620,7 +613,7 @@ void game_initialize (Game* self) {
 				if (!(i <= 10)) {
 					break;
 				}
-				_tmp14_ = self->factory;
+				_tmp14_ = self->world;
 				factory_createEnemy2 (_tmp14_);
 			}
 		}
@@ -642,7 +635,7 @@ void game_initialize (Game* self) {
 				if (!(i <= 5)) {
 					break;
 				}
-				_tmp17_ = self->factory;
+				_tmp17_ = self->world;
 				factory_createEnemy3 (_tmp17_);
 			}
 		}
@@ -664,60 +657,60 @@ void game_initialize (Game* self) {
 				if (!(i <= 90)) {
 					break;
 				}
-				_tmp20_ = self->factory;
+				_tmp20_ = self->world;
 				factory_createParticle (_tmp20_);
 			}
 		}
 	}
-	_tmp21_ = self->factory;
+	_tmp21_ = self->world;
 	_tmp22_ = systems_spawn_new (self, _tmp21_);
 	_systems_spawn_release0 (self->spawn);
 	self->spawn = _tmp22_;
-	_tmp23_ = self->factory;
+	_tmp23_ = self->world;
 	_tmp24_ = systems_input_new (self, _tmp23_);
 	_systems_input_release0 (self->input);
 	self->input = _tmp24_;
-	_tmp25_ = self->factory;
+	_tmp25_ = self->world;
 	_tmp26_ = systems_collision_new (self, _tmp25_);
 	_systems_collision_release0 (self->collision);
 	self->collision = _tmp26_;
-	_tmp27_ = self->factory;
+	_tmp27_ = self->world;
 	_tmp28_ = systems_physics_new (self, _tmp27_);
 	_systems_physics_release0 (self->physics);
 	self->physics = _tmp28_;
-	_tmp29_ = self->factory;
+	_tmp29_ = self->world;
 	_tmp30_ = systems_expire_new (self, _tmp29_);
 	_systems_expire_release0 (self->expire);
 	self->expire = _tmp30_;
-	_tmp31_ = self->factory;
+	_tmp31_ = self->world;
 	_tmp32_ = systems_remove_new (self, _tmp31_);
 	_systems_remove_release0 (self->remove);
 	self->remove = _tmp32_;
-	_tmp33_ = self->factory;
+	_tmp33_ = self->world;
 	_tmp34_ = self->spawn;
 	_tmp35_ = self->spawn;
 	entitas_world_addSystem ((entitasWorld*) _tmp33_, _systems_spawn_initialize_entitas_system_initialize, _tmp34_, _systems_spawn_execute_entitas_system_execute, _tmp35_);
-	_tmp36_ = self->factory;
+	_tmp36_ = self->world;
 	_tmp37_ = self->input;
 	_tmp38_ = self->input;
 	entitas_world_addSystem ((entitasWorld*) _tmp36_, _systems_input_initialize_entitas_system_initialize, _tmp37_, _systems_input_execute_entitas_system_execute, _tmp38_);
-	_tmp39_ = self->factory;
+	_tmp39_ = self->world;
 	_tmp40_ = self->collision;
 	_tmp41_ = self->collision;
 	entitas_world_addSystem ((entitasWorld*) _tmp39_, _systems_collision_initialize_entitas_system_initialize, _tmp40_, _systems_collision_execute_entitas_system_execute, _tmp41_);
-	_tmp42_ = self->factory;
+	_tmp42_ = self->world;
 	_tmp43_ = self->physics;
 	_tmp44_ = self->physics;
 	entitas_world_addSystem ((entitasWorld*) _tmp42_, _systems_physics_initialize_entitas_system_initialize, _tmp43_, _systems_physics_execute_entitas_system_execute, _tmp44_);
-	_tmp45_ = self->factory;
+	_tmp45_ = self->world;
 	_tmp46_ = self->expire;
 	_tmp47_ = self->expire;
 	entitas_world_addSystem ((entitasWorld*) _tmp45_, _systems_expire_initialize_entitas_system_initialize, _tmp46_, _systems_expire_execute_entitas_system_execute, _tmp47_);
-	_tmp48_ = self->factory;
+	_tmp48_ = self->world;
 	_tmp49_ = self->remove;
 	_tmp50_ = self->remove;
 	entitas_world_addSystem ((entitasWorld*) _tmp48_, _systems_remove_initialize_entitas_system_initialize, _tmp49_, _systems_remove_execute_entitas_system_execute, _tmp50_);
-	_tmp51_ = self->factory;
+	_tmp51_ = self->world;
 	entitas_world_initialize ((entitasWorld*) _tmp51_);
 }
 
@@ -860,7 +853,7 @@ void game_update (Game* self) {
 	game_processEvents (self);
 	_tmp4_ = emscripten_get_now ();
 	self->t1 = _tmp4_ / 1000;
-	_tmp5_ = self->factory;
+	_tmp5_ = self->world;
 	_tmp6_ = self->delta;
 	entitas_world_execute ((entitasWorld*) _tmp5_, _tmp6_);
 	_tmp7_ = emscripten_get_now ();
@@ -1041,8 +1034,7 @@ static void game_instance_init (Game * self) {
 
 
 void game_free (Game* self) {
-	_entitas_world_release0 (self->factory);
-	_systems_release0 (self->systems);
+	_entitas_world_release0 (self->world);
 	_g_list_free0 (self->sprites);
 	_systems_collision_release0 (self->collision);
 	_systems_expire_release0 (self->expire);

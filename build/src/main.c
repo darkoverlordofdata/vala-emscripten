@@ -14,7 +14,6 @@
 typedef struct _Game Game;
 typedef struct _entitasWorld entitasWorld;
 typedef entitasWorld Factory;
-typedef struct _Systems Systems;
 
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
 
@@ -211,8 +210,7 @@ struct _Game {
 	guint8 keys[256];
 	SDL_Event evt;
 	SDL_Surface* surface;
-	Factory* factory;
-	Systems* systems;
+	Factory* world;
 	GList* sprites;
 	systemsCollision* collision;
 	systemsExpire* expire;
@@ -234,7 +232,6 @@ void _vala_main (gchar** args, int args_length1);
 void game_free (Game* self);
 Game* game_new (gint width, gint height);
 void entitas_world_free (entitasWorld* self);
-void systems_free (Systems* self);
 GType entitas_entity_get_type (void) G_GNUC_CONST;
 GType entitas_background_get_type (void) G_GNUC_CONST;
 entitasBackground* entitas_background_dup (const entitasBackground* self);

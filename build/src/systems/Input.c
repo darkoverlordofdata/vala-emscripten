@@ -22,7 +22,6 @@ void entitas_world_release (entitasWorld* self);
 void entitas_world_free (entitasWorld* self);
 entitasWorld* entitas_world_addRef (entitasWorld* self);
 #define _entitas_world_release0(var) ((var == NULL) ? NULL : (var = (entitas_world_release (var), NULL)))
-typedef struct _Systems Systems;
 
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
 
@@ -223,8 +222,7 @@ struct _Game {
 	guint8 keys[256];
 	SDL_Event evt;
 	SDL_Surface* surface;
-	Factory* factory;
-	Systems* systems;
+	Factory* world;
 	GList* sprites;
 	systemsCollision* collision;
 	systemsExpire* expire;
@@ -252,7 +250,6 @@ void systems_input_free (systemsInput* self);
 systemsInput* systems_input_new (Game* game, Factory* factory);
 void systems_input_initialize (systemsInput* self);
 void systems_input_execute (systemsInput* self, gdouble delta);
-void systems_free (Systems* self);
 GType entitas_entity_get_type (void) G_GNUC_CONST;
 GType entitas_background_get_type (void) G_GNUC_CONST;
 entitasBackground* entitas_background_dup (const entitasBackground* self);
