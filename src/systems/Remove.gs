@@ -20,12 +20,9 @@ namespace systems
 
 		def initialize()
 			movable = factory.getGroup(Matcher.AllOf({Components.PositionComponent}))
-
-
 		/**
-		* physics system
-		* model movement
-		*/
+		 * Remove entities that have gone off-screen
+		 */
 		def execute(delta:double)
 			for entity in movable.entities
 				if entity.isActive() 

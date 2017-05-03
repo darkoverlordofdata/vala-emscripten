@@ -167,6 +167,8 @@ struct _entitasHud {
 
 struct _entitasIndex {
 	gint value;
+	gint limit;
+	gboolean vertical;
 };
 
 struct _entitasLayer {
@@ -442,9 +444,8 @@ void systems_remove_initialize (systemsRemove* self) {
 
 
 /**
-* physics system
-* model movement
-*/
+ * Remove entities that have gone off-screen
+ */
 void systems_remove_execute (systemsRemove* self, gdouble delta) {
 	entitasGroup* _tmp0_ = NULL;
 	GList* _tmp1_ = NULL;

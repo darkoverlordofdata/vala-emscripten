@@ -133,6 +133,8 @@ struct _entitasHud {
 
 struct _entitasIndex {
 	gint value;
+	gint limit;
+	gboolean vertical;
 };
 
 struct _entitasLayer {
@@ -365,9 +367,8 @@ void systems_spawn_initialize (systemsSpawn* self) {
 
 
 /**
-* physics system
-* model movement
-*/
+ * Spawn enemy ships
+ */
 void systems_spawn_execute (systemsSpawn* self, gdouble delta) {
 	gdouble _tmp0_ = 0.0;
 	gdouble _tmp1_ = 0.0;

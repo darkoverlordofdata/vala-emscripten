@@ -14,7 +14,8 @@ Basically, anything that relies on GTypeInfo or GObject is broken.
 Other stuff might work, and should be fixable by suplying missing runtime 
 
 For sanity, I'm preprocessing a class attribute [Pseudo] to provide reference counting.
-post-process files are in build/src
+post-process files are in build/src. classes need simple names - the name mangling in the custom
+script isn't workin correctly for OverlyLongNamedClasses
 
 ### fixed
 
@@ -37,6 +38,20 @@ string.split
 
 varoius list methods
 
+convert explosion.png -implode .5 boom.png
+
+convert boom.png -implode .1 star9.png
+convert boom.png -implode .2 star8.png
+convert boom.png -implode .3 star7.png
+convert boom.png -implode .4 star6.png
+convert boom.png -implode .5 star5.png
+convert boom.png -implode .6 star4.png
+convert boom.png -implode .7 star3.png
+convert boom.png -implode .8 star2.png
+convert boom.png -implode .9 star1.png
+
+convert +append star*.png boom.png
+convert +append star*.png particle.png
 
 
 

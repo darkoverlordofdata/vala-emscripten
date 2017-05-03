@@ -16,6 +16,7 @@ SOURCE=build/src/main.gs \
 	build/src/entitas/World.gs \
 	build/src/entitas/Group.gs \
 	build/src/entitas/Matcher.gs 
+
 CC=emcc
 INCLUDE=-Iposix
 RESOURCES=--use-preload-plugins --preload-file assets
@@ -33,7 +34,7 @@ CCODE=build/src/main.c \
 	build/src/entitas/entitas.c \
 	build/src/entitas/World.c \
 	build/src/entitas/Group.c \
-	build/src/entitas/Matcher.c
+	build/src/entitas/Matcher.c 
 
 
 build:

@@ -6,11 +6,15 @@
 #include <glib-object.h>
 #include <float.h>
 #include <math.h>
+#include <stdlib.h>
+#include <string.h>
+#include <SDL.h>
 
 typedef struct _systemsCollision systemsCollision;
 typedef struct _Game Game;
 typedef struct _entitasWorld entitasWorld;
 typedef entitasWorld Factory;
+typedef struct _entitasGroup entitasGroup;
 void game_release (Game* self);
 void game_free (Game* self);
 Game* game_addRef (Game* self);
@@ -19,11 +23,224 @@ void entitas_world_release (entitasWorld* self);
 void entitas_world_free (entitasWorld* self);
 entitasWorld* entitas_world_addRef (entitasWorld* self);
 #define _entitas_world_release0(var) ((var == NULL) ? NULL : (var = (entitas_world_release (var), NULL)))
+void entitas_group_release (entitasGroup* self);
+void entitas_group_free (entitasGroup* self);
+entitasGroup* entitas_group_addRef (entitasGroup* self);
+#define _entitas_group_release0(var) ((var == NULL) ? NULL : (var = (entitas_group_release (var), NULL)))
+typedef struct _entitasMatcher entitasMatcher;
+
+#define ENTITAS_TYPE_COMPONENTS (entitas_components_get_type ())
+void entitas_matcher_release (entitasMatcher* self);
+void entitas_matcher_free (entitasMatcher* self);
+entitasMatcher* entitas_matcher_addRef (entitasMatcher* self);
+#define _entitas_matcher_release0(var) ((var == NULL) ? NULL : (var = (entitas_matcher_release (var), NULL)))
+
+#define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
+
+#define ENTITAS_TYPE_BACKGROUND (entitas_background_get_type ())
+typedef struct _entitasBackground entitasBackground;
+
+#define ENTITAS_TYPE_BOUNDS (entitas_bounds_get_type ())
+typedef struct _entitasBounds entitasBounds;
+
+#define ENTITAS_TYPE_BULLET (entitas_bullet_get_type ())
+typedef struct _entitasBullet entitasBullet;
+
+#define ENTITAS_TYPE_ENEMY1 (entitas_enemy1_get_type ())
+typedef struct _entitasEnemy1 entitasEnemy1;
+
+#define ENTITAS_TYPE_ENEMY2 (entitas_enemy2_get_type ())
+typedef struct _entitasEnemy2 entitasEnemy2;
+
+#define ENTITAS_TYPE_ENEMY3 (entitas_enemy3_get_type ())
+typedef struct _entitasEnemy3 entitasEnemy3;
+
+#define ENTITAS_TYPE_EXPIRES (entitas_expires_get_type ())
+typedef struct _entitasExpires entitasExpires;
+
+#define ENTITAS_TYPE_HEALTH (entitas_health_get_type ())
+typedef struct _entitasHealth entitasHealth;
+
+#define ENTITAS_TYPE_HUD (entitas_hud_get_type ())
+typedef struct _entitasHud entitasHud;
+
+#define ENTITAS_TYPE_INDEX (entitas_index_get_type ())
+typedef struct _entitasIndex entitasIndex;
+
+#define ENTITAS_TYPE_LAYER (entitas_layer_get_type ())
+typedef struct _entitasLayer entitasLayer;
+
+#define ENTITAS_TYPE_POSITION (entitas_position_get_type ())
+typedef struct _entitasPosition entitasPosition;
+
+#define ENTITAS_TYPE_SCALE (entitas_scale_get_type ())
+typedef struct _entitasScale entitasScale;
+
+#define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _entitasSprite entitasSprite;
+
+#define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
+typedef struct _entitasText entitasText;
+
+#define ENTITAS_TYPE_TINT (entitas_tint_get_type ())
+typedef struct _entitasTint entitasTint;
+
+#define ENTITAS_TYPE_TWEEN (entitas_tween_get_type ())
+typedef struct _entitasTween entitasTween;
+
+#define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
+typedef struct _entitasVelocity entitasVelocity;
+typedef struct _entitasEntity entitasEntity;
 
 struct _systemsCollision {
 	gint refCount;
 	Game* game;
 	Factory* factory;
+	entitasGroup* bullets;
+	entitasGroup* enemies;
+};
+
+typedef enum  {
+	ENTITAS_COMPONENTS_BackgroundComponent = 1,
+	ENTITAS_COMPONENTS_BoundsComponent,
+	ENTITAS_COMPONENTS_BulletComponent,
+	ENTITAS_COMPONENTS_Enemy1Component,
+	ENTITAS_COMPONENTS_Enemy2Component,
+	ENTITAS_COMPONENTS_Enemy3Component,
+	ENTITAS_COMPONENTS_ExpiresComponent,
+	ENTITAS_COMPONENTS_HealthComponent,
+	ENTITAS_COMPONENTS_HudComponent,
+	ENTITAS_COMPONENTS_IndexComponent,
+	ENTITAS_COMPONENTS_LayerComponent,
+	ENTITAS_COMPONENTS_PositionComponent,
+	ENTITAS_COMPONENTS_ScaleComponent,
+	ENTITAS_COMPONENTS_SoundComponent,
+	ENTITAS_COMPONENTS_SpriteComponent,
+	ENTITAS_COMPONENTS_TextComponent,
+	ENTITAS_COMPONENTS_TintComponent,
+	ENTITAS_COMPONENTS_TweenComponent,
+	ENTITAS_COMPONENTS_VelocityComponent,
+	ENTITAS_COMPONENTS_COUNT = 19
+} entitasComponents;
+
+struct _entitasBackground {
+	gboolean active;
+};
+
+struct _entitasBounds {
+	gint x;
+	gint y;
+	gint w;
+	gint h;
+};
+
+struct _entitasBullet {
+	gboolean active;
+};
+
+struct _entitasEnemy1 {
+	gboolean active;
+};
+
+struct _entitasEnemy2 {
+	gboolean active;
+};
+
+struct _entitasEnemy3 {
+	gboolean active;
+};
+
+struct _entitasExpires {
+	gdouble value;
+};
+
+struct _entitasHealth {
+	gdouble current;
+	gdouble maximum;
+};
+
+struct _entitasHud {
+	gboolean active;
+};
+
+struct _entitasIndex {
+	gint value;
+	gint limit;
+	gboolean vertical;
+};
+
+struct _entitasLayer {
+	gint value;
+};
+
+struct _entitasPosition {
+	gdouble x;
+	gdouble y;
+};
+
+struct _entitasScale {
+	gdouble x;
+	gdouble y;
+};
+
+struct _entitasSprite {
+	SDL_Surface* surface;
+};
+
+struct _entitasText {
+	gchar* text;
+	SDL_Surface* surface;
+};
+
+struct _entitasTint {
+	gint r;
+	gint g;
+	gint b;
+	gint a;
+};
+
+struct _entitasTween {
+	gdouble min;
+	gdouble max;
+	gdouble speed;
+	gboolean repeat;
+	gboolean active;
+};
+
+struct _entitasVelocity {
+	gdouble x;
+	gdouble y;
+};
+
+struct _entitasEntity {
+	gint id;
+	gchar* name;
+	gint pool;
+	guint64 mask;
+	entitasBackground* background;
+	entitasBounds* bounds;
+	entitasBullet* bullet;
+	entitasEnemy1* enemy1;
+	entitasEnemy2* enemy2;
+	entitasEnemy3* enemy3;
+	entitasExpires* expires;
+	entitasHealth* health;
+	entitasHud* hud;
+	entitasIndex* index;
+	entitasLayer* layer;
+	entitasPosition* position;
+	entitasScale* scale;
+	entitasSprite* sprite;
+	entitasText* text;
+	entitasTint* tint;
+	entitasTween* tween;
+	entitasVelocity* velocity;
+};
+
+struct _entitasGroup {
+	gint refCount;
+	entitasMatcher* matcher;
+	GList* entities;
 };
 
 
@@ -31,13 +248,84 @@ struct _systemsCollision {
 void systems_collision_free (systemsCollision* self);
 void game_free (Game* self);
 void entitas_world_free (entitasWorld* self);
+void entitas_group_free (entitasGroup* self);
 static void systems_collision_instance_init (systemsCollision * self);
 systemsCollision* systems_collision_addRef (systemsCollision* self);
 void systems_collision_release (systemsCollision* self);
 void systems_collision_free (systemsCollision* self);
 systemsCollision* systems_collision_new (Game* game, Factory* factory);
 void systems_collision_initialize (systemsCollision* self);
+void entitas_matcher_free (entitasMatcher* self);
+entitasGroup* entitas_world_getGroup (entitasWorld* self, entitasMatcher* matcher);
+entitasMatcher* entitas_matcher_AllOf (gint* args, int args_length1);
+GType entitas_components_get_type (void) G_GNUC_CONST;
+entitasMatcher* entitas_matcher_AnyOf (gint* args, int args_length1);
 void systems_collision_execute (systemsCollision* self, gdouble delta);
+GType entitas_entity_get_type (void) G_GNUC_CONST;
+GType entitas_background_get_type (void) G_GNUC_CONST;
+entitasBackground* entitas_background_dup (const entitasBackground* self);
+void entitas_background_free (entitasBackground* self);
+GType entitas_bounds_get_type (void) G_GNUC_CONST;
+entitasBounds* entitas_bounds_dup (const entitasBounds* self);
+void entitas_bounds_free (entitasBounds* self);
+GType entitas_bullet_get_type (void) G_GNUC_CONST;
+entitasBullet* entitas_bullet_dup (const entitasBullet* self);
+void entitas_bullet_free (entitasBullet* self);
+GType entitas_enemy1_get_type (void) G_GNUC_CONST;
+entitasEnemy1* entitas_enemy1_dup (const entitasEnemy1* self);
+void entitas_enemy1_free (entitasEnemy1* self);
+GType entitas_enemy2_get_type (void) G_GNUC_CONST;
+entitasEnemy2* entitas_enemy2_dup (const entitasEnemy2* self);
+void entitas_enemy2_free (entitasEnemy2* self);
+GType entitas_enemy3_get_type (void) G_GNUC_CONST;
+entitasEnemy3* entitas_enemy3_dup (const entitasEnemy3* self);
+void entitas_enemy3_free (entitasEnemy3* self);
+GType entitas_expires_get_type (void) G_GNUC_CONST;
+entitasExpires* entitas_expires_dup (const entitasExpires* self);
+void entitas_expires_free (entitasExpires* self);
+GType entitas_health_get_type (void) G_GNUC_CONST;
+entitasHealth* entitas_health_dup (const entitasHealth* self);
+void entitas_health_free (entitasHealth* self);
+GType entitas_hud_get_type (void) G_GNUC_CONST;
+entitasHud* entitas_hud_dup (const entitasHud* self);
+void entitas_hud_free (entitasHud* self);
+GType entitas_index_get_type (void) G_GNUC_CONST;
+entitasIndex* entitas_index_dup (const entitasIndex* self);
+void entitas_index_free (entitasIndex* self);
+GType entitas_layer_get_type (void) G_GNUC_CONST;
+entitasLayer* entitas_layer_dup (const entitasLayer* self);
+void entitas_layer_free (entitasLayer* self);
+GType entitas_position_get_type (void) G_GNUC_CONST;
+entitasPosition* entitas_position_dup (const entitasPosition* self);
+void entitas_position_free (entitasPosition* self);
+GType entitas_scale_get_type (void) G_GNUC_CONST;
+entitasScale* entitas_scale_dup (const entitasScale* self);
+void entitas_scale_free (entitasScale* self);
+GType entitas_sprite_get_type (void) G_GNUC_CONST;
+entitasSprite* entitas_sprite_dup (const entitasSprite* self);
+void entitas_sprite_free (entitasSprite* self);
+GType entitas_text_get_type (void) G_GNUC_CONST;
+entitasText* entitas_text_dup (const entitasText* self);
+void entitas_text_free (entitasText* self);
+void entitas_text_copy (const entitasText* self, entitasText* dest);
+void entitas_text_destroy (entitasText* self);
+GType entitas_tint_get_type (void) G_GNUC_CONST;
+entitasTint* entitas_tint_dup (const entitasTint* self);
+void entitas_tint_free (entitasTint* self);
+GType entitas_tween_get_type (void) G_GNUC_CONST;
+entitasTween* entitas_tween_dup (const entitasTween* self);
+void entitas_tween_free (entitasTween* self);
+GType entitas_velocity_get_type (void) G_GNUC_CONST;
+entitasVelocity* entitas_velocity_dup (const entitasVelocity* self);
+void entitas_velocity_free (entitasVelocity* self);
+entitasEntity* entitas_entity_dup (const entitasEntity* self);
+void entitas_entity_free (entitasEntity* self);
+void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
+void entitas_entity_destroy (entitasEntity* self);
+gboolean entitas_entity_isActive (entitasEntity *self);
+gboolean systems_collision_intersects (systemsCollision* self, entitasBounds r1, entitasBounds r2);
+void systems_collision_handleCollision (systemsCollision* self, entitasEntity** a, entitasEntity** b);
+void entitas_world_deleteEntity (entitasWorld* self, entitasEntity* entity);
 
 
 systemsCollision* systems_collision_addRef (systemsCollision* self) {
@@ -92,7 +380,47 @@ systemsCollision* systems_collision_new (Game* game, Factory* factory) {
 
 
 void systems_collision_initialize (systemsCollision* self) {
+	Factory* _tmp0_ = NULL;
+	gint* _tmp1_ = NULL;
+	gint* _tmp2_ = NULL;
+	gint _tmp2__length1 = 0;
+	entitasMatcher* _tmp3_ = NULL;
+	entitasMatcher* _tmp4_ = NULL;
+	entitasGroup* _tmp5_ = NULL;
+	Factory* _tmp6_ = NULL;
+	gint* _tmp7_ = NULL;
+	gint* _tmp8_ = NULL;
+	gint _tmp8__length1 = 0;
+	entitasMatcher* _tmp9_ = NULL;
+	entitasMatcher* _tmp10_ = NULL;
+	entitasGroup* _tmp11_ = NULL;
 	g_return_if_fail (self != NULL);
+	_tmp0_ = self->factory;
+	_tmp1_ = g_new0 (gint, 1);
+	_tmp1_[0] = (gint) ENTITAS_COMPONENTS_BulletComponent;
+	_tmp2_ = _tmp1_;
+	_tmp2__length1 = 1;
+	_tmp3_ = entitas_matcher_AllOf (_tmp2_, 1);
+	_tmp4_ = _tmp3_;
+	_tmp5_ = entitas_world_getGroup ((entitasWorld*) _tmp0_, _tmp4_);
+	_entitas_group_release0 (self->bullets);
+	self->bullets = _tmp5_;
+	_entitas_matcher_release0 (_tmp4_);
+	_tmp2_ = (g_free (_tmp2_), NULL);
+	_tmp6_ = self->factory;
+	_tmp7_ = g_new0 (gint, 3);
+	_tmp7_[0] = (gint) ENTITAS_COMPONENTS_Enemy1Component;
+	_tmp7_[1] = (gint) ENTITAS_COMPONENTS_Enemy2Component;
+	_tmp7_[2] = (gint) ENTITAS_COMPONENTS_Enemy3Component;
+	_tmp8_ = _tmp7_;
+	_tmp8__length1 = 3;
+	_tmp9_ = entitas_matcher_AnyOf (_tmp8_, 3);
+	_tmp10_ = _tmp9_;
+	_tmp11_ = entitas_world_getGroup ((entitasWorld*) _tmp6_, _tmp10_);
+	_entitas_group_release0 (self->enemies);
+	self->enemies = _tmp11_;
+	_entitas_matcher_release0 (_tmp10_);
+	_tmp8_ = (g_free (_tmp8_), NULL);
 }
 
 
@@ -101,7 +429,202 @@ void systems_collision_initialize (systemsCollision* self) {
 * model movement
 */
 void systems_collision_execute (systemsCollision* self, gdouble delta) {
+	entitasGroup* _tmp0_ = NULL;
+	GList* _tmp1_ = NULL;
 	g_return_if_fail (self != NULL);
+	_tmp0_ = self->enemies;
+	_tmp1_ = _tmp0_->entities;
+	{
+		GList* enemy_collection = NULL;
+		GList* enemy_it = NULL;
+		enemy_collection = _tmp1_;
+		for (enemy_it = enemy_collection; enemy_it != NULL; enemy_it = enemy_it->next) {
+			entitasEntity* enemy = NULL;
+			enemy = enemy_it->data;
+			{
+				gboolean _tmp2_ = FALSE;
+				_tmp2_ = entitas_entity_isActive (enemy);
+				if (_tmp2_) {
+					entitasGroup* _tmp3_ = NULL;
+					GList* _tmp4_ = NULL;
+					_tmp3_ = self->bullets;
+					_tmp4_ = _tmp3_->entities;
+					{
+						GList* bullet_collection = NULL;
+						GList* bullet_it = NULL;
+						bullet_collection = _tmp4_;
+						for (bullet_it = bullet_collection; bullet_it != NULL; bullet_it = bullet_it->next) {
+							entitasEntity* bullet = NULL;
+							bullet = bullet_it->data;
+							{
+								gboolean _tmp5_ = FALSE;
+								_tmp5_ = entitas_entity_isActive (bullet);
+								if (_tmp5_) {
+									entitasEntity* _tmp6_ = NULL;
+									entitasBounds* _tmp7_ = NULL;
+									entitasEntity* _tmp8_ = NULL;
+									entitasBounds* _tmp9_ = NULL;
+									gboolean _tmp10_ = FALSE;
+									_tmp6_ = enemy;
+									_tmp7_ = (*_tmp6_).bounds;
+									_tmp8_ = bullet;
+									_tmp9_ = (*_tmp8_).bounds;
+									_tmp10_ = systems_collision_intersects (self, *_tmp7_, *_tmp9_);
+									if (_tmp10_) {
+										systems_collision_handleCollision (self, &enemy, &bullet);
+										return;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+
+gboolean systems_collision_intersects (systemsCollision* self, entitasBounds r1, entitasBounds r2) {
+	gboolean result = FALSE;
+	gboolean _tmp0_ = FALSE;
+	gboolean _tmp1_ = FALSE;
+	gboolean _tmp2_ = FALSE;
+	entitasBounds _tmp3_ = {0};
+	gint _tmp4_ = 0;
+	entitasBounds _tmp5_ = {0};
+	gint _tmp6_ = 0;
+	entitasBounds _tmp7_ = {0};
+	gint _tmp8_ = 0;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp3_ = r1;
+	_tmp4_ = _tmp3_.x;
+	_tmp5_ = r2;
+	_tmp6_ = _tmp5_.x;
+	_tmp7_ = r2;
+	_tmp8_ = _tmp7_.w;
+	if (_tmp4_ < (_tmp6_ + _tmp8_)) {
+		entitasBounds _tmp9_ = {0};
+		gint _tmp10_ = 0;
+		entitasBounds _tmp11_ = {0};
+		gint _tmp12_ = 0;
+		entitasBounds _tmp13_ = {0};
+		gint _tmp14_ = 0;
+		_tmp9_ = r1;
+		_tmp10_ = _tmp9_.x;
+		_tmp11_ = r1;
+		_tmp12_ = _tmp11_.w;
+		_tmp13_ = r2;
+		_tmp14_ = _tmp13_.x;
+		_tmp2_ = (_tmp10_ + _tmp12_) > _tmp14_;
+	} else {
+		_tmp2_ = FALSE;
+	}
+	if (_tmp2_) {
+		entitasBounds _tmp15_ = {0};
+		gint _tmp16_ = 0;
+		entitasBounds _tmp17_ = {0};
+		gint _tmp18_ = 0;
+		entitasBounds _tmp19_ = {0};
+		gint _tmp20_ = 0;
+		_tmp15_ = r1;
+		_tmp16_ = _tmp15_.y;
+		_tmp17_ = r2;
+		_tmp18_ = _tmp17_.y;
+		_tmp19_ = r2;
+		_tmp20_ = _tmp19_.h;
+		_tmp1_ = _tmp16_ < (_tmp18_ + _tmp20_);
+	} else {
+		_tmp1_ = FALSE;
+	}
+	if (_tmp1_) {
+		entitasBounds _tmp21_ = {0};
+		gint _tmp22_ = 0;
+		entitasBounds _tmp23_ = {0};
+		gint _tmp24_ = 0;
+		entitasBounds _tmp25_ = {0};
+		gint _tmp26_ = 0;
+		_tmp21_ = r1;
+		_tmp22_ = _tmp21_.y;
+		_tmp23_ = r1;
+		_tmp24_ = _tmp23_.h;
+		_tmp25_ = r2;
+		_tmp26_ = _tmp25_.y;
+		_tmp0_ = (_tmp22_ + _tmp24_) > _tmp26_;
+	} else {
+		_tmp0_ = FALSE;
+	}
+	result = _tmp0_;
+	return result;
+}
+
+
+void systems_collision_handleCollision (systemsCollision* self, entitasEntity** a, entitasEntity** b) {
+	gint x = 0;
+	entitasEntity* _tmp0_ = NULL;
+	entitasPosition* _tmp1_ = NULL;
+	gdouble _tmp2_ = 0.0;
+	entitasEntity* _tmp3_ = NULL;
+	entitasBounds* _tmp4_ = NULL;
+	gint _tmp5_ = 0;
+	gint y = 0;
+	entitasEntity* _tmp6_ = NULL;
+	entitasPosition* _tmp7_ = NULL;
+	gdouble _tmp8_ = 0.0;
+	entitasEntity* _tmp9_ = NULL;
+	entitasBounds* _tmp10_ = NULL;
+	gint _tmp11_ = 0;
+	Factory* _tmp12_ = NULL;
+	entitasEntity* _tmp13_ = NULL;
+	entitasEntity* _tmp14_ = NULL;
+	entitasHealth* _tmp15_ = NULL;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = *b;
+	_tmp1_ = (*_tmp0_).position;
+	_tmp2_ = (*_tmp1_).x;
+	_tmp3_ = *b;
+	_tmp4_ = (*_tmp3_).bounds;
+	_tmp5_ = (*_tmp4_).w;
+	x = (gint) (((gdouble) _tmp2_) - (_tmp5_ / 2));
+	_tmp6_ = *b;
+	_tmp7_ = (*_tmp6_).position;
+	_tmp8_ = (*_tmp7_).y;
+	_tmp9_ = *b;
+	_tmp10_ = (*_tmp9_).bounds;
+	_tmp11_ = (*_tmp10_).h;
+	y = (gint) (((gdouble) _tmp8_) - (_tmp11_ / 2));
+	_tmp12_ = self->factory;
+	_tmp13_ = *b;
+	entitas_world_deleteEntity ((entitasWorld*) _tmp12_, _tmp13_);
+	_tmp14_ = *a;
+	_tmp15_ = (*_tmp14_).health;
+	if (_tmp15_ != NULL) {
+		gdouble current = 0.0;
+		entitasEntity* _tmp16_ = NULL;
+		entitasHealth* _tmp17_ = NULL;
+		gdouble _tmp18_ = 0.0;
+		gdouble _tmp19_ = 0.0;
+		_tmp16_ = *a;
+		_tmp17_ = (*_tmp16_).health;
+		_tmp18_ = (*_tmp17_).current;
+		current = _tmp18_ - 2;
+		_tmp19_ = current;
+		if (_tmp19_ < ((gdouble) 0)) {
+			Factory* _tmp20_ = NULL;
+			entitasEntity* _tmp21_ = NULL;
+			_tmp20_ = self->factory;
+			_tmp21_ = *a;
+			entitas_world_deleteEntity ((entitasWorld*) _tmp20_, _tmp21_);
+		} else {
+			entitasEntity* _tmp22_ = NULL;
+			entitasHealth* _tmp23_ = NULL;
+			gdouble _tmp24_ = 0.0;
+			_tmp22_ = *a;
+			_tmp23_ = (*_tmp22_).health;
+			_tmp24_ = current;
+			(*_tmp23_).current = _tmp24_;
+		}
+	}
 }
 
 
@@ -113,6 +636,8 @@ static void systems_collision_instance_init (systemsCollision * self) {
 void systems_collision_free (systemsCollision* self) {
 	_game_release0 (self->game);
 	_entitas_world_release0 (self->factory);
+	_entitas_group_release0 (self->bullets);
+	_entitas_group_release0 (self->enemies);
 	g_slice_free (systemsCollision, self);
 }
 

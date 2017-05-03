@@ -164,6 +164,8 @@ struct _entitasHud {
 
 struct _entitasIndex {
 	gint value;
+	gint limit;
+	gboolean vertical;
 };
 
 struct _entitasLayer {
@@ -398,9 +400,8 @@ void systems_expire_initialize (systemsExpire* self) {
 
 
 /**
-* physics system
-* model movement
-*/
+ * Remove exired entities
+ */
 void systems_expire_execute (systemsExpire* self, gdouble delta) {
 	entitasGroup* _tmp0_ = NULL;
 	GList* _tmp1_ = NULL;

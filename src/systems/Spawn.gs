@@ -25,9 +25,8 @@ namespace systems
 
 
 		/**
-		* physics system
-		* model movement
-		*/
+		 * Spawn enemy ships
+		 */
 		def execute(delta:double)
 			enemyT1 = spawnEnemy(delta, enemyT1, 1)
 			enemyT2 = spawnEnemy(delta, enemyT2, 2)

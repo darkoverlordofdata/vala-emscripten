@@ -11,6 +11,19 @@ struct _GList {
 };
 
 #define _g_list_alloc() calloc(1, sizeof(GList))
+/**
+ * g_list_alloc:
+ *
+ * Allocates space for one #GList element. It is called by
+ * g_list_append(), g_list_prepend(), g_list_insert() and
+ * g_list_insert_sorted() and so is rarely used on its own.
+ *
+ * Returns: a pointer to the newly-allocated #GList element
+ **/
+static inline GList *g_list_alloc (void)
+{
+  return _g_list_alloc ();
+}
 
 static inline void g_list_free(GList *list) {
 	GList *current, *tmp;
@@ -22,49 +35,155 @@ static inline void g_list_free(GList *list) {
 	}
 }
 
-static inline GList* g_list_last (GList *list) {
-	if (list)
-		while (list->next)
-			list = list->next;
-	return list;
+/**
+ * g_list_last:
+ * @list: any #GList element
+ *
+ * Gets the last element in a #GList.
+ *
+ * Returns: the last element in the #GList,
+ *     or %NULL if the #GList has no elements
+ */
+static inline GList *g_list_last (GList *list)
+{
+  if (list)
+    {
+      while (list->next)
+        list = list->next;
+    }
+  
+  return list;
 }
 
-static inline GList* g_list_append (GList *list, gpointer data) {
-	GList *new_list = _g_list_alloc ();
-	GList *last;
-	if (!new_list) return NULL;
-	new_list->data = data;
-	new_list->next = NULL;
-	if (list) {
-		last = g_list_last (list);
-		last->next = new_list;
-		new_list->prev = last;
-		return list;
-	}
-	new_list->prev = NULL;
-	return new_list;
+/**
+ * g_list_append:
+ * @list: a pointer to a #GList
+ * @data: the data for the new element
+ *
+ * Adds a new element on to the end of the list.
+ *
+ * Note that the return value is the new start of the list,
+ * if @list was empty; make sure you store the new value.
+ *
+ * g_list_append() has to traverse the entire list to find the end,
+ * which is inefficient when adding multiple elements. A common idiom
+ * to avoid the inefficiency is to use g_list_prepend() and reverse
+ * the list with g_list_reverse() when all elements have been added.
+ *
+ * |[<!-- language="C" -->
+ * // Notice that these are initialized to the empty list.
+ * GList *string_list = NULL, *number_list = NULL;
+ *
+ * // This is a list of strings.
+ * string_list = g_list_append (string_list, "first");
+ * string_list = g_list_append (string_list, "second");
+ * 
+ * // This is a list of integers.
+ * number_list = g_list_append (number_list, GINT_TO_POINTER (27));
+ * number_list = g_list_append (number_list, GINT_TO_POINTER (14));
+ * ]|
+ *
+ * Returns: either @list or the new start of the #GList if @list was %NULL
+ */
+static inline GList *g_list_append (GList *list, gpointer  data)
+{
+  GList *new_list;
+  GList *last;
+  
+  new_list = _g_list_alloc ();
+  new_list->data = data;
+  new_list->next = NULL;
+  
+  if (list)
+    {
+      last = g_list_last (list);
+      /* g_assert (last != NULL); */
+      last->next = new_list;
+      new_list->prev = last;
+
+      return list;
+    }
+  else
+    {
+      new_list->prev = NULL;
+      return new_list;
+    }
 }
 
-static inline GList* g_list_prepend (GList *list, gpointer data) {
-	GList *new_list = _g_list_alloc ();
-	new_list->data = data;
-	new_list->next = list;
-	if (list) {
-		new_list->prev = list->prev;
-		if (list->prev)
-			list->prev->next = new_list;
-		list->prev = new_list;
-	} else new_list->prev = NULL;
-	return new_list;
+/**
+ * g_list_prepend:
+ * @list: a pointer to a #GList, this must point to the top of the list
+ * @data: the data for the new element
+ *
+ * Prepends a new element on to the start of the list.
+ *
+ * Note that the return value is the new start of the list,
+ * which will have changed, so make sure you store the new value. 
+ *
+ * |[<!-- language="C" -->
+ * // Notice that it is initialized to the empty list.
+ * GList *list = NULL;
+ *
+ * list = g_list_prepend (list, "last");
+ * list = g_list_prepend (list, "first");
+ * ]|
+ *
+ * Do not use this function to prepend a new element to a different
+ * element than the start of the list. Use g_list_insert_before() instead.
+ *
+ * Returns: a pointer to the newly prepended element, which is the new 
+ *     start of the #GList
+ */
+static inline GList *g_list_prepend (GList *list, gpointer  data)
+{
+  GList *new_list;
+  
+  new_list = _g_list_alloc ();
+  new_list->data = data;
+  new_list->next = list;
+  
+  if (list)
+    {
+      new_list->prev = list->prev;
+      if (list->prev)
+        list->prev->next = new_list;
+      list->prev = new_list;
+    }
+  else
+    new_list->prev = NULL;
+  
+  return new_list;
 }
 
-static inline void g_list_foreach (GList *list, GFunc func, gpointer user_data) {
-	while (list) {
-		GList *next = list->next;
-		(*func) (list->data, user_data);
-		list = next;
-	}
+/**
+ * g_list_foreach:
+ * @list: a #GList, this must point to the top of the list
+ * @func: the function to call with each element's data
+ * @user_data: user data to pass to the function
+ *
+ * Calls a function for each element of a #GList.
+ */
+/**
+ * GFunc:
+ * @data: the element's data
+ * @user_data: user data passed to g_list_foreach() or g_slist_foreach()
+ *
+ * Specifies the type of functions passed to g_list_foreach() and
+ * g_slist_foreach().
+ */
+static inline void
+g_list_foreach (GList    *list,
+                GFunc     func,
+                gpointer  user_data)
+{
+  while (list)
+    {
+      GList *next = list->next;
+      (*func) (list->data, user_data);
+      list = next;
+    }
 }
+
 
 static inline GList *_g_list_remove_link (GList *list, GList *link)
 {
@@ -94,11 +213,18 @@ static inline GList *_g_list_remove_link (GList *list, GList *link)
 
   return list;
 }
-//#define _g_slist_free1(slist)   g_slice_free (GSList, slist)
-/* delegate to system malloc */
-//     memset ((slist), 0, sizeof (GSList));
-//   free ((slist));
 
+/**
+ * g_list_remove:
+ * @list: a #GList, this must point to the top of the list
+ * @data: the data of the element to remove
+ *
+ * Removes an element from a #GList.
+ * If two elements contain the same data, only the first is removed.
+ * If none of the elements contain the data, the #GList is unchanged.
+ *
+ * Returns: the (possibly changed) start of the #GList
+ */
 static inline GList *g_list_remove (GList *list, gconstpointer  data)
 {
   GList *tmp;
@@ -111,15 +237,15 @@ static inline GList *g_list_remove (GList *list, gconstpointer  data)
       else
         {
           list = _g_list_remove_link (list, tmp);
-			memset ((tmp), 0, sizeof (GList));
-			free ((tmp));
-        //   _g_list_free1 (tmp);
+          //_g_list_free1 (tmp);
+          free(tmp);
 
           break;
         }
     }
   return list;
 }
+
 /**
  * g_list_find:
  * @list: a #GList, this must point to the top of the list
@@ -255,6 +381,46 @@ static inline gpointer g_list_nth_data (GList *list, guint  n)
 static inline GList *g_list_remove_link (GList *list, GList *llink)
 {
   return _g_list_remove_link (list, llink);
+}
+
+
+/**
+ * g_list_insert:
+ * @list: a pointer to a #GList, this must point to the top of the list
+ * @data: the data for the new element
+ * @position: the position to insert the element. If this is 
+ *     negative, or is larger than the number of elements in the 
+ *     list, the new element is added on to the end of the list.
+ * 
+ * Inserts a new element into the list at the given position.
+ *
+ * Returns: the (possibly changed) start of the #GList
+ */
+static inline GList *
+g_list_insert (GList    *list,
+               gpointer  data,
+               gint      position)
+{
+  GList *new_list;
+  GList *tmp_list;
+
+  if (position < 0)
+    return g_list_append (list, data);
+  else if (position == 0)
+    return g_list_prepend (list, data);
+
+  tmp_list = g_list_nth (list, position);
+  if (!tmp_list)
+    return g_list_append (list, data);
+
+  new_list = _g_list_alloc ();
+  new_list->data = data;
+  new_list->prev = tmp_list->prev;
+  tmp_list->prev->next = new_list;
+  new_list->next = tmp_list;
+  tmp_list->prev = new_list;
+
+  return list;
 }
 
 

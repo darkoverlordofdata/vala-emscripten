@@ -131,6 +131,8 @@ struct _entitasHud {
 
 struct _entitasIndex {
 	gint value;
+	gint limit;
+	gboolean vertical;
 };
 
 struct _entitasLayer {
@@ -235,8 +237,8 @@ typedef enum  {
 } entitasException;
 #define ENTITAS_EXCEPTION entitas_exception_quark ()
 
-extern entitasEntity entitas_POOL[100];
-entitasEntity entitas_POOL[100] = {0};
+extern entitasEntity entitas_POOL[256];
+entitasEntity entitas_POOL[256] = {0};
 
 GType entitas_entity_get_type (void) G_GNUC_CONST;
 GType entitas_background_get_type (void) G_GNUC_CONST;
@@ -348,8 +350,8 @@ entitasEntity* entitas_entity_setHud (entitasEntity *self, gboolean value);
 gboolean entitas_entity_isHud (entitasEntity *self);
 gboolean entitas_entity_hasIndex (entitasEntity *self);
 #define ENTITAS___INDEX__ ((guint64) 0x0200)
-entitasEntity* entitas_entity_addIndex (entitasEntity *self, gint value);
-entitasEntity* entitas_entity_setIndex (entitasEntity *self, gint value);
+entitasEntity* entitas_entity_addIndex (entitasEntity *self, gint value, gint limit, gboolean vertical);
+entitasEntity* entitas_entity_setIndex (entitasEntity *self, gint value, gint limit, gboolean vertical);
 entitasEntity* entitas_entity_removeIndex (entitasEntity *self);
 gboolean entitas_entity_hasLayer (entitasEntity *self);
 #define ENTITAS___LAYER__ ((guint64) 0x0400)
@@ -1689,13 +1691,15 @@ static gpointer _entitas_index_dup0 (gpointer self) {
 }
 
 
-entitasEntity* entitas_entity_addIndex (entitasEntity *self, gint value) {
+entitasEntity* entitas_entity_addIndex (entitasEntity *self, gint value, gint limit, gboolean vertical) {
 	entitasEntity* result = NULL;
 	guint64 _tmp0_ = 0ULL;
 	gint _tmp2_ = 0;
-	entitasIndex _tmp3_ = {0};
-	entitasIndex* _tmp4_ = NULL;
-	guint64 _tmp5_ = 0ULL;
+	gint _tmp3_ = 0;
+	gboolean _tmp4_ = FALSE;
+	entitasIndex _tmp5_ = {0};
+	entitasIndex* _tmp6_ = NULL;
+	guint64 _tmp7_ = 0ULL;
 	GError * _inner_error_ = NULL;
 	_tmp0_ = (*self).mask;
 	if ((_tmp0_ & ENTITAS___INDEX__) != ((guint64) 0)) {
@@ -1707,23 +1711,31 @@ entitasEntity* entitas_entity_addIndex (entitasEntity *self, gint value) {
 		return NULL;
 	}
 	_tmp2_ = value;
-	_tmp3_.value = _tmp2_;
-	_tmp4_ = _entitas_index_dup0 (&_tmp3_);
+	_tmp3_ = limit;
+	_tmp4_ = vertical;
+	_tmp5_.value = _tmp2_;
+	_tmp5_.limit = _tmp3_;
+	_tmp5_.vertical = _tmp4_;
+	_tmp6_ = _entitas_index_dup0 (&_tmp5_);
 	_entitas_index_free0 ((*self).index);
-	(*self).index = _tmp4_;
-	_tmp5_ = (*self).mask;
-	(*self).mask = _tmp5_ | ENTITAS___INDEX__;
+	(*self).index = _tmp6_;
+	_tmp7_ = (*self).mask;
+	(*self).mask = _tmp7_ | ENTITAS___INDEX__;
 	entitas_world_onComponentAdded (&(*self), ENTITAS_COMPONENTS_IndexComponent);
 	result = &(*self);
 	return result;
 }
 
 
-entitasEntity* entitas_entity_setIndex (entitasEntity *self, gint value) {
+entitasEntity* entitas_entity_setIndex (entitasEntity *self, gint value, gint limit, gboolean vertical) {
 	entitasEntity* result = NULL;
 	guint64 _tmp0_ = 0ULL;
 	entitasIndex* _tmp2_ = NULL;
 	gint _tmp3_ = 0;
+	entitasIndex* _tmp4_ = NULL;
+	gint _tmp5_ = 0;
+	entitasIndex* _tmp6_ = NULL;
+	gboolean _tmp7_ = FALSE;
 	GError * _inner_error_ = NULL;
 	_tmp0_ = (*self).mask;
 	if ((_tmp0_ & ENTITAS___INDEX__) == ((guint64) 0)) {
@@ -1737,6 +1749,12 @@ entitasEntity* entitas_entity_setIndex (entitasEntity *self, gint value) {
 	_tmp2_ = (*self).index;
 	_tmp3_ = value;
 	(*_tmp2_).value = _tmp3_;
+	_tmp4_ = (*self).index;
+	_tmp5_ = value;
+	(*_tmp4_).limit = _tmp5_;
+	_tmp6_ = (*self).index;
+	_tmp7_ = vertical;
+	(*_tmp6_).vertical = _tmp7_;
 	result = &(*self);
 	return result;
 }

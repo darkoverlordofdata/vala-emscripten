@@ -6,7 +6,7 @@
  
 namespace entitas
 
-	POOL: entitas.Entity[100]
+	POOL: entitas.Entity[256]
 	
 	[SimpleType]
 	struct Background
@@ -51,6 +51,8 @@ namespace entitas
 	[SimpleType]
 	struct Index
 		value : int 
+		limit : int
+		vertical  : bool
 
 	[SimpleType]
 	struct Layer
@@ -330,16 +332,18 @@ namespace entitas
 		def hasIndex():bool
 			return (mask & __INDEX__) != 0
 
-		def addIndex(value:int):Entity* 
+		def addIndex(value:int, limit: int, vertical: bool):Entity* 
 			if (mask & __INDEX__) != 0 do raise new Exception.EntityAlreadyHasComponent("Index")
-			this.index = { value }
+			this.index = { value , limit, vertical }
 			mask |= __INDEX__
 			World.onComponentAdded(&this, Components.IndexComponent)
 			return &this
 
-		def setIndex(value:int):Entity*
+		def setIndex(value:int, limit: int, vertical: bool):Entity*
 			if (mask & __INDEX__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Index")
 			this.index.value = value
+			this.index.limit = value
+			this.index.vertical = vertical
 			return &this
 
 		def removeIndex():Entity*

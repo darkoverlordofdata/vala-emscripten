@@ -23,9 +23,8 @@ namespace systems
 
 
 		/**
-		* physics system
-		* model movement
-		*/
+		 * Remove exired entities
+		 */
 		def execute(delta:double)
 			for entity in expiring.entities
 				if entity.isActive() 

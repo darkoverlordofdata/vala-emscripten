@@ -35,9 +35,8 @@ namespace systems
 
 
 		/**
-		* physics system
-		* model movement
-		*/
+		 * get player input
+		 */
 		def execute(delta:double)
 			var x = (int)game.mouseX
 			var y = (int)game.mouseY

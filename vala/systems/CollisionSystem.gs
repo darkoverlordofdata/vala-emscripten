@@ -11,6 +11,7 @@ namespace demo
         factory:Factory
         bullets:Group
         enemies:Group
+        
 
         construct(game:ShmupWarz, factory:Factory)
             this.game = game

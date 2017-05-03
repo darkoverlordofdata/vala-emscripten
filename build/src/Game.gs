@@ -4,7 +4,43 @@
 uses SDL
 uses Emscripten
 uses entitas
+
+k:int
+/**
+ * remove from game.sprites
+ */
+def entityRemoved(e:Entity*) 
+	Game.instance.sprites.remove(e)
+	pass
+
+/**
+ * add to game.sprites in layer order
+ */
+def entityAdded(e:Entity*) 
+	// print "entity ADDED %s\n", e.name
+	if !e.hasSprite() // just add it to the end of the list
+		// Game.instance.sprites.prepend(e)
+		return
+		
+	var layer = (int)e.layer.value
+	e.layer.value = layer
 	
+	if Game.instance.sprites.length() == 0
+		Game.instance.sprites.append(e)
+
+	else
+		var i = 0
+		for s in Game.instance.sprites
+			assert(s != null)
+			if layer <= (int)s.layer.value
+				Game.instance.sprites.insert(e, i)
+				return
+			else
+				i++
+		Game.instance.sprites.append(e)
+
+	
+
 [Compact, CCode ( /** reference counting */
 	ref_function = "game_addRef", 
 	unref_function = "game_release"
@@ -17,6 +53,7 @@ class Game
 	def release() 
 		if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
 	def extern free()
+	instance	: static Game
 	width		: int
 	height		: int
 	mark1		: double
@@ -33,21 +70,24 @@ class Game
 	systems		: Systems
 	sprites		: List of Entity* = new List of Entity*
 
-	k           : int
-	t           : double
-	t1          : double = 0.0
-	t2          : double = 0.0
-	t3          : double = 0.0
+		
+	k		   : int
+	t		   : double
+	t1		  : double = 0.0
+	t2		  : double = 0.0
+	t3		  : double = 0.0
 
 	player : Entity*
 	
 
 	construct(width:int, height:int)
+		instance = this
 		this.width = width
 		this.height = height
 
 	def initialize()
 		factory = new Factory()
+		factory.setEntityRemovedListener(entityRemoved)
 		factory.createBackground(0)
 		factory.createBackground(1)
 		player = factory.createPlayer()
@@ -55,9 +95,10 @@ class Game
 		for var i=1 to 15 do factory.createEnemy1()
 		for var i=1 to 10 do factory.createEnemy2()
 		for var i=1 to  5 do factory.createEnemy3()
+		for var i=1 to 90 do factory.createParticle()
 		systems = new Systems()
 		systems.initialize(this, factory)
-		
+			
 
 	def start()
 		running = true
@@ -103,15 +144,30 @@ class Game
 
 
 		surface.fill(null, surface.format.map_rgb(255, 0, 0))
-		for var i=0 to (POOL.length-1)
-			if !POOL[i].isActive() do continue
-			POOL[i].sprite.surface.blit(null, surface, 
-				{ 	
-					(int16)POOL[i].bounds.x, 
-					(int16)POOL[i].bounds.y, 
-					(int16)POOL[i].bounds.w, 
-					(int16)POOL[i].bounds.h
-				})
+
+		for entity in sprites
+			if !entity.isActive() do continue
+			if entity.hasIndex()
+				var w = (int16)(entity.bounds.w / entity.index.limit)
+				var h = (int16)entity.bounds.h
+				var x = (int16)0
+				var y = (int16)(entity.index.value * w)
+				entity.sprite.surface.blit({ x, y, w, h }, surface, 
+					{ 	
+						(int16)entity.bounds.x, 
+						(int16)entity.bounds.y, 
+						(int16)w, 
+						(int16)h
+					})
+			else
+				entity.sprite.surface.blit(null, surface, 
+					{ 	
+						(int16)entity.bounds.x, 
+						(int16)entity.bounds.y, 
+						(int16)entity.bounds.w, 
+						(int16)entity.bounds.h
+					})
+
 
 		surface.flip()
 

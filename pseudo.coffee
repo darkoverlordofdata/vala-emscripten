@@ -65,6 +65,7 @@ class #{klass}
 walk = (namespace = '') ->
     source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
     for file in fs.readdirSync(source)
+        if path.extname(file) is '.vala' then continue
         if path.extname(file) is '.c' then continue
         if path.extname(file) isnt '.gs' then walk(file)
         else 
