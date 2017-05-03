@@ -4,42 +4,8 @@
 uses SDL
 uses Emscripten
 uses entitas
+uses systems
 
-k:int
-/**
- * remove from game.sprites
- */
-def entityRemoved(e:Entity*) 
-	Game.instance.sprites.remove(e)
-	pass
-
-/**
- * add to game.sprites in layer order
- */
-def entityAdded(e:Entity*) 
-	// print "entity ADDED %s\n", e.name
-	if !e.hasSprite() // just add it to the end of the list
-		// Game.instance.sprites.prepend(e)
-		return
-		
-	var layer = (int)e.layer.value
-	e.layer.value = layer
-	
-	if Game.instance.sprites.length() == 0
-		Game.instance.sprites.append(e)
-
-	else
-		var i = 0
-		for s in Game.instance.sprites
-			assert(s != null)
-			if layer <= (int)s.layer.value
-				Game.instance.sprites.insert(e, i)
-				return
-			else
-				i++
-		Game.instance.sprites.append(e)
-
-	
 
 [Compact, CCode ( /** reference counting */
 	ref_function = "game_addRef", 
@@ -70,12 +36,19 @@ class Game
 	systems		: Systems
 	sprites		: List of Entity* = new List of Entity*
 
+	collision	: Collision
+	expire		: Expire
+	input		: Input
+	physics		: Physics
+	remove		: Remove
+	spawn		: Spawn
+
 		
-	k		   : int
-	t		   : double
-	t1		  : double = 0.0
-	t2		  : double = 0.0
-	t3		  : double = 0.0
+	k		   	: int
+	t		   	: double
+	t1		  	: double = 0.0
+	t2		  	: double = 0.0
+	t3		  	: double = 0.0
 
 	player : Entity*
 	
@@ -96,10 +69,32 @@ class Game
 		for var i=1 to 10 do factory.createEnemy2()
 		for var i=1 to  5 do factory.createEnemy3()
 		for var i=1 to 90 do factory.createParticle()
-		systems = new Systems()
-		systems.initialize(this, factory)
-			
+		// systems = new Systems()
+		// systems.initialize(this, factory)
 
+		spawn = new Spawn(this, factory)
+		input = new Input(this, factory)
+		collision = new Collision(this, factory)
+		physics = new Physics(this, factory)
+		expire = new Expire(this, factory)
+		remove = new Remove(this, factory)
+
+		// spawn.initialize()
+		// input.initialize() 
+		// collision.initialize()
+		// physics.initialize()
+		// expire.initialize()
+		// remove.initialize()
+
+		factory.addSystem(spawn.initialize, spawn.execute)
+		factory.addSystem(input.initialize, input.execute)
+		factory.addSystem(collision.initialize, collision.execute)
+		factory.addSystem(physics.initialize, physics.execute)
+		factory.addSystem(expire.initialize, expire.execute)
+		factory.addSystem(remove.initialize, remove.execute)
+		
+		factory.initialize()
+			
 	def start()
 		running = true
 		mark1 = emscripten_get_now()/1000
@@ -131,7 +126,14 @@ class Game
 		processEvents()
 
 		t1 = emscripten_get_now()/1000
-		systems.update(delta)
+		// systems.update(delta)
+		factory.execute(delta)
+		// spawn.execute(delta)
+		// input.execute(delta) 
+		// collision.execute(delta)
+		// physics.execute(delta)
+		// expire.execute(delta)
+		// remove.execute(delta)
 		t2 = emscripten_get_now()/1000
 		t3 = t2 - t1
 		t = t + t3
@@ -172,3 +174,31 @@ class Game
 		surface.flip()
 
 
+/**
+ * add to game.sprites in layer order
+ */
+def entityAdded(e:Entity*) 
+	if !e.hasSprite() do return
+
+	var layer = e.layer.value
+	if Game.instance.sprites.length() == 0
+		Game.instance.sprites.append(e)
+
+	else
+		var i = 0
+		for s in Game.instance.sprites
+			assert(s != null)
+			if layer <= s.layer.value
+				Game.instance.sprites.insert(e, i)
+				return
+			else
+				i++
+		Game.instance.sprites.append(e)
+
+/**
+* remove from game.sprites
+*/
+def entityRemoved(e:Entity*) 
+	Game.instance.sprites.remove(e)
+
+	

@@ -94,6 +94,11 @@ typedef struct _entitasEntity entitasEntity;
 
 #define TYPE_POOL (pool_get_type ())
 typedef struct _Systems Systems;
+typedef struct _systemsCollision systemsCollision;
+typedef struct _systemsExpire systemsExpire;
+typedef struct _systemsInput systemsInput;
+typedef struct _systemsPhysics systemsPhysics;
+typedef struct _systemsSpawn systemsSpawn;
 
 struct _systemsRemove {
 	gint refCount;
@@ -276,6 +281,12 @@ struct _Game {
 	Factory* factory;
 	Systems* systems;
 	GList* sprites;
+	systemsCollision* collision;
+	systemsExpire* expire;
+	systemsInput* input;
+	systemsPhysics* physics;
+	systemsRemove* remove;
+	systemsSpawn* spawn;
 	gint k;
 	gdouble t;
 	gdouble t1;
@@ -365,6 +376,11 @@ void entitas_entity_destroy (entitasEntity* self);
 gboolean entitas_entity_isActive (entitasEntity *self);
 GType pool_get_type (void) G_GNUC_CONST;
 void systems_free (Systems* self);
+void systems_collision_free (systemsCollision* self);
+void systems_expire_free (systemsExpire* self);
+void systems_input_free (systemsInput* self);
+void systems_physics_free (systemsPhysics* self);
+void systems_spawn_free (systemsSpawn* self);
 void entitas_world_deleteEntity (entitasWorld* self, entitasEntity* entity);
 
 

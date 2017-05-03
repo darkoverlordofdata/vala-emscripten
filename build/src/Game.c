@@ -4,13 +4,17 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <stdlib.h>
-#include <string.h>
 #include <float.h>
 #include <math.h>
 #include <SDL.h>
+#include <stdlib.h>
+#include <string.h>
 #include <emscripten.h>
 
+typedef struct _Game Game;
+typedef struct _entitasWorld entitasWorld;
+typedef entitasWorld Factory;
+typedef struct _Systems Systems;
 
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
 
@@ -68,10 +72,12 @@ typedef struct _entitasTween entitasTween;
 #define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
 typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
-typedef struct _Game Game;
-typedef struct _entitasWorld entitasWorld;
-typedef entitasWorld Factory;
-typedef struct _Systems Systems;
+typedef struct _systemsCollision systemsCollision;
+typedef struct _systemsExpire systemsExpire;
+typedef struct _systemsInput systemsInput;
+typedef struct _systemsPhysics systemsPhysics;
+typedef struct _systemsRemove systemsRemove;
+typedef struct _systemsSpawn systemsSpawn;
 void entitas_world_release (entitasWorld* self);
 void entitas_world_free (entitasWorld* self);
 entitasWorld* entitas_world_addRef (entitasWorld* self);
@@ -81,6 +87,30 @@ void systems_free (Systems* self);
 Systems* systems_addRef (Systems* self);
 #define _systems_release0(var) ((var == NULL) ? NULL : (var = (systems_release (var), NULL)))
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
+void systems_collision_release (systemsCollision* self);
+void systems_collision_free (systemsCollision* self);
+systemsCollision* systems_collision_addRef (systemsCollision* self);
+#define _systems_collision_release0(var) ((var == NULL) ? NULL : (var = (systems_collision_release (var), NULL)))
+void systems_expire_release (systemsExpire* self);
+void systems_expire_free (systemsExpire* self);
+systemsExpire* systems_expire_addRef (systemsExpire* self);
+#define _systems_expire_release0(var) ((var == NULL) ? NULL : (var = (systems_expire_release (var), NULL)))
+void systems_input_release (systemsInput* self);
+void systems_input_free (systemsInput* self);
+systemsInput* systems_input_addRef (systemsInput* self);
+#define _systems_input_release0(var) ((var == NULL) ? NULL : (var = (systems_input_release (var), NULL)))
+void systems_physics_release (systemsPhysics* self);
+void systems_physics_free (systemsPhysics* self);
+systemsPhysics* systems_physics_addRef (systemsPhysics* self);
+#define _systems_physics_release0(var) ((var == NULL) ? NULL : (var = (systems_physics_release (var), NULL)))
+void systems_remove_release (systemsRemove* self);
+void systems_remove_free (systemsRemove* self);
+systemsRemove* systems_remove_addRef (systemsRemove* self);
+#define _systems_remove_release0(var) ((var == NULL) ? NULL : (var = (systems_remove_release (var), NULL)))
+void systems_spawn_release (systemsSpawn* self);
+void systems_spawn_free (systemsSpawn* self);
+systemsSpawn* systems_spawn_addRef (systemsSpawn* self);
+#define _systems_spawn_release0(var) ((var == NULL) ? NULL : (var = (systems_spawn_release (var), NULL)))
 void game_release (Game* self);
 void game_free (Game* self);
 Game* game_addRef (Game* self);
@@ -221,6 +251,12 @@ struct _Game {
 	Factory* factory;
 	Systems* systems;
 	GList* sprites;
+	systemsCollision* collision;
+	systemsExpire* expire;
+	systemsInput* input;
+	systemsPhysics* physics;
+	systemsRemove* remove;
+	systemsSpawn* spawn;
 	gint k;
 	gdouble t;
 	gdouble t1;
@@ -230,12 +266,15 @@ struct _Game {
 };
 
 typedef void (*entitasEntityRemovedListener) (entitasEntity* e, void* user_data);
+typedef void (*entitasSystemInitialize) (void* user_data);
+typedef void (*entitasSystemExecute) (gdouble delta, void* user_data);
 
-extern gint k;
-gint k = 0;
 extern Game* game_instance;
 Game* game_instance = NULL;
 
+void game_free (Game* self);
+void entitas_world_free (entitasWorld* self);
+void systems_free (Systems* self);
 GType entitas_entity_get_type (void) G_GNUC_CONST;
 GType entitas_background_get_type (void) G_GNUC_CONST;
 entitasBackground* entitas_background_dup (const entitasBackground* self);
@@ -297,12 +336,12 @@ entitasEntity* entitas_entity_dup (const entitasEntity* self);
 void entitas_entity_free (entitasEntity* self);
 void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
-void entityRemoved (entitasEntity* e);
-void game_free (Game* self);
-void entitas_world_free (entitasWorld* self);
-void systems_free (Systems* self);
-void entityAdded (entitasEntity* e);
-gboolean entitas_entity_hasSprite (entitasEntity *self);
+void systems_collision_free (systemsCollision* self);
+void systems_expire_free (systemsExpire* self);
+void systems_input_free (systemsInput* self);
+void systems_physics_free (systemsPhysics* self);
+void systems_remove_free (systemsRemove* self);
+void systems_spawn_free (systemsSpawn* self);
 static void game_instance_init (Game * self);
 Game* game_addRef (Game* self);
 void game_release (Game* self);
@@ -311,6 +350,7 @@ Game* game_new (gint width, gint height);
 void game_initialize (Game* self);
 Factory* factory_new (void);
 void entitas_world_setEntityRemovedListener (entitasWorld* self, entitasEntityRemovedListener removed, void* removed_target);
+void entityRemoved (entitasEntity* e);
 static void _entityRemoved_entitas_entity_removed_listener (entitasEntity* e, gpointer self);
 entitasEntity* factory_createBackground (Factory* self, gint tile);
 entitasEntity* factory_createPlayer (Factory* self);
@@ -319,114 +359,46 @@ entitasEntity* factory_createEnemy1 (Factory* self);
 entitasEntity* factory_createEnemy2 (Factory* self);
 entitasEntity* factory_createEnemy3 (Factory* self);
 entitasEntity* factory_createParticle (Factory* self);
-Systems* systems_new (void);
-void systems_initialize (Systems* self, Game* game, Factory* factory);
+systemsSpawn* systems_spawn_new (Game* game, Factory* factory);
+systemsInput* systems_input_new (Game* game, Factory* factory);
+systemsCollision* systems_collision_new (Game* game, Factory* factory);
+systemsPhysics* systems_physics_new (Game* game, Factory* factory);
+systemsExpire* systems_expire_new (Game* game, Factory* factory);
+systemsRemove* systems_remove_new (Game* game, Factory* factory);
+void entitas_world_addSystem (entitasWorld* self, entitasSystemInitialize initialize, void* initialize_target, entitasSystemExecute execute, void* execute_target);
+void systems_spawn_initialize (systemsSpawn* self);
+static void _systems_spawn_initialize_entitas_system_initialize (gpointer self);
+void systems_spawn_execute (systemsSpawn* self, gdouble delta);
+static void _systems_spawn_execute_entitas_system_execute (gdouble delta, gpointer self);
+void systems_input_initialize (systemsInput* self);
+static void _systems_input_initialize_entitas_system_initialize (gpointer self);
+void systems_input_execute (systemsInput* self, gdouble delta);
+static void _systems_input_execute_entitas_system_execute (gdouble delta, gpointer self);
+void systems_collision_initialize (systemsCollision* self);
+static void _systems_collision_initialize_entitas_system_initialize (gpointer self);
+void systems_collision_execute (systemsCollision* self, gdouble delta);
+static void _systems_collision_execute_entitas_system_execute (gdouble delta, gpointer self);
+void systems_physics_initialize (systemsPhysics* self);
+static void _systems_physics_initialize_entitas_system_initialize (gpointer self);
+void systems_physics_execute (systemsPhysics* self, gdouble delta);
+static void _systems_physics_execute_entitas_system_execute (gdouble delta, gpointer self);
+void systems_expire_initialize (systemsExpire* self);
+static void _systems_expire_initialize_entitas_system_initialize (gpointer self);
+void systems_expire_execute (systemsExpire* self, gdouble delta);
+static void _systems_expire_execute_entitas_system_execute (gdouble delta, gpointer self);
+void systems_remove_initialize (systemsRemove* self);
+static void _systems_remove_initialize_entitas_system_initialize (gpointer self);
+void systems_remove_execute (systemsRemove* self, gdouble delta);
+static void _systems_remove_execute_entitas_system_execute (gdouble delta, gpointer self);
+void entitas_world_initialize (entitasWorld* self);
 void game_start (Game* self);
 void game_processEvents (Game* self);
 void game_update (Game* self);
-void systems_update (Systems* self, gdouble delta);
+void entitas_world_execute (entitasWorld* self, gdouble delta);
 gboolean entitas_entity_isActive (entitasEntity *self);
 gboolean entitas_entity_hasIndex (entitasEntity *self);
-
-
-/**
- * remove from game.sprites
- */
-void entityRemoved (entitasEntity* e) {
-	Game* _tmp0_ = NULL;
-	entitasEntity* _tmp1_ = NULL;
-	_tmp0_ = game_instance;
-	_tmp1_ = e;
-	_tmp0_->sprites = g_list_remove (_tmp0_->sprites, _tmp1_);
-}
-
-
-/**
- * add to game.sprites in layer order
- */
-void entityAdded (entitasEntity* e) {
-	gboolean _tmp0_ = FALSE;
-	gint layer = 0;
-	entitasEntity* _tmp1_ = NULL;
-	entitasLayer* _tmp2_ = NULL;
-	gint _tmp3_ = 0;
-	entitasEntity* _tmp4_ = NULL;
-	entitasLayer* _tmp5_ = NULL;
-	gint _tmp6_ = 0;
-	Game* _tmp7_ = NULL;
-	GList* _tmp8_ = NULL;
-	guint _tmp9_ = 0U;
-	_tmp0_ = entitas_entity_hasSprite (e);
-	if (!_tmp0_) {
-		return;
-	}
-	_tmp1_ = e;
-	_tmp2_ = (*_tmp1_).layer;
-	_tmp3_ = (*_tmp2_).value;
-	layer = (gint) _tmp3_;
-	_tmp4_ = e;
-	_tmp5_ = (*_tmp4_).layer;
-	_tmp6_ = layer;
-	(*_tmp5_).value = _tmp6_;
-	_tmp7_ = game_instance;
-	_tmp8_ = _tmp7_->sprites;
-	_tmp9_ = g_list_length (_tmp8_);
-	if (_tmp9_ == ((guint) 0)) {
-		Game* _tmp10_ = NULL;
-		entitasEntity* _tmp11_ = NULL;
-		_tmp10_ = game_instance;
-		_tmp11_ = e;
-		_tmp10_->sprites = g_list_append (_tmp10_->sprites, _tmp11_);
-	} else {
-		gint i = 0;
-		Game* _tmp12_ = NULL;
-		GList* _tmp13_ = NULL;
-		Game* _tmp23_ = NULL;
-		entitasEntity* _tmp24_ = NULL;
-		i = 0;
-		_tmp12_ = game_instance;
-		_tmp13_ = _tmp12_->sprites;
-		{
-			GList* s_collection = NULL;
-			GList* s_it = NULL;
-			s_collection = _tmp13_;
-			for (s_it = s_collection; s_it != NULL; s_it = s_it->next) {
-				entitasEntity* s = NULL;
-				s = s_it->data;
-				{
-					entitasEntity* _tmp14_ = NULL;
-					gint _tmp15_ = 0;
-					entitasEntity* _tmp16_ = NULL;
-					entitasLayer* _tmp17_ = NULL;
-					gint _tmp18_ = 0;
-					_tmp14_ = s;
-					_vala_assert (_tmp14_ != NULL, "s != null");
-					_tmp15_ = layer;
-					_tmp16_ = s;
-					_tmp17_ = (*_tmp16_).layer;
-					_tmp18_ = (*_tmp17_).value;
-					if (_tmp15_ <= ((gint) _tmp18_)) {
-						Game* _tmp19_ = NULL;
-						entitasEntity* _tmp20_ = NULL;
-						gint _tmp21_ = 0;
-						_tmp19_ = game_instance;
-						_tmp20_ = e;
-						_tmp21_ = i;
-						_tmp19_->sprites = g_list_insert (_tmp19_->sprites, _tmp20_, _tmp21_);
-						return;
-					} else {
-						gint _tmp22_ = 0;
-						_tmp22_ = i;
-						i = _tmp22_ + 1;
-					}
-				}
-			}
-		}
-		_tmp23_ = game_instance;
-		_tmp24_ = e;
-		_tmp23_->sprites = g_list_append (_tmp23_->sprites, _tmp24_);
-	}
-}
+void entityAdded (entitasEntity* e);
+gboolean entitas_entity_hasSprite (entitasEntity *self);
 
 
 Game* game_addRef (Game* self) {
@@ -476,6 +448,66 @@ static void _entityRemoved_entitas_entity_removed_listener (entitasEntity* e, gp
 }
 
 
+static void _systems_spawn_initialize_entitas_system_initialize (gpointer self) {
+	systems_spawn_initialize ((systemsSpawn*) self);
+}
+
+
+static void _systems_spawn_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_spawn_execute ((systemsSpawn*) self, delta);
+}
+
+
+static void _systems_input_initialize_entitas_system_initialize (gpointer self) {
+	systems_input_initialize ((systemsInput*) self);
+}
+
+
+static void _systems_input_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_input_execute ((systemsInput*) self, delta);
+}
+
+
+static void _systems_collision_initialize_entitas_system_initialize (gpointer self) {
+	systems_collision_initialize ((systemsCollision*) self);
+}
+
+
+static void _systems_collision_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_collision_execute ((systemsCollision*) self, delta);
+}
+
+
+static void _systems_physics_initialize_entitas_system_initialize (gpointer self) {
+	systems_physics_initialize ((systemsPhysics*) self);
+}
+
+
+static void _systems_physics_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_physics_execute ((systemsPhysics*) self, delta);
+}
+
+
+static void _systems_expire_initialize_entitas_system_initialize (gpointer self) {
+	systems_expire_initialize ((systemsExpire*) self);
+}
+
+
+static void _systems_expire_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_expire_execute ((systemsExpire*) self, delta);
+}
+
+
+static void _systems_remove_initialize_entitas_system_initialize (gpointer self) {
+	systems_remove_initialize ((systemsRemove*) self);
+}
+
+
+static void _systems_remove_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_remove_execute ((systemsRemove*) self, delta);
+}
+
+
 void game_initialize (Game* self) {
 	Factory* _tmp0_ = NULL;
 	Factory* _tmp1_ = NULL;
@@ -483,9 +515,37 @@ void game_initialize (Game* self) {
 	Factory* _tmp3_ = NULL;
 	Factory* _tmp4_ = NULL;
 	entitasEntity* _tmp5_ = NULL;
-	Systems* _tmp21_ = NULL;
-	Systems* _tmp22_ = NULL;
+	Factory* _tmp21_ = NULL;
+	systemsSpawn* _tmp22_ = NULL;
 	Factory* _tmp23_ = NULL;
+	systemsInput* _tmp24_ = NULL;
+	Factory* _tmp25_ = NULL;
+	systemsCollision* _tmp26_ = NULL;
+	Factory* _tmp27_ = NULL;
+	systemsPhysics* _tmp28_ = NULL;
+	Factory* _tmp29_ = NULL;
+	systemsExpire* _tmp30_ = NULL;
+	Factory* _tmp31_ = NULL;
+	systemsRemove* _tmp32_ = NULL;
+	Factory* _tmp33_ = NULL;
+	systemsSpawn* _tmp34_ = NULL;
+	systemsSpawn* _tmp35_ = NULL;
+	Factory* _tmp36_ = NULL;
+	systemsInput* _tmp37_ = NULL;
+	systemsInput* _tmp38_ = NULL;
+	Factory* _tmp39_ = NULL;
+	systemsCollision* _tmp40_ = NULL;
+	systemsCollision* _tmp41_ = NULL;
+	Factory* _tmp42_ = NULL;
+	systemsPhysics* _tmp43_ = NULL;
+	systemsPhysics* _tmp44_ = NULL;
+	Factory* _tmp45_ = NULL;
+	systemsExpire* _tmp46_ = NULL;
+	systemsExpire* _tmp47_ = NULL;
+	Factory* _tmp48_ = NULL;
+	systemsRemove* _tmp49_ = NULL;
+	systemsRemove* _tmp50_ = NULL;
+	Factory* _tmp51_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = factory_new ();
 	_entitas_world_release0 (self->factory);
@@ -609,12 +669,56 @@ void game_initialize (Game* self) {
 			}
 		}
 	}
-	_tmp21_ = systems_new ();
-	_systems_release0 (self->systems);
-	self->systems = _tmp21_;
-	_tmp22_ = self->systems;
+	_tmp21_ = self->factory;
+	_tmp22_ = systems_spawn_new (self, _tmp21_);
+	_systems_spawn_release0 (self->spawn);
+	self->spawn = _tmp22_;
 	_tmp23_ = self->factory;
-	systems_initialize (_tmp22_, self, _tmp23_);
+	_tmp24_ = systems_input_new (self, _tmp23_);
+	_systems_input_release0 (self->input);
+	self->input = _tmp24_;
+	_tmp25_ = self->factory;
+	_tmp26_ = systems_collision_new (self, _tmp25_);
+	_systems_collision_release0 (self->collision);
+	self->collision = _tmp26_;
+	_tmp27_ = self->factory;
+	_tmp28_ = systems_physics_new (self, _tmp27_);
+	_systems_physics_release0 (self->physics);
+	self->physics = _tmp28_;
+	_tmp29_ = self->factory;
+	_tmp30_ = systems_expire_new (self, _tmp29_);
+	_systems_expire_release0 (self->expire);
+	self->expire = _tmp30_;
+	_tmp31_ = self->factory;
+	_tmp32_ = systems_remove_new (self, _tmp31_);
+	_systems_remove_release0 (self->remove);
+	self->remove = _tmp32_;
+	_tmp33_ = self->factory;
+	_tmp34_ = self->spawn;
+	_tmp35_ = self->spawn;
+	entitas_world_addSystem ((entitasWorld*) _tmp33_, _systems_spawn_initialize_entitas_system_initialize, _tmp34_, _systems_spawn_execute_entitas_system_execute, _tmp35_);
+	_tmp36_ = self->factory;
+	_tmp37_ = self->input;
+	_tmp38_ = self->input;
+	entitas_world_addSystem ((entitasWorld*) _tmp36_, _systems_input_initialize_entitas_system_initialize, _tmp37_, _systems_input_execute_entitas_system_execute, _tmp38_);
+	_tmp39_ = self->factory;
+	_tmp40_ = self->collision;
+	_tmp41_ = self->collision;
+	entitas_world_addSystem ((entitasWorld*) _tmp39_, _systems_collision_initialize_entitas_system_initialize, _tmp40_, _systems_collision_execute_entitas_system_execute, _tmp41_);
+	_tmp42_ = self->factory;
+	_tmp43_ = self->physics;
+	_tmp44_ = self->physics;
+	entitas_world_addSystem ((entitasWorld*) _tmp42_, _systems_physics_initialize_entitas_system_initialize, _tmp43_, _systems_physics_execute_entitas_system_execute, _tmp44_);
+	_tmp45_ = self->factory;
+	_tmp46_ = self->expire;
+	_tmp47_ = self->expire;
+	entitas_world_addSystem ((entitasWorld*) _tmp45_, _systems_expire_initialize_entitas_system_initialize, _tmp46_, _systems_expire_execute_entitas_system_execute, _tmp47_);
+	_tmp48_ = self->factory;
+	_tmp49_ = self->remove;
+	_tmp50_ = self->remove;
+	entitas_world_addSystem ((entitasWorld*) _tmp48_, _systems_remove_initialize_entitas_system_initialize, _tmp49_, _systems_remove_execute_entitas_system_execute, _tmp50_);
+	_tmp51_ = self->factory;
+	entitas_world_initialize ((entitasWorld*) _tmp51_);
 }
 
 
@@ -730,7 +834,7 @@ void game_update (Game* self) {
 	gdouble _tmp2_ = 0.0;
 	gdouble _tmp3_ = 0.0;
 	gdouble _tmp4_ = 0.0;
-	Systems* _tmp5_ = NULL;
+	Factory* _tmp5_ = NULL;
 	gdouble _tmp6_ = 0.0;
 	gdouble _tmp7_ = 0.0;
 	gdouble _tmp8_ = 0.0;
@@ -756,9 +860,9 @@ void game_update (Game* self) {
 	game_processEvents (self);
 	_tmp4_ = emscripten_get_now ();
 	self->t1 = _tmp4_ / 1000;
-	_tmp5_ = self->systems;
+	_tmp5_ = self->factory;
 	_tmp6_ = self->delta;
-	systems_update (_tmp5_, _tmp6_);
+	entitas_world_execute ((entitasWorld*) _tmp5_, _tmp6_);
 	_tmp7_ = emscripten_get_now ();
 	self->t2 = _tmp7_ / 1000;
 	_tmp8_ = self->t2;
@@ -940,7 +1044,106 @@ void game_free (Game* self) {
 	_entitas_world_release0 (self->factory);
 	_systems_release0 (self->systems);
 	_g_list_free0 (self->sprites);
+	_systems_collision_release0 (self->collision);
+	_systems_expire_release0 (self->expire);
+	_systems_input_release0 (self->input);
+	_systems_physics_release0 (self->physics);
+	_systems_remove_release0 (self->remove);
+	_systems_spawn_release0 (self->spawn);
 	g_slice_free (Game, self);
+}
+
+
+/**
+ * add to game.sprites in layer order
+ */
+void entityAdded (entitasEntity* e) {
+	gboolean _tmp0_ = FALSE;
+	gint layer = 0;
+	entitasEntity* _tmp1_ = NULL;
+	entitasLayer* _tmp2_ = NULL;
+	gint _tmp3_ = 0;
+	Game* _tmp4_ = NULL;
+	GList* _tmp5_ = NULL;
+	guint _tmp6_ = 0U;
+	_tmp0_ = entitas_entity_hasSprite (e);
+	if (!_tmp0_) {
+		return;
+	}
+	_tmp1_ = e;
+	_tmp2_ = (*_tmp1_).layer;
+	_tmp3_ = (*_tmp2_).value;
+	layer = _tmp3_;
+	_tmp4_ = game_instance;
+	_tmp5_ = _tmp4_->sprites;
+	_tmp6_ = g_list_length (_tmp5_);
+	if (_tmp6_ == ((guint) 0)) {
+		Game* _tmp7_ = NULL;
+		entitasEntity* _tmp8_ = NULL;
+		_tmp7_ = game_instance;
+		_tmp8_ = e;
+		_tmp7_->sprites = g_list_append (_tmp7_->sprites, _tmp8_);
+	} else {
+		gint i = 0;
+		Game* _tmp9_ = NULL;
+		GList* _tmp10_ = NULL;
+		Game* _tmp20_ = NULL;
+		entitasEntity* _tmp21_ = NULL;
+		i = 0;
+		_tmp9_ = game_instance;
+		_tmp10_ = _tmp9_->sprites;
+		{
+			GList* s_collection = NULL;
+			GList* s_it = NULL;
+			s_collection = _tmp10_;
+			for (s_it = s_collection; s_it != NULL; s_it = s_it->next) {
+				entitasEntity* s = NULL;
+				s = s_it->data;
+				{
+					entitasEntity* _tmp11_ = NULL;
+					gint _tmp12_ = 0;
+					entitasEntity* _tmp13_ = NULL;
+					entitasLayer* _tmp14_ = NULL;
+					gint _tmp15_ = 0;
+					_tmp11_ = s;
+					_vala_assert (_tmp11_ != NULL, "s != null");
+					_tmp12_ = layer;
+					_tmp13_ = s;
+					_tmp14_ = (*_tmp13_).layer;
+					_tmp15_ = (*_tmp14_).value;
+					if (_tmp12_ <= _tmp15_) {
+						Game* _tmp16_ = NULL;
+						entitasEntity* _tmp17_ = NULL;
+						gint _tmp18_ = 0;
+						_tmp16_ = game_instance;
+						_tmp17_ = e;
+						_tmp18_ = i;
+						_tmp16_->sprites = g_list_insert (_tmp16_->sprites, _tmp17_, _tmp18_);
+						return;
+					} else {
+						gint _tmp19_ = 0;
+						_tmp19_ = i;
+						i = _tmp19_ + 1;
+					}
+				}
+			}
+		}
+		_tmp20_ = game_instance;
+		_tmp21_ = e;
+		_tmp20_->sprites = g_list_append (_tmp20_->sprites, _tmp21_);
+	}
+}
+
+
+/**
+* remove from game.sprites
+*/
+void entityRemoved (entitasEntity* e) {
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
+	_tmp0_ = game_instance;
+	_tmp1_ = e;
+	_tmp0_->sprites = g_list_remove (_tmp0_->sprites, _tmp1_);
 }
 
 

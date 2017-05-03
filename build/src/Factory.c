@@ -72,6 +72,9 @@ typedef struct _entitasTween entitasTween;
 #define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
 typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
+
+#define ENTITAS_TYPE_ISYSTEM (entitas_isystem_get_type ())
+typedef struct _entitasISystem entitasISystem;
 typedef entitasWorld Factory;
 
 typedef enum  {
@@ -202,6 +205,15 @@ struct _entitasEntity {
 	entitasVelocity* velocity;
 };
 
+typedef void (*entitasSystemInitialize) (void* user_data);
+typedef void (*entitasSystemExecute) (gdouble delta, void* user_data);
+struct _entitasISystem {
+	entitasSystemInitialize initialize;
+	gpointer initialize_target;
+	entitasSystemExecute execute;
+	gpointer execute_target;
+};
+
 typedef void (*entitasEntityRemovedListener) (entitasEntity* e, void* user_data);
 struct _entitasWorld {
 	gint refCount;
@@ -211,6 +223,8 @@ struct _entitasWorld {
 	SDL_Surface** surface;
 	gint surface_length1;
 	gint id;
+	entitasISystem* systems[100];
+	gint count;
 	entitasEntityRemovedListener entityRemoved;
 	gpointer entityRemoved_target;
 };
@@ -282,6 +296,9 @@ entitasEntity* entitas_entity_dup (const entitasEntity* self);
 void entitas_entity_free (entitasEntity* self);
 void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
+GType entitas_isystem_get_type (void) G_GNUC_CONST;
+entitasISystem* entitas_isystem_dup (const entitasISystem* self);
+void entitas_isystem_free (entitasISystem* self);
 Factory* factory_new (void);
 entitasWorld* entitas_world_new (void);
 entitasEntity* factory_createBase (Factory* self, const gchar* name, gint pool, SDL_Surface* s, gboolean active);

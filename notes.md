@@ -17,6 +17,9 @@ For sanity, I'm preprocessing a class attribute [Pseudo] to provide reference co
 post-process files are in build/src. classes need simple names - the name mangling in the custom
 script isn't workin correctly for OverlyLongNamedClasses
 
+### workaround
+to replace an interface, make a struct of delegates
+
 ### fixed
 
 array concat:

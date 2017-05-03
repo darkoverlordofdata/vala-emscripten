@@ -81,6 +81,11 @@ typedef struct _entitasTween entitasTween;
 #define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
 typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
+typedef struct _systemsCollision systemsCollision;
+typedef struct _systemsExpire systemsExpire;
+typedef struct _systemsInput systemsInput;
+typedef struct _systemsPhysics systemsPhysics;
+typedef struct _systemsRemove systemsRemove;
 
 struct _systemsSpawn {
 	gint refCount;
@@ -222,6 +227,12 @@ struct _Game {
 	Factory* factory;
 	Systems* systems;
 	GList* sprites;
+	systemsCollision* collision;
+	systemsExpire* expire;
+	systemsInput* input;
+	systemsPhysics* physics;
+	systemsRemove* remove;
+	systemsSpawn* spawn;
 	gint k;
 	gdouble t;
 	gdouble t1;
@@ -305,6 +316,11 @@ entitasEntity* entitas_entity_dup (const entitasEntity* self);
 void entitas_entity_free (entitasEntity* self);
 void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
+void systems_collision_free (systemsCollision* self);
+void systems_expire_free (systemsExpire* self);
+void systems_input_free (systemsInput* self);
+void systems_physics_free (systemsPhysics* self);
+void systems_remove_free (systemsRemove* self);
 void factory_newEnemy1 (Factory* self, gint x, gint y);
 void factory_newEnemy2 (Factory* self, gint x, gint y);
 void factory_newEnemy3 (Factory* self, gint x, gint y);

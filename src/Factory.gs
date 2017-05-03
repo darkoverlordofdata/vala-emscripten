@@ -27,8 +27,6 @@ enum Pool
 [Compact]
 class Factory : World
 
-
-
 	/**
 	 * Load all the surface resources
 	 */
