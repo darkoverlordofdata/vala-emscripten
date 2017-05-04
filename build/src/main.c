@@ -37,7 +37,7 @@ gdouble t2 = 0.0;
 extern gdouble t3;
 gdouble t3 = 0.0;
 
-void _vala_main (gchar** args, int args_length1);
+gint _vala_main (void);
 void game_free (Game* self);
 Game* game_new (gint width, gint height, SDL_Renderer* renderer);
 void game_initialize (Game* self);
@@ -53,7 +53,8 @@ static void _mainloop_em_arg_callback_func (void* arg) {
 }
 
 
-void _vala_main (gchar** args, int args_length1) {
+gint _vala_main (void) {
+	gint result = 0;
 	gchar* name = NULL;
 	gchar* _tmp0_ = NULL;
 	gint width = 0;
@@ -73,26 +74,32 @@ void _vala_main (gchar** args, int args_length1) {
 	SDL_Renderer* _tmp13_ = NULL;
 	SDL_Renderer* _tmp14_ = NULL;
 	Game* game = NULL;
-	SDL_Renderer* _tmp16_ = NULL;
-	Game* _tmp17_ = NULL;
-	Game* _tmp18_ = NULL;
+	gint _tmp16_ = 0;
+	gint _tmp17_ = 0;
+	SDL_Renderer* _tmp18_ = NULL;
 	Game* _tmp19_ = NULL;
 	Game* _tmp20_ = NULL;
+	Game* _tmp21_ = NULL;
+	Game* _tmp22_ = NULL;
 	_tmp0_ = g_strdup ("Shmupwarz");
 	name = _tmp0_;
-	width = 600;
-	height = 400;
+	width = 920;
+	height = 640;
 	_tmp1_ = SDL_Init ((guint32) ((SDL_INIT_VIDEO | SDL_INIT_TIMER) | SDL_INIT_EVENTS));
 	if (_tmp1_ < 0) {
 		const gchar* _tmp2_ = NULL;
 		_tmp2_ = SDL_GetError ();
 		g_print ("Unable to init SDL %s\n", _tmp2_);
+		result = 0;
 		_g_free0 (name);
-		return;
+		return result;
 	}
 	_tmp3_ = IMG_Init ((gint) IMG_INIT_PNG);
 	if (_tmp3_ < 0) {
 		g_print ("SDL_image could not initialize!\n");
+		result = 0;
+		_g_free0 (name);
+		return result;
 	}
 	_tmp4_ = SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");
 	if (!_tmp4_) {
@@ -101,6 +108,9 @@ void _vala_main (gchar** args, int args_length1) {
 	_tmp5_ = TTF_Init ();
 	if (_tmp5_ == (-1)) {
 		g_print ("SDL_ttf could not initialize!\n");
+		result = 0;
+		_g_free0 (name);
+		return result;
 	}
 	_tmp6_ = name;
 	_tmp7_ = width;
@@ -112,9 +122,10 @@ void _vala_main (gchar** args, int args_length1) {
 		const gchar* _tmp11_ = NULL;
 		_tmp11_ = SDL_GetError ();
 		g_print ("Unable to open window %s\n", _tmp11_);
+		result = 0;
 		_SDL_DestroyWindow0 (window);
 		_g_free0 (name);
-		return;
+		return result;
 	}
 	_tmp12_ = window;
 	_tmp13_ = SDL_CreateRenderer (_tmp12_, -1, (guint32) (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
@@ -124,24 +135,29 @@ void _vala_main (gchar** args, int args_length1) {
 		const gchar* _tmp15_ = NULL;
 		_tmp15_ = SDL_GetError ();
 		g_print ("Unable to get renderer %s\n", _tmp15_);
+		result = 0;
 		_SDL_DestroyRenderer0 (renderer);
 		_SDL_DestroyWindow0 (window);
 		_g_free0 (name);
-		return;
+		return result;
 	}
-	_tmp16_ = renderer;
-	_tmp17_ = game_new (600, 480, _tmp16_);
-	game = _tmp17_;
-	_tmp18_ = game;
-	game_initialize (_tmp18_);
-	_tmp19_ = game;
-	game_start (_tmp19_);
+	_tmp16_ = width;
+	_tmp17_ = height;
+	_tmp18_ = renderer;
+	_tmp19_ = game_new (_tmp16_, _tmp17_, _tmp18_);
+	game = _tmp19_;
 	_tmp20_ = game;
-	emscripten_set_main_loop_arg (_mainloop_em_arg_callback_func, _tmp20_, 0, 1);
+	game_initialize (_tmp20_);
+	_tmp21_ = game;
+	game_start (_tmp21_);
+	_tmp22_ = game;
+	emscripten_set_main_loop_arg (_mainloop_em_arg_callback_func, _tmp22_, 0, 1);
+	result = 0;
 	_game_release0 (game);
 	_SDL_DestroyRenderer0 (renderer);
 	_SDL_DestroyWindow0 (window);
 	_g_free0 (name);
+	return result;
 }
 
 
@@ -149,8 +165,7 @@ int main (int argc, char ** argv) {
 #if !GLIB_CHECK_VERSION (2,35,0)
 	g_type_init ();
 #endif
-	_vala_main (argv, argc);
-	return 0;
+	return _vala_main ();
 }
 
 

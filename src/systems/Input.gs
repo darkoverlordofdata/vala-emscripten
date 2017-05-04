@@ -36,8 +36,8 @@ namespace systems
 			shoot = game.mouseDown || (game.keys[122] == 1)
 			if shoot do timeToFire -= delta
 			if timeToFire < 0.0
-				factory.newBullet(x - 27, y + 2)
 				factory.newBullet(x + 27, y + 2)
+				factory.newBullet(x - 27, y + 2)
 				timeToFire = FireRate
 
 

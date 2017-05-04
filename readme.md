@@ -3,9 +3,6 @@
 Compile vala/genie to wasm using emscripten. 
 Works with SDL2. 
 
-
-
-
 ## status
 work in progress
 uses https://github.com/radare/posixvala + custom posix runtime for enscriptem

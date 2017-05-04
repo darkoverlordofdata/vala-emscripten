@@ -1,9 +1,20 @@
 .PHONY: build
 VALAC=posixvalac
-DEPS=--vapidir ./vapis --pkg sdl2 --pkg SDL2_image --pkg SDL2_ttf --pkg emscripten
+DEPS=--vapidir ./vapis \
+	--pkg sdl2 \
+	--pkg SDL2_image \
+	--pkg SDL2_ttf \
+	--pkg SDL2_mixer \
+	--pkg emscripten
 CC=emcc
 INCLUDE=-Iposix 
-RESOURCES=-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='["png"]' -s USE_SDL_TTF=2 --preload-file assets
+RESOURCES=-s USE_SDL=2 \
+	-s USE_SDL_IMAGE=2 \
+	-s USE_SDL_TTF=2 \
+	-s USE_SDL_MIXER=1 \
+	-s SDL2_IMAGE_FORMATS='["png"]' \
+	--preload-file assets
+
 #-I/usr/local/include/SDL2 -I/usr/include/SDL2
 
 SOURCE=build/src/main.gs \
@@ -50,8 +61,10 @@ build:
 	./pseudo.coffee
 	$(VALAC) -C --save-temps --disable-warnings $(DEPS) $(SOURCE)
 	./ccode.coffee
-	$(CC) -s WASM=1 $(INCLUDE) -O2 $(RESOURCES) -s ASSERTIONS=1 -o web/index.html $(CCODE)
+	$(CC) -s WASM=1 $(INCLUDE) -O2 $(RESOURCES) -s ASSERTIONS=1 -o web/shmupwarz.html $(CCODE)
 
+emcc:
+	$(CC) -s WASM=1 $(INCLUDE) -O2 $(RESOURCES) -s ASSERTIONS=1 -o web/shmupwarz.html $(CCODE)
 
 
 clean:

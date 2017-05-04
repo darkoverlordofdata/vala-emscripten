@@ -1,3 +1,13 @@
+
+#### performance
+wow - as fast as desktop c/c++.
+
+    0.000045
+    0.000069
+    0.000052
+
+
+
 #### notes
 no data structs (list, dict, array are from libGee), only GList, struct and [].
 however, libGee is implemented in Vala. check dova-core for tips on integrating my own no-g version of libGee

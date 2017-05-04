@@ -3,24 +3,30 @@ uses SDL.Video
 uses SDLImage
 uses Emscripten
 
-init
+//extern "C" void game() {
+
+
+// def game():int
+def main():int
 
 	var name = "Shmupwarz"
-	var width = 600
-	var height = 400
+	var width = 920
+	var height = 640
 
 	if SDL.init(SDL.InitFlag.VIDEO | SDL.InitFlag.TIMER | SDL.InitFlag.EVENTS) < 0
 		print "Unable to init SDL %s", SDL.get_error()
-		return
+		return 0
 
 	if SDLImage.init(SDLImage.InitFlags.PNG) < 0
 		print "SDL_image could not initialize!"
+		return 0
 
 	if !SDL.Hint.set_hint(Hint.RENDER_SCALE_QUALITY, "1")	
 		print "Warning: Linear texture filtering not enabled!!"	
 
 	if SDLTTF.init() == -1
 		print "SDL_ttf could not initialize!"
+		return 0
 
 	// if SDLMixer.open(22050, SDL.Audio.AudioFormat.S16LSB, 2, 4096) == -1
 	// 	print "SDL_mixer unagle to initialize!"
@@ -29,17 +35,19 @@ init
 	var window = new Window(name, Window.POS_CENTERED, Window.POS_CENTERED, width, height, WindowFlags.SHOWN)
 	if window == null
 		print "Unable to open window %s", SDL.get_error()
-		return
+		return 0
 	
 	var renderer = Renderer.create(window, -1, RendererFlags.ACCELERATED | RendererFlags.PRESENTVSYNC)
 	if renderer == null
 		print "Unable to get renderer %s", SDL.get_error()
-		return
+		return 0
 
-	var game = new Game(600, 480, renderer)
+	// emscripten_set_canvas_size(720, 640)
+	var game = new Game(width, height, renderer)
 	game.initialize()
 	game.start()
 	emscripten_set_main_loop_arg(mainloop, game, 0, 1)
+	return 0
 
 /**
  *	profiling data

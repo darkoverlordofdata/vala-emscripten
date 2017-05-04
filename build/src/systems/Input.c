@@ -468,11 +468,11 @@ void systems_input_execute (systemsInput* self, gdouble delta) {
 		_tmp24_ = self->factory;
 		_tmp25_ = x;
 		_tmp26_ = y;
-		factory_newBullet (_tmp24_, _tmp25_ - 27, _tmp26_ + 2);
+		factory_newBullet (_tmp24_, _tmp25_ + 27, _tmp26_ + 2);
 		_tmp27_ = self->factory;
 		_tmp28_ = x;
 		_tmp29_ = y;
-		factory_newBullet (_tmp27_, _tmp28_ + 27, _tmp29_ + 2);
+		factory_newBullet (_tmp27_, _tmp28_ - 27, _tmp29_ + 2);
 		_tmp30_ = self->FireRate;
 		self->timeToFire = _tmp30_;
 	}

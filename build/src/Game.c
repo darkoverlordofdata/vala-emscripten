@@ -852,7 +852,7 @@ void game_initialize (Game* self) {
 	entitas_world_addSystem ((entitasWorld*) _tmp58_, _systems_remove_initialize_entitas_system_initialize, _tmp59_, _systems_remove_execute_entitas_system_execute, _tmp60_);
 	_tmp61_ = self->world;
 	entitas_world_initialize ((entitasWorld*) _tmp61_);
-	_tmp62_ = sdx_font_new ("assets/fonts/OpenDyslexic-Bold.otf", 16);
+	_tmp62_ = sdx_font_new ("assets/fonts/OpenDyslexic-Bold.otf", 24);
 	_sdx_font_release0 (self->font);
 	self->font = _tmp62_;
 }

@@ -23,8 +23,8 @@ THE SOFTWARE.
 */
 //FOR: SDL2.0 - This is not official, to be futurely changed for the official binding
 //Maintainer: PedroHLC, Txasatonga, Desiderantes
-
 [CCode (cheader_filename = "SDL2/SDL_mixer.h")]
+
 namespace SDLMixer {
 	[CCode (cname = "Mix_Linked_Version")]
 	public static unowned SDL.Version linked ();

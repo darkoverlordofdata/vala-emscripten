@@ -84,7 +84,7 @@ class Game
 		world.addSystem(remove.initialize, remove.execute)
 		
 		world.initialize()
-		font = new sdx.Font("assets/fonts/OpenDyslexic-Bold.otf", 16)
+		font = new sdx.Font("assets/fonts/OpenDyslexic-Bold.otf", 24)
 
 			
 	def start()
