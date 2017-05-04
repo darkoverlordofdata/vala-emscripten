@@ -26,10 +26,9 @@ namespace systems
 		 * Remove exired entities
 		 */
 		def execute(delta:double)
-			for entity in expiring.entities
-				if entity.isActive() 
-					var exp = entity.expires.value - delta
-					entity.expires.value = exp
-					if entity.expires.value < 0 do factory.deleteEntity(entity)
+			for entity in expiring.entities do if entity.isActive() 
+				var exp = entity.expires.value - delta
+				entity.expires.value = exp
+				if entity.expires.value < 0 do factory.deleteEntity(entity)
 
 

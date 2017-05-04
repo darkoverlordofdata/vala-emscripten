@@ -6,7 +6,8 @@
 #include <glib-object.h>
 #include <float.h>
 #include <math.h>
-#include <SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -65,6 +66,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -79,11 +81,13 @@ typedef struct _entitasTween entitasTween;
 #define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
 typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
+typedef struct _sdxFont sdxFont;
 typedef struct _systemsCollision systemsCollision;
 typedef struct _systemsExpire systemsExpire;
 typedef struct _systemsPhysics systemsPhysics;
 typedef struct _systemsRemove systemsRemove;
 typedef struct _systemsSpawn systemsSpawn;
+typedef struct _systemsAnimation systemsAnimation;
 
 struct _systemsInput {
 	gint refCount;
@@ -155,12 +159,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -221,20 +227,22 @@ struct _Game {
 	gboolean running;
 	guint8 keys[256];
 	SDL_Event evt;
-	SDL_Surface* surface;
+	SDL_Renderer* renderer;
 	Factory* world;
 	GList* sprites;
+	sdxFont* font;
+	sdxSprite* fpsSprite;
+	gdouble fps;
+	gdouble elapsed;
+	gint frames;
 	systemsCollision* collision;
 	systemsExpire* expire;
 	systemsInput* input;
 	systemsPhysics* physics;
 	systemsRemove* remove;
 	systemsSpawn* spawn;
-	gint k;
-	gdouble t;
-	gdouble t1;
-	gdouble t2;
-	gdouble t3;
+	systemsAnimation* animate;
+	gdouble freq;
 	entitasEntity* player;
 };
 
@@ -291,8 +299,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);
@@ -311,11 +322,13 @@ entitasEntity* entitas_entity_dup (const entitasEntity* self);
 void entitas_entity_free (entitasEntity* self);
 void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
+void sdx_font_free (sdxFont* self);
 void systems_collision_free (systemsCollision* self);
 void systems_expire_free (systemsExpire* self);
 void systems_physics_free (systemsPhysics* self);
 void systems_remove_free (systemsRemove* self);
 void systems_spawn_free (systemsSpawn* self);
+void systems_animation_free (systemsAnimation* self);
 entitasEntity* entitas_entity_setPosition (entitasEntity *self, gdouble x, gdouble y);
 void factory_newBullet (Factory* self, gint x, gint y);
 
@@ -386,34 +399,22 @@ void systems_input_execute (systemsInput* self, gdouble delta) {
 	gint y = 0;
 	Game* _tmp2_ = NULL;
 	gdouble _tmp3_ = 0.0;
-	gint x1 = 0;
-	gint _tmp4_ = 0;
-	Game* _tmp5_ = NULL;
-	entitasEntity* _tmp6_ = NULL;
-	entitasBounds* _tmp7_ = NULL;
-	gint _tmp8_ = 0;
-	gint y1 = 0;
-	gint _tmp9_ = 0;
-	Game* _tmp10_ = NULL;
-	entitasEntity* _tmp11_ = NULL;
-	entitasBounds* _tmp12_ = NULL;
-	gint _tmp13_ = 0;
-	Game* _tmp14_ = NULL;
-	gint _tmp15_ = 0;
-	gint _tmp16_ = 0;
-	Game* _tmp17_ = NULL;
-	entitasEntity* _tmp18_ = NULL;
-	entitasBounds* _tmp19_ = NULL;
-	gint _tmp20_ = 0;
-	Game* _tmp21_ = NULL;
-	entitasEntity* _tmp22_ = NULL;
-	entitasBounds* _tmp23_ = NULL;
-	gint _tmp24_ = 0;
-	gboolean _tmp25_ = FALSE;
-	Game* _tmp26_ = NULL;
-	gboolean _tmp27_ = FALSE;
-	gboolean _tmp30_ = FALSE;
-	gdouble _tmp33_ = 0.0;
+	Game* _tmp4_ = NULL;
+	gint _tmp5_ = 0;
+	gint _tmp6_ = 0;
+	Game* _tmp7_ = NULL;
+	entitasEntity* _tmp8_ = NULL;
+	entitasBounds* _tmp9_ = NULL;
+	gint _tmp10_ = 0;
+	Game* _tmp11_ = NULL;
+	entitasEntity* _tmp12_ = NULL;
+	entitasBounds* _tmp13_ = NULL;
+	gint _tmp14_ = 0;
+	gboolean _tmp15_ = FALSE;
+	Game* _tmp16_ = NULL;
+	gboolean _tmp17_ = FALSE;
+	gboolean _tmp20_ = FALSE;
+	gdouble _tmp23_ = 0.0;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = self->game;
 	_tmp1_ = _tmp0_->mouseX;
@@ -421,71 +422,59 @@ void systems_input_execute (systemsInput* self, gdouble delta) {
 	_tmp2_ = self->game;
 	_tmp3_ = _tmp2_->mouseY;
 	y = (gint) _tmp3_;
-	_tmp4_ = x;
-	_tmp5_ = self->game;
-	_tmp6_ = _tmp5_->player;
-	_tmp7_ = (*_tmp6_).bounds;
-	_tmp8_ = (*_tmp7_).w;
-	x1 = _tmp4_ - (_tmp8_ / 2);
-	_tmp9_ = y;
-	_tmp10_ = self->game;
-	_tmp11_ = _tmp10_->player;
-	_tmp12_ = (*_tmp11_).bounds;
-	_tmp13_ = (*_tmp12_).h;
-	y1 = _tmp9_ - (_tmp13_ / 2);
-	_tmp14_ = self->game;
-	_tmp15_ = x1;
-	_tmp16_ = y1;
-	entitas_entity_setPosition (_tmp14_->player, (gdouble) _tmp15_, (gdouble) _tmp16_);
-	_tmp17_ = self->game;
-	_tmp18_ = _tmp17_->player;
-	_tmp19_ = (*_tmp18_).bounds;
-	_tmp20_ = x1;
-	(*_tmp19_).x = _tmp20_;
-	_tmp21_ = self->game;
-	_tmp22_ = _tmp21_->player;
-	_tmp23_ = (*_tmp22_).bounds;
-	_tmp24_ = y1;
-	(*_tmp23_).y = _tmp24_;
-	_tmp26_ = self->game;
-	_tmp27_ = _tmp26_->mouseDown;
-	if (_tmp27_) {
-		_tmp25_ = TRUE;
+	_tmp4_ = self->game;
+	_tmp5_ = x;
+	_tmp6_ = y;
+	entitas_entity_setPosition (_tmp4_->player, (gdouble) _tmp5_, (gdouble) _tmp6_);
+	_tmp7_ = self->game;
+	_tmp8_ = _tmp7_->player;
+	_tmp9_ = (*_tmp8_).bounds;
+	_tmp10_ = x;
+	(*_tmp9_).x = _tmp10_;
+	_tmp11_ = self->game;
+	_tmp12_ = _tmp11_->player;
+	_tmp13_ = (*_tmp12_).bounds;
+	_tmp14_ = y;
+	(*_tmp13_).y = _tmp14_;
+	_tmp16_ = self->game;
+	_tmp17_ = _tmp16_->mouseDown;
+	if (_tmp17_) {
+		_tmp15_ = TRUE;
 	} else {
-		Game* _tmp28_ = NULL;
-		guint8 _tmp29_ = 0U;
-		_tmp28_ = self->game;
-		_tmp29_ = _tmp28_->keys[122];
-		_tmp25_ = ((gint) _tmp29_) == 1;
+		Game* _tmp18_ = NULL;
+		guint8 _tmp19_ = 0U;
+		_tmp18_ = self->game;
+		_tmp19_ = _tmp18_->keys[122];
+		_tmp15_ = ((gint) _tmp19_) == 1;
 	}
-	self->shoot = _tmp25_;
-	_tmp30_ = self->shoot;
-	if (_tmp30_) {
-		gdouble _tmp31_ = 0.0;
-		gdouble _tmp32_ = 0.0;
-		_tmp31_ = self->timeToFire;
-		_tmp32_ = delta;
-		self->timeToFire = _tmp31_ - _tmp32_;
+	self->shoot = _tmp15_;
+	_tmp20_ = self->shoot;
+	if (_tmp20_) {
+		gdouble _tmp21_ = 0.0;
+		gdouble _tmp22_ = 0.0;
+		_tmp21_ = self->timeToFire;
+		_tmp22_ = delta;
+		self->timeToFire = _tmp21_ - _tmp22_;
 	}
-	_tmp33_ = self->timeToFire;
-	if (_tmp33_ < 0.0) {
-		Factory* _tmp34_ = NULL;
-		gint _tmp35_ = 0;
-		gint _tmp36_ = 0;
-		Factory* _tmp37_ = NULL;
-		gint _tmp38_ = 0;
-		gint _tmp39_ = 0;
-		gdouble _tmp40_ = 0.0;
-		_tmp34_ = self->factory;
-		_tmp35_ = x;
-		_tmp36_ = y;
-		factory_newBullet (_tmp34_, _tmp35_ - 27, _tmp36_ + 2);
-		_tmp37_ = self->factory;
-		_tmp38_ = x;
-		_tmp39_ = y;
-		factory_newBullet (_tmp37_, _tmp38_ + 27, _tmp39_ + 2);
-		_tmp40_ = self->FireRate;
-		self->timeToFire = _tmp40_;
+	_tmp23_ = self->timeToFire;
+	if (_tmp23_ < 0.0) {
+		Factory* _tmp24_ = NULL;
+		gint _tmp25_ = 0;
+		gint _tmp26_ = 0;
+		Factory* _tmp27_ = NULL;
+		gint _tmp28_ = 0;
+		gint _tmp29_ = 0;
+		gdouble _tmp30_ = 0.0;
+		_tmp24_ = self->factory;
+		_tmp25_ = x;
+		_tmp26_ = y;
+		factory_newBullet (_tmp24_, _tmp25_ - 27, _tmp26_ + 2);
+		_tmp27_ = self->factory;
+		_tmp28_ = x;
+		_tmp29_ = y;
+		factory_newBullet (_tmp27_, _tmp28_ + 27, _tmp29_ + 2);
+		_tmp30_ = self->FireRate;
+		self->timeToFire = _tmp30_;
 	}
 }
 

@@ -8,7 +8,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL.h>
 
 typedef struct _systemsCollision systemsCollision;
 typedef struct _Game Game;
@@ -77,6 +76,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -184,12 +184,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -302,8 +304,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);
@@ -323,9 +328,12 @@ void entitas_entity_free (entitasEntity* self);
 void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
 gboolean entitas_entity_isActive (entitasEntity *self);
-gboolean systems_collision_intersects (systemsCollision* self, entitasBounds r1, entitasBounds r2);
+gboolean systems_collision_intersects (systemsCollision* self, entitasEntity** a, entitasEntity** b);
 void systems_collision_handleCollision (systemsCollision* self, entitasEntity** a, entitasEntity** b);
+void factory_newBang (Factory* self, gint x, gint y);
 void entitas_world_deleteEntity (entitasWorld* self, entitasEntity* entity);
+void factory_newParticle (Factory* self, gint x, gint y);
+void factory_newExplosion (Factory* self, gint x, gint y);
 
 
 systemsCollision* systems_collision_addRef (systemsCollision* self) {
@@ -460,17 +468,9 @@ void systems_collision_execute (systemsCollision* self, gdouble delta) {
 								gboolean _tmp5_ = FALSE;
 								_tmp5_ = entitas_entity_isActive (bullet);
 								if (_tmp5_) {
-									entitasEntity* _tmp6_ = NULL;
-									entitasBounds* _tmp7_ = NULL;
-									entitasEntity* _tmp8_ = NULL;
-									entitasBounds* _tmp9_ = NULL;
-									gboolean _tmp10_ = FALSE;
-									_tmp6_ = enemy;
-									_tmp7_ = (*_tmp6_).bounds;
-									_tmp8_ = bullet;
-									_tmp9_ = (*_tmp8_).bounds;
-									_tmp10_ = systems_collision_intersects (self, *_tmp7_, *_tmp9_);
-									if (_tmp10_) {
+									gboolean _tmp6_ = FALSE;
+									_tmp6_ = systems_collision_intersects (self, &enemy, &bullet);
+									if (_tmp6_) {
 										systems_collision_handleCollision (self, &enemy, &bullet);
 										return;
 									}
@@ -485,72 +485,96 @@ void systems_collision_execute (systemsCollision* self, gdouble delta) {
 }
 
 
-gboolean systems_collision_intersects (systemsCollision* self, entitasBounds r1, entitasBounds r2) {
+gboolean systems_collision_intersects (systemsCollision* self, entitasEntity** a, entitasEntity** b) {
 	gboolean result = FALSE;
 	gboolean _tmp0_ = FALSE;
 	gboolean _tmp1_ = FALSE;
 	gboolean _tmp2_ = FALSE;
-	entitasBounds _tmp3_ = {0};
-	gint _tmp4_ = 0;
-	entitasBounds _tmp5_ = {0};
-	gint _tmp6_ = 0;
-	entitasBounds _tmp7_ = {0};
+	entitasEntity* _tmp3_ = NULL;
+	entitasBounds* _tmp4_ = NULL;
+	gint _tmp5_ = 0;
+	entitasEntity* _tmp6_ = NULL;
+	entitasBounds* _tmp7_ = NULL;
 	gint _tmp8_ = 0;
+	entitasEntity* _tmp9_ = NULL;
+	entitasBounds* _tmp10_ = NULL;
+	gint _tmp11_ = 0;
 	g_return_val_if_fail (self != NULL, FALSE);
-	_tmp3_ = r1;
-	_tmp4_ = _tmp3_.x;
-	_tmp5_ = r2;
-	_tmp6_ = _tmp5_.x;
-	_tmp7_ = r2;
-	_tmp8_ = _tmp7_.w;
-	if (_tmp4_ < (_tmp6_ + _tmp8_)) {
-		entitasBounds _tmp9_ = {0};
-		gint _tmp10_ = 0;
-		entitasBounds _tmp11_ = {0};
-		gint _tmp12_ = 0;
-		entitasBounds _tmp13_ = {0};
+	_tmp3_ = *a;
+	_tmp4_ = (*_tmp3_).bounds;
+	_tmp5_ = (*_tmp4_).x;
+	_tmp6_ = *b;
+	_tmp7_ = (*_tmp6_).bounds;
+	_tmp8_ = (*_tmp7_).x;
+	_tmp9_ = *b;
+	_tmp10_ = (*_tmp9_).bounds;
+	_tmp11_ = (*_tmp10_).w;
+	if (_tmp5_ < (_tmp8_ + _tmp11_)) {
+		entitasEntity* _tmp12_ = NULL;
+		entitasBounds* _tmp13_ = NULL;
 		gint _tmp14_ = 0;
-		_tmp9_ = r1;
-		_tmp10_ = _tmp9_.x;
-		_tmp11_ = r1;
-		_tmp12_ = _tmp11_.w;
-		_tmp13_ = r2;
-		_tmp14_ = _tmp13_.x;
-		_tmp2_ = (_tmp10_ + _tmp12_) > _tmp14_;
+		entitasEntity* _tmp15_ = NULL;
+		entitasBounds* _tmp16_ = NULL;
+		gint _tmp17_ = 0;
+		entitasEntity* _tmp18_ = NULL;
+		entitasBounds* _tmp19_ = NULL;
+		gint _tmp20_ = 0;
+		_tmp12_ = *a;
+		_tmp13_ = (*_tmp12_).bounds;
+		_tmp14_ = (*_tmp13_).x;
+		_tmp15_ = *a;
+		_tmp16_ = (*_tmp15_).bounds;
+		_tmp17_ = (*_tmp16_).w;
+		_tmp18_ = *b;
+		_tmp19_ = (*_tmp18_).bounds;
+		_tmp20_ = (*_tmp19_).x;
+		_tmp2_ = (_tmp14_ + _tmp17_) > _tmp20_;
 	} else {
 		_tmp2_ = FALSE;
 	}
 	if (_tmp2_) {
-		entitasBounds _tmp15_ = {0};
-		gint _tmp16_ = 0;
-		entitasBounds _tmp17_ = {0};
-		gint _tmp18_ = 0;
-		entitasBounds _tmp19_ = {0};
-		gint _tmp20_ = 0;
-		_tmp15_ = r1;
-		_tmp16_ = _tmp15_.y;
-		_tmp17_ = r2;
-		_tmp18_ = _tmp17_.y;
-		_tmp19_ = r2;
-		_tmp20_ = _tmp19_.h;
-		_tmp1_ = _tmp16_ < (_tmp18_ + _tmp20_);
+		entitasEntity* _tmp21_ = NULL;
+		entitasBounds* _tmp22_ = NULL;
+		gint _tmp23_ = 0;
+		entitasEntity* _tmp24_ = NULL;
+		entitasBounds* _tmp25_ = NULL;
+		gint _tmp26_ = 0;
+		entitasEntity* _tmp27_ = NULL;
+		entitasBounds* _tmp28_ = NULL;
+		gint _tmp29_ = 0;
+		_tmp21_ = *a;
+		_tmp22_ = (*_tmp21_).bounds;
+		_tmp23_ = (*_tmp22_).y;
+		_tmp24_ = *b;
+		_tmp25_ = (*_tmp24_).bounds;
+		_tmp26_ = (*_tmp25_).y;
+		_tmp27_ = *b;
+		_tmp28_ = (*_tmp27_).bounds;
+		_tmp29_ = (*_tmp28_).h;
+		_tmp1_ = _tmp23_ < (_tmp26_ + _tmp29_);
 	} else {
 		_tmp1_ = FALSE;
 	}
 	if (_tmp1_) {
-		entitasBounds _tmp21_ = {0};
-		gint _tmp22_ = 0;
-		entitasBounds _tmp23_ = {0};
-		gint _tmp24_ = 0;
-		entitasBounds _tmp25_ = {0};
-		gint _tmp26_ = 0;
-		_tmp21_ = r1;
-		_tmp22_ = _tmp21_.y;
-		_tmp23_ = r1;
-		_tmp24_ = _tmp23_.h;
-		_tmp25_ = r2;
-		_tmp26_ = _tmp25_.y;
-		_tmp0_ = (_tmp22_ + _tmp24_) > _tmp26_;
+		entitasEntity* _tmp30_ = NULL;
+		entitasBounds* _tmp31_ = NULL;
+		gint _tmp32_ = 0;
+		entitasEntity* _tmp33_ = NULL;
+		entitasBounds* _tmp34_ = NULL;
+		gint _tmp35_ = 0;
+		entitasEntity* _tmp36_ = NULL;
+		entitasBounds* _tmp37_ = NULL;
+		gint _tmp38_ = 0;
+		_tmp30_ = *a;
+		_tmp31_ = (*_tmp30_).bounds;
+		_tmp32_ = (*_tmp31_).y;
+		_tmp33_ = *a;
+		_tmp34_ = (*_tmp33_).bounds;
+		_tmp35_ = (*_tmp34_).h;
+		_tmp36_ = *b;
+		_tmp37_ = (*_tmp36_).bounds;
+		_tmp38_ = (*_tmp37_).y;
+		_tmp0_ = (_tmp32_ + _tmp35_) > _tmp38_;
 	} else {
 		_tmp0_ = FALSE;
 	}
@@ -564,65 +588,101 @@ void systems_collision_handleCollision (systemsCollision* self, entitasEntity** 
 	entitasEntity* _tmp0_ = NULL;
 	entitasPosition* _tmp1_ = NULL;
 	gdouble _tmp2_ = 0.0;
-	entitasEntity* _tmp3_ = NULL;
-	entitasBounds* _tmp4_ = NULL;
-	gint _tmp5_ = 0;
 	gint y = 0;
-	entitasEntity* _tmp6_ = NULL;
-	entitasPosition* _tmp7_ = NULL;
-	gdouble _tmp8_ = 0.0;
-	entitasEntity* _tmp9_ = NULL;
-	entitasBounds* _tmp10_ = NULL;
-	gint _tmp11_ = 0;
-	Factory* _tmp12_ = NULL;
-	entitasEntity* _tmp13_ = NULL;
-	entitasEntity* _tmp14_ = NULL;
-	entitasHealth* _tmp15_ = NULL;
+	entitasEntity* _tmp3_ = NULL;
+	entitasPosition* _tmp4_ = NULL;
+	gdouble _tmp5_ = 0.0;
+	Factory* _tmp6_ = NULL;
+	gint _tmp7_ = 0;
+	gint _tmp8_ = 0;
+	Factory* _tmp9_ = NULL;
+	entitasEntity* _tmp10_ = NULL;
+	entitasEntity* _tmp16_ = NULL;
+	entitasHealth* _tmp17_ = NULL;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = *b;
+	_tmp0_ = *a;
 	_tmp1_ = (*_tmp0_).position;
 	_tmp2_ = (*_tmp1_).x;
-	_tmp3_ = *b;
-	_tmp4_ = (*_tmp3_).bounds;
-	_tmp5_ = (*_tmp4_).w;
-	x = (gint) (((gdouble) _tmp2_) - (_tmp5_ / 2));
-	_tmp6_ = *b;
-	_tmp7_ = (*_tmp6_).position;
-	_tmp8_ = (*_tmp7_).y;
-	_tmp9_ = *b;
-	_tmp10_ = (*_tmp9_).bounds;
-	_tmp11_ = (*_tmp10_).h;
-	y = (gint) (((gdouble) _tmp8_) - (_tmp11_ / 2));
-	_tmp12_ = self->factory;
-	_tmp13_ = *b;
-	entitas_world_deleteEntity ((entitasWorld*) _tmp12_, _tmp13_);
-	_tmp14_ = *a;
-	_tmp15_ = (*_tmp14_).health;
-	if (_tmp15_ != NULL) {
+	x = (gint) ((gdouble) _tmp2_);
+	_tmp3_ = *a;
+	_tmp4_ = (*_tmp3_).position;
+	_tmp5_ = (*_tmp4_).y;
+	y = (gint) ((gdouble) _tmp5_);
+	_tmp6_ = self->factory;
+	_tmp7_ = x;
+	_tmp8_ = y;
+	factory_newBang (_tmp6_, _tmp7_, _tmp8_);
+	_tmp9_ = self->factory;
+	_tmp10_ = *b;
+	entitas_world_deleteEntity ((entitasWorld*) _tmp9_, _tmp10_);
+	{
+		gint i = 0;
+		i = 0;
+		{
+			gboolean _tmp11_ = FALSE;
+			_tmp11_ = TRUE;
+			while (TRUE) {
+				Factory* _tmp13_ = NULL;
+				gint _tmp14_ = 0;
+				gint _tmp15_ = 0;
+				if (!_tmp11_) {
+					gint _tmp12_ = 0;
+					_tmp12_ = i;
+					i = _tmp12_ + 1;
+				}
+				_tmp11_ = FALSE;
+				if (!(i <= 3)) {
+					break;
+				}
+				_tmp13_ = self->factory;
+				_tmp14_ = x;
+				_tmp15_ = y;
+				factory_newParticle (_tmp13_, _tmp14_, _tmp15_);
+			}
+		}
+	}
+	_tmp16_ = *a;
+	_tmp17_ = (*_tmp16_).health;
+	if (_tmp17_ != NULL) {
 		gdouble current = 0.0;
-		entitasEntity* _tmp16_ = NULL;
-		entitasHealth* _tmp17_ = NULL;
-		gdouble _tmp18_ = 0.0;
-		gdouble _tmp19_ = 0.0;
-		_tmp16_ = *a;
-		_tmp17_ = (*_tmp16_).health;
-		_tmp18_ = (*_tmp17_).current;
-		current = _tmp18_ - 2;
-		_tmp19_ = current;
-		if (_tmp19_ < ((gdouble) 0)) {
-			Factory* _tmp20_ = NULL;
-			entitasEntity* _tmp21_ = NULL;
-			_tmp20_ = self->factory;
-			_tmp21_ = *a;
-			entitas_world_deleteEntity ((entitasWorld*) _tmp20_, _tmp21_);
+		entitasEntity* _tmp18_ = NULL;
+		entitasHealth* _tmp19_ = NULL;
+		gdouble _tmp20_ = 0.0;
+		gdouble _tmp21_ = 0.0;
+		_tmp18_ = *a;
+		_tmp19_ = (*_tmp18_).health;
+		_tmp20_ = (*_tmp19_).current;
+		current = _tmp20_ - 2;
+		_tmp21_ = current;
+		if (_tmp21_ < ((gdouble) 0)) {
+			Factory* _tmp22_ = NULL;
+			entitasEntity* _tmp23_ = NULL;
+			entitasPosition* _tmp24_ = NULL;
+			gdouble _tmp25_ = 0.0;
+			entitasEntity* _tmp26_ = NULL;
+			entitasPosition* _tmp27_ = NULL;
+			gdouble _tmp28_ = 0.0;
+			Factory* _tmp29_ = NULL;
+			entitasEntity* _tmp30_ = NULL;
+			_tmp22_ = self->factory;
+			_tmp23_ = *a;
+			_tmp24_ = (*_tmp23_).position;
+			_tmp25_ = (*_tmp24_).x;
+			_tmp26_ = *a;
+			_tmp27_ = (*_tmp26_).position;
+			_tmp28_ = (*_tmp27_).y;
+			factory_newExplosion (_tmp22_, (gint) _tmp25_, (gint) _tmp28_);
+			_tmp29_ = self->factory;
+			_tmp30_ = *a;
+			entitas_world_deleteEntity ((entitasWorld*) _tmp29_, _tmp30_);
 		} else {
-			entitasEntity* _tmp22_ = NULL;
-			entitasHealth* _tmp23_ = NULL;
-			gdouble _tmp24_ = 0.0;
-			_tmp22_ = *a;
-			_tmp23_ = (*_tmp22_).health;
-			_tmp24_ = current;
-			(*_tmp23_).current = _tmp24_;
+			entitasEntity* _tmp31_ = NULL;
+			entitasHealth* _tmp32_ = NULL;
+			gdouble _tmp33_ = 0.0;
+			_tmp31_ = *a;
+			_tmp32_ = (*_tmp31_).health;
+			_tmp33_ = current;
+			(*_tmp32_).current = _tmp33_;
 		}
 	}
 }

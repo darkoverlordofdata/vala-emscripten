@@ -8,7 +8,6 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL.h>
 
 typedef struct _systemsExpire systemsExpire;
 typedef struct _Game Game;
@@ -77,6 +76,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -183,12 +183,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -300,8 +302,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);

@@ -72,11 +72,13 @@ namespace entitas
 	// 	sound : SDL.Chunk 
 
 	struct Sprite
-		surface : unowned SDL.Surface 
+		sprite: sdx.Sprite
+		width: int
+		height: int
 
 	struct Text
 		text : string 
-		surface : unowned SDL.Surface 
+		sprite: sdx.Sprite
 
 	[SimpleType]
 	struct Tint
@@ -446,16 +448,18 @@ namespace entitas
 		def hasSprite():bool
 			return (mask & __SPRITE__) != 0
 
-		def addSprite(surface:SDL.Surface):Entity* 
+		def addSprite(sprite:sdx.Sprite, width: int, height: int):Entity* 
 			if (mask & __SPRITE__) != 0 do raise new Exception.EntityAlreadyHasComponent("Sprite")
-			this.sprite = { surface }
+			this.sprite = { sprite, width, height }
 			mask |= __SPRITE__
 			World.onComponentAdded(&this, Components.SpriteComponent)
 			return &this
 
-		def setSprite(surface:SDL.Surface):Entity*
+		def setSprite(sprite:sdx.Sprite, width: int, height: int):Entity*
 			if (mask & __SPRITE__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Sprite")
-			this.sprite.surface = surface
+			this.sprite.sprite = sprite
+			this.sprite.width = width
+			this.sprite.height = height
 			return &this
 
 		def removeSprite():Entity*
@@ -468,17 +472,17 @@ namespace entitas
 		def hasText():bool
 			return (mask & __TEXT__) != 0
 
-		def addText(text:string,surface:SDL.Surface):Entity* 
+		def addText(text:string,texture:sdx.Sprite):Entity* 
 			if (mask & __TEXT__) != 0 do raise new Exception.EntityAlreadyHasComponent("Text")
-			this.text = { text, surface }
+			this.text = { text, texture }
 			mask |= __TEXT__
 			World.onComponentAdded(&this, Components.TextComponent)
 			return &this
 
-		def setText(text:string,surface:SDL.Surface):Entity*
+		def setText(text:string,texture:sdx.Sprite):Entity*
 			if (mask & __TEXT__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Text")
 			this.text.text = text
-			this.text.surface = surface
+			this.text.sprite = texture
 			return &this
 
 		def removeText():Entity*

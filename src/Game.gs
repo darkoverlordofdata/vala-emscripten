@@ -1,11 +1,12 @@
 /**
  * Game controller 
  */
-uses SDL
+// uses SDL
+// uses SDL.Video
+uses SDLImage
 uses Emscripten
 uses entitas
 uses systems
-
 
 [Pseudo]
 class Game
@@ -21,10 +22,15 @@ class Game
 	running		: bool
 	keys		: uint8[256]
 	evt			: SDL.Event
-	surface		: unowned Surface
+	renderer	: unowned SDL.Video.Renderer
 	world		: Factory
-	//systems		: Systems
 	sprites		: List of Entity* = new List of Entity*
+	font 		: sdx.Font
+	fpsSprite	: sdx.Sprite
+	fps			: double
+	elapsed		: double  = 0
+	frames		: int  = 0
+
 
 	collision	: Collision
 	expire		: Expire
@@ -32,33 +38,34 @@ class Game
 	physics		: Physics
 	remove		: Remove
 	spawn		: Spawn
+	animate		: Animation
 
-		
-	k		   	: int
-	t		   	: double
-	t1		  	: double = 0.0
-	t2		  	: double = 0.0
-	t3		  	: double = 0.0
+	// freq		: double = 1000 //SDL.Timer.get_performance_frequency()
+    
+	freq		: double = SDL.Timer.get_performance_frequency()
 
 	player : Entity*
 	
 
-	construct(width:int, height:int)
+	construct(width:int, height:int, renderer:SDL.Video.Renderer)//, renderer:SDL.Video.Renderer)
 		instance = this
 		this.width = width
 		this.height = height
+		this.renderer = renderer
 
 	def initialize()
+
 		world = new Factory()
 		world.setEntityRemovedListener(entityRemoved)
-		world.createBackground(0)
-		world.createBackground(1)
-		player = world.createPlayer()
-		for var i=1 to 10 do world.createBullet()
-		for var i=1 to 15 do world.createEnemy1()
-		for var i=1 to 10 do world.createEnemy2()
-		for var i=1 to  5 do world.createEnemy3()
-		for var i=1 to 90 do world.createParticle()
+		world.createBackground(this)
+		player = world.createPlayer(this)
+		for var i=1 to 20 do world.createBullet(this)
+		for var i=1 to 15 do world.createEnemy1(this)
+		for var i=1 to 10 do world.createEnemy2(this)
+		for var i=1 to  5 do world.createEnemy3(this)
+		for var i=1 to 10 do world.createExplosion(this)
+		for var i=1 to 12 do world.createBang(this)
+		for var i=1 to 90 do world.createParticle(this)
 
 		spawn = new Spawn(this, world)
 		input = new Input(this, world)
@@ -66,87 +73,98 @@ class Game
 		physics = new Physics(this, world)
 		expire = new Expire(this, world)
 		remove = new Remove(this, world)
+		animate = new Animation(this, world)
 
 		world.addSystem(spawn.initialize, spawn.execute)
 		world.addSystem(input.initialize, input.execute)
 		world.addSystem(collision.initialize, collision.execute)
 		world.addSystem(physics.initialize, physics.execute)
+		world.addSystem(animate.initialize, animate.execute)
 		world.addSystem(expire.initialize, expire.execute)
 		world.addSystem(remove.initialize, remove.execute)
 		
 		world.initialize()
+		font = new sdx.Font("assets/fonts/OpenDyslexic-Bold.otf", 16)
+
 			
 	def start()
 		running = true
-		mark1 = emscripten_get_now()/1000
+		// mark1 = emscripten_get_now()/freq
+		mark1 = (double)SDL.Timer.get_performance_counter()/freq
 
 	def processEvents()
-		while Event.poll(out evt) != 0
+		while SDL.Event.poll(out evt) != 0
 
 			case evt.type
-				when EventType.QUIT
+				when SDL.EventType.QUIT
 					running = false
-				when EventType.KEYDOWN
+				when SDL.EventType.KEYDOWN
 					keys[evt.key.keysym.sym] = 1
-				when EventType.KEYUP
+				when SDL.EventType.KEYUP
 					keys[evt.key.keysym.sym] = 0
-				when EventType.MOUSEMOTION
+				when SDL.EventType.MOUSEMOTION
 					mouseX = evt.motion.x
 					mouseY = evt.motion.y
-				when EventType.MOUSEBUTTONDOWN
+				when SDL.EventType.MOUSEBUTTONDOWN
 					mouseDown = true
-				when EventType.MOUSEBUTTONUP
+				when SDL.EventType.MOUSEBUTTONUP
 					mouseDown = false
 
 
 	def update()
-		mark2 = emscripten_get_now()/1000
+
+		mark2 = (double)SDL.Timer.get_performance_counter()/freq
+		// mark2 = emscripten_get_now()/freq
 		delta = mark2 - mark1
 		mark1 = mark2
-
+		// print "delta %f", delta
+		frames++
+		elapsed = elapsed + delta
+		if elapsed > 1.0
+			fps = (int)((double)frames / elapsed)
+			elapsed = 0.0
+			frames = 0
+		
 		processEvents()
-
-		t1 = emscripten_get_now()/1000
 		world.execute(delta)
-		t2 = emscripten_get_now()/1000
-		t3 = t2 - t1
-		t = t + t3
-		k += 1
-		if k == 1000
-			k = 0
-			t = t / 1000.0
-			print "%f", t
-			t = 0
+		
 
 
-		surface.fill(null, surface.format.map_rgb(255, 0, 0))
+	def draw()
+		renderer.set_draw_color(0, 0, 0xff, 0)
+		renderer.clear()
+		for sprite in sprites
+			if sprite.isActive() do drawEach(sprite)
+		drawFps()
+		renderer.present()
 
-		for entity in sprites
-			if !entity.isActive() do continue
-			if entity.hasIndex()
-				var w = (int16)(entity.bounds.w / entity.index.limit)
-				var h = (int16)entity.bounds.h
-				var x = (int16)0
-				var y = (int16)(entity.index.value * w)
-				entity.sprite.surface.blit({ x, y, w, h }, surface, 
-					{ 	
-						(int16)entity.bounds.x, 
-						(int16)entity.bounds.y, 
-						(int16)w, 
-						(int16)h
-					})
-			else
-				entity.sprite.surface.blit(null, surface, 
-					{ 	
-						(int16)entity.bounds.x, 
-						(int16)entity.bounds.y, 
-						(int16)entity.bounds.w, 
-						(int16)entity.bounds.h
-					})
+	def drawFps()
+		if fpsSprite != null do fpsSprite = null 
+		fpsSprite = new sdx.Sprite(renderer, "%2.2f".printf(fps), font, {0xd7, 0xeb, 0xd7, 0xfa} )
+		fpsSprite.centered = false
+		fpsSprite.render(renderer, 0, 0)
 
+	def drawEach(e:Entity*):bool
+		if e.hasSprite()
 
-		surface.flip()
+			e.bounds.w = (int)((double)e.sprite.width * e.scale.x)
+			e.bounds.h = (int)((double)e.sprite.height * e.scale.y)
+			if !e.isBackground()
+				e.bounds.x = (int)((double)e.position.x - e.bounds.w / 2)
+				e.bounds.y = (int)((double)e.position.y - e.bounds.h / 2)
+				if e.hasTint()
+					e.sprite.sprite.texture.set_color_mod((uint8)e.tint.r, (uint8)e.tint.g, (uint8)e.tint.b)
+					e.sprite.sprite.texture.set_alpha_mod((uint8)e.tint.a)
+			
+			// print "(%d, %d, %d, %d) %s", e.bounds.x, e.bounds.y, e.bounds.w, e.bounds.h, e.name 
+			renderer.copy(e.sprite.sprite.texture, null, 
+				{ e.bounds.x, e.bounds.y, (uint)e.bounds.w, (uint)e.bounds.h })
 
+		// if e.hasText()
+		// 	renderer.copy(e.text.sprite.texture, null, 
+		// 		{ (int)e.position.x, (int)e.position.y, e.text.sprite.width, e.text.sprite.height })
+
+		return true
 
 /**
  * add to game.sprites in layer order

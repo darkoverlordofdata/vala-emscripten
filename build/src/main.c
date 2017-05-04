@@ -6,304 +6,46 @@
 #include <glib-object.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <SDL2/SDL_hints.h>
+#include <SDL_ttf.h>
+#include <SDL2/SDL_video.h>
+#include <SDL2/SDL_render.h>
+#include <emscripten.h>
 #include <float.h>
 #include <math.h>
-#include <emscripten.h>
 
+#define _g_free0(var) (var = (g_free (var), NULL))
+#define _SDL_DestroyWindow0(var) ((var == NULL) ? NULL : (var = (SDL_DestroyWindow (var), NULL)))
+#define _SDL_DestroyRenderer0(var) ((var == NULL) ? NULL : (var = (SDL_DestroyRenderer (var), NULL)))
 typedef struct _Game Game;
-typedef struct _entitasWorld entitasWorld;
-typedef entitasWorld Factory;
-
-#define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
-
-#define ENTITAS_TYPE_BACKGROUND (entitas_background_get_type ())
-typedef struct _entitasBackground entitasBackground;
-
-#define ENTITAS_TYPE_BOUNDS (entitas_bounds_get_type ())
-typedef struct _entitasBounds entitasBounds;
-
-#define ENTITAS_TYPE_BULLET (entitas_bullet_get_type ())
-typedef struct _entitasBullet entitasBullet;
-
-#define ENTITAS_TYPE_ENEMY1 (entitas_enemy1_get_type ())
-typedef struct _entitasEnemy1 entitasEnemy1;
-
-#define ENTITAS_TYPE_ENEMY2 (entitas_enemy2_get_type ())
-typedef struct _entitasEnemy2 entitasEnemy2;
-
-#define ENTITAS_TYPE_ENEMY3 (entitas_enemy3_get_type ())
-typedef struct _entitasEnemy3 entitasEnemy3;
-
-#define ENTITAS_TYPE_EXPIRES (entitas_expires_get_type ())
-typedef struct _entitasExpires entitasExpires;
-
-#define ENTITAS_TYPE_HEALTH (entitas_health_get_type ())
-typedef struct _entitasHealth entitasHealth;
-
-#define ENTITAS_TYPE_HUD (entitas_hud_get_type ())
-typedef struct _entitasHud entitasHud;
-
-#define ENTITAS_TYPE_INDEX (entitas_index_get_type ())
-typedef struct _entitasIndex entitasIndex;
-
-#define ENTITAS_TYPE_LAYER (entitas_layer_get_type ())
-typedef struct _entitasLayer entitasLayer;
-
-#define ENTITAS_TYPE_POSITION (entitas_position_get_type ())
-typedef struct _entitasPosition entitasPosition;
-
-#define ENTITAS_TYPE_SCALE (entitas_scale_get_type ())
-typedef struct _entitasScale entitasScale;
-
-#define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
-typedef struct _entitasSprite entitasSprite;
-
-#define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
-typedef struct _entitasText entitasText;
-
-#define ENTITAS_TYPE_TINT (entitas_tint_get_type ())
-typedef struct _entitasTint entitasTint;
-
-#define ENTITAS_TYPE_TWEEN (entitas_tween_get_type ())
-typedef struct _entitasTween entitasTween;
-
-#define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
-typedef struct _entitasVelocity entitasVelocity;
-typedef struct _entitasEntity entitasEntity;
-typedef struct _systemsCollision systemsCollision;
-typedef struct _systemsExpire systemsExpire;
-typedef struct _systemsInput systemsInput;
-typedef struct _systemsPhysics systemsPhysics;
-typedef struct _systemsRemove systemsRemove;
-typedef struct _systemsSpawn systemsSpawn;
 void game_release (Game* self);
 void game_free (Game* self);
 Game* game_addRef (Game* self);
 #define _game_release0(var) ((var == NULL) ? NULL : (var = (game_release (var), NULL)))
 
-struct _entitasBackground {
-	gboolean active;
-};
 
-struct _entitasBounds {
-	gint x;
-	gint y;
-	gint w;
-	gint h;
-};
-
-struct _entitasBullet {
-	gboolean active;
-};
-
-struct _entitasEnemy1 {
-	gboolean active;
-};
-
-struct _entitasEnemy2 {
-	gboolean active;
-};
-
-struct _entitasEnemy3 {
-	gboolean active;
-};
-
-struct _entitasExpires {
-	gdouble value;
-};
-
-struct _entitasHealth {
-	gdouble current;
-	gdouble maximum;
-};
-
-struct _entitasHud {
-	gboolean active;
-};
-
-struct _entitasIndex {
-	gint value;
-	gint limit;
-	gboolean vertical;
-};
-
-struct _entitasLayer {
-	gint value;
-};
-
-struct _entitasPosition {
-	gdouble x;
-	gdouble y;
-};
-
-struct _entitasScale {
-	gdouble x;
-	gdouble y;
-};
-
-struct _entitasSprite {
-	SDL_Surface* surface;
-};
-
-struct _entitasText {
-	gchar* text;
-	SDL_Surface* surface;
-};
-
-struct _entitasTint {
-	gint r;
-	gint g;
-	gint b;
-	gint a;
-};
-
-struct _entitasTween {
-	gdouble min;
-	gdouble max;
-	gdouble speed;
-	gboolean repeat;
-	gboolean active;
-};
-
-struct _entitasVelocity {
-	gdouble x;
-	gdouble y;
-};
-
-struct _entitasEntity {
-	gint id;
-	gchar* name;
-	gint pool;
-	guint64 mask;
-	entitasBackground* background;
-	entitasBounds* bounds;
-	entitasBullet* bullet;
-	entitasEnemy1* enemy1;
-	entitasEnemy2* enemy2;
-	entitasEnemy3* enemy3;
-	entitasExpires* expires;
-	entitasHealth* health;
-	entitasHud* hud;
-	entitasIndex* index;
-	entitasLayer* layer;
-	entitasPosition* position;
-	entitasScale* scale;
-	entitasSprite* sprite;
-	entitasText* text;
-	entitasTint* tint;
-	entitasTween* tween;
-	entitasVelocity* velocity;
-};
-
-struct _Game {
-	gint refCount;
-	gint width;
-	gint height;
-	gdouble mark1;
-	gdouble mark2;
-	gdouble delta;
-	gdouble mouseX;
-	gdouble mouseY;
-	gboolean mouseDown;
-	gboolean running;
-	guint8 keys[256];
-	SDL_Event evt;
-	SDL_Surface* surface;
-	Factory* world;
-	GList* sprites;
-	systemsCollision* collision;
-	systemsExpire* expire;
-	systemsInput* input;
-	systemsPhysics* physics;
-	systemsRemove* remove;
-	systemsSpawn* spawn;
-	gint k;
-	gdouble t;
-	gdouble t1;
-	gdouble t2;
-	gdouble t3;
-	entitasEntity* player;
-};
-
-
+extern gint k;
+gint k = 0;
+extern gdouble t;
+gdouble t = 0.0;
+extern gdouble t1;
+gdouble t1 = 0.0;
+extern gdouble t2;
+gdouble t2 = 0.0;
+extern gdouble t3;
+gdouble t3 = 0.0;
 
 void _vala_main (gchar** args, int args_length1);
 void game_free (Game* self);
-Game* game_new (gint width, gint height);
-void entitas_world_free (entitasWorld* self);
-GType entitas_entity_get_type (void) G_GNUC_CONST;
-GType entitas_background_get_type (void) G_GNUC_CONST;
-entitasBackground* entitas_background_dup (const entitasBackground* self);
-void entitas_background_free (entitasBackground* self);
-GType entitas_bounds_get_type (void) G_GNUC_CONST;
-entitasBounds* entitas_bounds_dup (const entitasBounds* self);
-void entitas_bounds_free (entitasBounds* self);
-GType entitas_bullet_get_type (void) G_GNUC_CONST;
-entitasBullet* entitas_bullet_dup (const entitasBullet* self);
-void entitas_bullet_free (entitasBullet* self);
-GType entitas_enemy1_get_type (void) G_GNUC_CONST;
-entitasEnemy1* entitas_enemy1_dup (const entitasEnemy1* self);
-void entitas_enemy1_free (entitasEnemy1* self);
-GType entitas_enemy2_get_type (void) G_GNUC_CONST;
-entitasEnemy2* entitas_enemy2_dup (const entitasEnemy2* self);
-void entitas_enemy2_free (entitasEnemy2* self);
-GType entitas_enemy3_get_type (void) G_GNUC_CONST;
-entitasEnemy3* entitas_enemy3_dup (const entitasEnemy3* self);
-void entitas_enemy3_free (entitasEnemy3* self);
-GType entitas_expires_get_type (void) G_GNUC_CONST;
-entitasExpires* entitas_expires_dup (const entitasExpires* self);
-void entitas_expires_free (entitasExpires* self);
-GType entitas_health_get_type (void) G_GNUC_CONST;
-entitasHealth* entitas_health_dup (const entitasHealth* self);
-void entitas_health_free (entitasHealth* self);
-GType entitas_hud_get_type (void) G_GNUC_CONST;
-entitasHud* entitas_hud_dup (const entitasHud* self);
-void entitas_hud_free (entitasHud* self);
-GType entitas_index_get_type (void) G_GNUC_CONST;
-entitasIndex* entitas_index_dup (const entitasIndex* self);
-void entitas_index_free (entitasIndex* self);
-GType entitas_layer_get_type (void) G_GNUC_CONST;
-entitasLayer* entitas_layer_dup (const entitasLayer* self);
-void entitas_layer_free (entitasLayer* self);
-GType entitas_position_get_type (void) G_GNUC_CONST;
-entitasPosition* entitas_position_dup (const entitasPosition* self);
-void entitas_position_free (entitasPosition* self);
-GType entitas_scale_get_type (void) G_GNUC_CONST;
-entitasScale* entitas_scale_dup (const entitasScale* self);
-void entitas_scale_free (entitasScale* self);
-GType entitas_sprite_get_type (void) G_GNUC_CONST;
-entitasSprite* entitas_sprite_dup (const entitasSprite* self);
-void entitas_sprite_free (entitasSprite* self);
-GType entitas_text_get_type (void) G_GNUC_CONST;
-entitasText* entitas_text_dup (const entitasText* self);
-void entitas_text_free (entitasText* self);
-void entitas_text_copy (const entitasText* self, entitasText* dest);
-void entitas_text_destroy (entitasText* self);
-GType entitas_tint_get_type (void) G_GNUC_CONST;
-entitasTint* entitas_tint_dup (const entitasTint* self);
-void entitas_tint_free (entitasTint* self);
-GType entitas_tween_get_type (void) G_GNUC_CONST;
-entitasTween* entitas_tween_dup (const entitasTween* self);
-void entitas_tween_free (entitasTween* self);
-GType entitas_velocity_get_type (void) G_GNUC_CONST;
-entitasVelocity* entitas_velocity_dup (const entitasVelocity* self);
-void entitas_velocity_free (entitasVelocity* self);
-entitasEntity* entitas_entity_dup (const entitasEntity* self);
-void entitas_entity_free (entitasEntity* self);
-void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
-void entitas_entity_destroy (entitasEntity* self);
-void systems_collision_free (systemsCollision* self);
-void systems_expire_free (systemsExpire* self);
-void systems_input_free (systemsInput* self);
-void systems_physics_free (systemsPhysics* self);
-void systems_remove_free (systemsRemove* self);
-void systems_spawn_free (systemsSpawn* self);
+Game* game_new (gint width, gint height, SDL_Renderer* renderer);
 void game_initialize (Game* self);
 void game_start (Game* self);
 void mainloop (void* arg);
 static void _mainloop_em_arg_callback_func (void* arg);
 void game_update (Game* self);
+void game_draw (Game* self);
 
 
 static void _mainloop_em_arg_callback_func (void* arg) {
@@ -312,45 +54,94 @@ static void _mainloop_em_arg_callback_func (void* arg) {
 
 
 void _vala_main (gchar** args, int args_length1) {
-	gint _tmp0_ = 0;
+	gchar* name = NULL;
+	gchar* _tmp0_ = NULL;
+	gint width = 0;
+	gint height = 0;
+	gint _tmp1_ = 0;
+	gint _tmp3_ = 0;
+	gboolean _tmp4_ = FALSE;
+	gint _tmp5_ = 0;
+	SDL_Window* window = NULL;
+	const gchar* _tmp6_ = NULL;
+	gint _tmp7_ = 0;
+	gint _tmp8_ = 0;
+	SDL_Window* _tmp9_ = NULL;
+	SDL_Window* _tmp10_ = NULL;
+	SDL_Renderer* renderer = NULL;
+	SDL_Window* _tmp12_ = NULL;
+	SDL_Renderer* _tmp13_ = NULL;
+	SDL_Renderer* _tmp14_ = NULL;
 	Game* game = NULL;
-	Game* _tmp2_ = NULL;
-	Game* _tmp3_ = NULL;
-	SDL_Surface* _tmp4_ = NULL;
-	Game* _tmp5_ = NULL;
-	SDL_Surface* _tmp6_ = NULL;
-	Game* _tmp8_ = NULL;
-	Game* _tmp9_ = NULL;
-	Game* _tmp10_ = NULL;
-	_tmp0_ = SDL_Init ((guint32) SDL_INIT_VIDEO);
-	if (_tmp0_ < 0) {
-		const gchar* _tmp1_ = NULL;
-		_tmp1_ = SDL_GetError ();
-		g_print ("Unable to init SDL %s\n", _tmp1_);
+	SDL_Renderer* _tmp16_ = NULL;
+	Game* _tmp17_ = NULL;
+	Game* _tmp18_ = NULL;
+	Game* _tmp19_ = NULL;
+	Game* _tmp20_ = NULL;
+	_tmp0_ = g_strdup ("Shmupwarz");
+	name = _tmp0_;
+	width = 600;
+	height = 400;
+	_tmp1_ = SDL_Init ((guint32) ((SDL_INIT_VIDEO | SDL_INIT_TIMER) | SDL_INIT_EVENTS));
+	if (_tmp1_ < 0) {
+		const gchar* _tmp2_ = NULL;
+		_tmp2_ = SDL_GetError ();
+		g_print ("Unable to init SDL %s\n", _tmp2_);
+		_g_free0 (name);
 		return;
 	}
-	_tmp2_ = game_new (600, 480);
-	game = _tmp2_;
-	_tmp3_ = game;
-	_tmp4_ = SDL_SetVideoMode (600, 480, 32, (guint32) (SDL_HWSURFACE | SDL_DOUBLEBUF));
-	_tmp3_->surface = _tmp4_;
-	_tmp5_ = game;
-	_tmp6_ = _tmp5_->surface;
-	if (_tmp6_ == NULL) {
-		const gchar* _tmp7_ = NULL;
-		_tmp7_ = SDL_GetError ();
-		g_print ("Unable to set video mode %s\n", _tmp7_);
-		_game_release0 (game);
+	_tmp3_ = IMG_Init ((gint) IMG_INIT_PNG);
+	if (_tmp3_ < 0) {
+		g_print ("SDL_image could not initialize!\n");
+	}
+	_tmp4_ = SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	if (!_tmp4_) {
+		g_print ("Warning: Linear texture filtering not enabled!!\n");
+	}
+	_tmp5_ = TTF_Init ();
+	if (_tmp5_ == (-1)) {
+		g_print ("SDL_ttf could not initialize!\n");
+	}
+	_tmp6_ = name;
+	_tmp7_ = width;
+	_tmp8_ = height;
+	_tmp9_ = SDL_CreateWindow (_tmp6_, (gint) SDL_WINDOWPOS_CENTERED_MASK, (gint) SDL_WINDOWPOS_CENTERED_MASK, _tmp7_, _tmp8_, (guint32) SDL_WINDOW_SHOWN);
+	window = _tmp9_;
+	_tmp10_ = window;
+	if (_tmp10_ == NULL) {
+		const gchar* _tmp11_ = NULL;
+		_tmp11_ = SDL_GetError ();
+		g_print ("Unable to open window %s\n", _tmp11_);
+		_SDL_DestroyWindow0 (window);
+		_g_free0 (name);
 		return;
 	}
-	SDL_WM_SetCaption ("ShmupWarz", "ShmupWarz");
-	_tmp8_ = game;
-	game_initialize (_tmp8_);
-	_tmp9_ = game;
-	game_start (_tmp9_);
-	_tmp10_ = game;
-	emscripten_set_main_loop_arg (_mainloop_em_arg_callback_func, _tmp10_, 0, 1);
+	_tmp12_ = window;
+	_tmp13_ = SDL_CreateRenderer (_tmp12_, -1, (guint32) (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+	renderer = _tmp13_;
+	_tmp14_ = renderer;
+	if (_tmp14_ == NULL) {
+		const gchar* _tmp15_ = NULL;
+		_tmp15_ = SDL_GetError ();
+		g_print ("Unable to get renderer %s\n", _tmp15_);
+		_SDL_DestroyRenderer0 (renderer);
+		_SDL_DestroyWindow0 (window);
+		_g_free0 (name);
+		return;
+	}
+	_tmp16_ = renderer;
+	_tmp17_ = game_new (600, 480, _tmp16_);
+	game = _tmp17_;
+	_tmp18_ = game;
+	game_initialize (_tmp18_);
+	_tmp19_ = game;
+	game_start (_tmp19_);
+	_tmp20_ = game;
+	emscripten_set_main_loop_arg (_mainloop_em_arg_callback_func, _tmp20_, 0, 1);
 	_game_release0 (game);
+	_SDL_DestroyRenderer0 (renderer);
+	_SDL_DestroyWindow0 (window);
+	_g_free0 (name);
 }
 
 
@@ -363,12 +154,51 @@ int main (int argc, char ** argv) {
 }
 
 
+/**
+ * call the main loop
+ */
 void mainloop (void* arg) {
 	Game* game = NULL;
 	void* _tmp0_ = NULL;
+	gdouble _tmp1_ = 0.0;
+	Game* _tmp2_ = NULL;
+	gdouble _tmp3_ = 0.0;
+	gdouble _tmp4_ = 0.0;
+	gdouble _tmp5_ = 0.0;
+	gdouble _tmp6_ = 0.0;
+	gdouble _tmp7_ = 0.0;
+	gint _tmp8_ = 0;
+	gint _tmp9_ = 0;
+	Game* _tmp12_ = NULL;
 	_tmp0_ = arg;
 	game = (Game*) _tmp0_;
-	game_update (game);
+	_tmp1_ = emscripten_get_now ();
+	t1 = _tmp1_ / 1000;
+	_tmp2_ = game;
+	game_update (_tmp2_);
+	_tmp3_ = emscripten_get_now ();
+	t2 = _tmp3_ / 1000;
+	_tmp4_ = t2;
+	_tmp5_ = t1;
+	t3 = _tmp4_ - _tmp5_;
+	_tmp6_ = t;
+	_tmp7_ = t3;
+	t = _tmp6_ + _tmp7_;
+	_tmp8_ = k;
+	k = _tmp8_ + 1;
+	_tmp9_ = k;
+	if (_tmp9_ == 1000) {
+		gdouble _tmp10_ = 0.0;
+		gdouble _tmp11_ = 0.0;
+		k = 0;
+		_tmp10_ = t;
+		t = _tmp10_ / 1000.0;
+		_tmp11_ = t;
+		g_print ("%f\n", _tmp11_);
+		t = (gdouble) 0;
+	}
+	_tmp12_ = game;
+	game_draw (_tmp12_);
 }
 
 

@@ -30,11 +30,9 @@ namespace systems
 		def execute(delta:double)
 			var x = (int)game.mouseX
 			var y = (int)game.mouseY
-			var x1 = x-game.player.bounds.w/2
-			var y1 = y-game.player.bounds.h/2
-			game.player.setPosition(x1, y1)
-			game.player.bounds.x = x1
-			game.player.bounds.y = y1
+			game.player.setPosition(x, y)
+			game.player.bounds.x = x
+			game.player.bounds.y = y
 			shoot = game.mouseDown || (game.keys[122] == 1)
 			if shoot do timeToFire -= delta
 			if timeToFire < 0.0

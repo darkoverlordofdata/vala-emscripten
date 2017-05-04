@@ -8,7 +8,6 @@
 #include <string.h>
 #include <float.h>
 #include <math.h>
-#include <SDL.h>
 
 
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
@@ -53,6 +52,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -67,6 +67,10 @@ typedef struct _entitasTween entitasTween;
 #define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
 typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
+void sdx_sprite_release (sdxSprite* self);
+void sdx_sprite_free (sdxSprite* self);
+sdxSprite* sdx_sprite_addRef (sdxSprite* self);
+#define _sdx_sprite_release0(var) ((var == NULL) ? NULL : (var = (sdx_sprite_release (var), NULL)))
 #define _g_free0(var) (var = (g_free (var), NULL))
 #define _entitas_background_free0(var) ((var == NULL) ? NULL : (var = (entitas_background_free (var), NULL)))
 #define _entitas_bounds_free0(var) ((var == NULL) ? NULL : (var = (entitas_bounds_free (var), NULL)))
@@ -150,12 +154,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -281,8 +287,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);
@@ -370,13 +379,13 @@ entitasEntity* entitas_entity_setScale (entitasEntity *self, gdouble x, gdouble 
 entitasEntity* entitas_entity_removeScale (entitasEntity *self);
 gboolean entitas_entity_hasSprite (entitasEntity *self);
 #define ENTITAS___SPRITE__ ((guint64) 0x4000)
-entitasEntity* entitas_entity_addSprite (entitasEntity *self, SDL_Surface* surface);
-entitasEntity* entitas_entity_setSprite (entitasEntity *self, SDL_Surface* surface);
+entitasEntity* entitas_entity_addSprite (entitasEntity *self, sdxSprite* sprite, gint width, gint height);
+entitasEntity* entitas_entity_setSprite (entitasEntity *self, sdxSprite* sprite, gint width, gint height);
 entitasEntity* entitas_entity_removeSprite (entitasEntity *self);
 gboolean entitas_entity_hasText (entitasEntity *self);
 #define ENTITAS___TEXT__ ((guint64) 0x8000)
-entitasEntity* entitas_entity_addText (entitasEntity *self, const gchar* text, SDL_Surface* surface);
-entitasEntity* entitas_entity_setText (entitasEntity *self, const gchar* text, SDL_Surface* surface);
+entitasEntity* entitas_entity_addText (entitasEntity *self, const gchar* text, sdxSprite* texture);
+entitasEntity* entitas_entity_setText (entitasEntity *self, const gchar* text, sdxSprite* texture);
 entitasEntity* entitas_entity_removeText (entitasEntity *self);
 gboolean entitas_entity_hasTint (entitasEntity *self);
 #define ENTITAS___TINT__ ((guint64) 0x10000)
@@ -709,15 +718,42 @@ GType entitas_scale_get_type (void) {
 }
 
 
+static gpointer _sdx_sprite_addRef0 (gpointer self) {
+	return self ? sdx_sprite_addRef (self) : NULL;
+}
+
+
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest) {
+	sdxSprite* _tmp0_ = NULL;
+	sdxSprite* _tmp1_ = NULL;
+	gint _tmp2_ = 0;
+	gint _tmp3_ = 0;
+	_tmp0_ = (*self).sprite;
+	_tmp1_ = _sdx_sprite_addRef0 (_tmp0_);
+	_sdx_sprite_release0 ((*dest).sprite);
+	(*dest).sprite = _tmp1_;
+	_tmp2_ = (*self).width;
+	(*dest).width = _tmp2_;
+	_tmp3_ = (*self).height;
+	(*dest).height = _tmp3_;
+}
+
+
+void entitas_sprite_destroy (entitasSprite* self) {
+	_sdx_sprite_release0 ((*self).sprite);
+}
+
+
 entitasSprite* entitas_sprite_dup (const entitasSprite* self) {
 	entitasSprite* dup;
 	dup = g_new0 (entitasSprite, 1);
-	memcpy (dup, self, sizeof (entitasSprite));
+	entitas_sprite_copy (self, dup);
 	return dup;
 }
 
 
 void entitas_sprite_free (entitasSprite* self) {
+	entitas_sprite_destroy (self);
 	g_free (self);
 }
 
@@ -736,18 +772,22 @@ GType entitas_sprite_get_type (void) {
 void entitas_text_copy (const entitasText* self, entitasText* dest) {
 	const gchar* _tmp0_ = NULL;
 	gchar* _tmp1_ = NULL;
-	SDL_Surface* _tmp2_ = NULL;
+	sdxSprite* _tmp2_ = NULL;
+	sdxSprite* _tmp3_ = NULL;
 	_tmp0_ = (*self).text;
 	_tmp1_ = g_strdup (_tmp0_);
 	_g_free0 ((*dest).text);
 	(*dest).text = _tmp1_;
-	_tmp2_ = (*self).surface;
-	(*dest).surface = _tmp2_;
+	_tmp2_ = (*self).sprite;
+	_tmp3_ = _sdx_sprite_addRef0 (_tmp2_);
+	_sdx_sprite_release0 ((*dest).sprite);
+	(*dest).sprite = _tmp3_;
 }
 
 
 void entitas_text_destroy (entitasText* self) {
 	_g_free0 ((*self).text);
+	_sdx_sprite_release0 ((*self).sprite);
 }
 
 
@@ -2087,15 +2127,19 @@ static gpointer _entitas_sprite_dup0 (gpointer self) {
 }
 
 
-entitasEntity* entitas_entity_addSprite (entitasEntity *self, SDL_Surface* surface) {
+entitasEntity* entitas_entity_addSprite (entitasEntity *self, sdxSprite* sprite, gint width, gint height) {
 	entitasEntity* result = NULL;
 	guint64 _tmp0_ = 0ULL;
-	SDL_Surface* _tmp2_ = NULL;
-	entitasSprite _tmp3_ = {0};
-	entitasSprite* _tmp4_ = NULL;
-	guint64 _tmp5_ = 0ULL;
+	sdxSprite* _tmp2_ = NULL;
+	sdxSprite* _tmp3_ = NULL;
+	gint _tmp4_ = 0;
+	gint _tmp5_ = 0;
+	entitasSprite _tmp6_ = {0};
+	entitasSprite _tmp7_ = {0};
+	entitasSprite* _tmp8_ = NULL;
+	guint64 _tmp9_ = 0ULL;
 	GError * _inner_error_ = NULL;
-	g_return_val_if_fail (surface != NULL, NULL);
+	g_return_val_if_fail (sprite != NULL, NULL);
 	_tmp0_ = (*self).mask;
 	if ((_tmp0_ & ENTITAS___SPRITE__) != ((guint64) 0)) {
 		GError* _tmp1_ = NULL;
@@ -2105,26 +2149,39 @@ entitasEntity* entitas_entity_addSprite (entitasEntity *self, SDL_Surface* surfa
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp2_ = surface;
-	_tmp3_.surface = _tmp2_;
-	_tmp4_ = _entitas_sprite_dup0 (&_tmp3_);
+	_tmp2_ = sprite;
+	_tmp3_ = _sdx_sprite_addRef0 (_tmp2_);
+	_tmp4_ = width;
+	_tmp5_ = height;
+	_sdx_sprite_release0 (_tmp6_.sprite);
+	_tmp6_.sprite = _tmp3_;
+	_tmp6_.width = _tmp4_;
+	_tmp6_.height = _tmp5_;
+	_tmp7_ = _tmp6_;
+	_tmp8_ = _entitas_sprite_dup0 (&_tmp7_);
 	_entitas_sprite_free0 ((*self).sprite);
-	(*self).sprite = _tmp4_;
-	_tmp5_ = (*self).mask;
-	(*self).mask = _tmp5_ | ENTITAS___SPRITE__;
+	(*self).sprite = _tmp8_;
+	entitas_sprite_destroy (&_tmp7_);
+	_tmp9_ = (*self).mask;
+	(*self).mask = _tmp9_ | ENTITAS___SPRITE__;
 	entitas_world_onComponentAdded (&(*self), ENTITAS_COMPONENTS_SpriteComponent);
 	result = &(*self);
 	return result;
 }
 
 
-entitasEntity* entitas_entity_setSprite (entitasEntity *self, SDL_Surface* surface) {
+entitasEntity* entitas_entity_setSprite (entitasEntity *self, sdxSprite* sprite, gint width, gint height) {
 	entitasEntity* result = NULL;
 	guint64 _tmp0_ = 0ULL;
 	entitasSprite* _tmp2_ = NULL;
-	SDL_Surface* _tmp3_ = NULL;
+	sdxSprite* _tmp3_ = NULL;
+	sdxSprite* _tmp4_ = NULL;
+	entitasSprite* _tmp5_ = NULL;
+	gint _tmp6_ = 0;
+	entitasSprite* _tmp7_ = NULL;
+	gint _tmp8_ = 0;
 	GError * _inner_error_ = NULL;
-	g_return_val_if_fail (surface != NULL, NULL);
+	g_return_val_if_fail (sprite != NULL, NULL);
 	_tmp0_ = (*self).mask;
 	if ((_tmp0_ & ENTITAS___SPRITE__) == ((guint64) 0)) {
 		GError* _tmp1_ = NULL;
@@ -2135,8 +2192,16 @@ entitasEntity* entitas_entity_setSprite (entitasEntity *self, SDL_Surface* surfa
 		return NULL;
 	}
 	_tmp2_ = (*self).sprite;
-	_tmp3_ = surface;
-	(*_tmp2_).surface = _tmp3_;
+	_tmp3_ = sprite;
+	_tmp4_ = _sdx_sprite_addRef0 (_tmp3_);
+	_sdx_sprite_release0 ((*_tmp2_).sprite);
+	(*_tmp2_).sprite = _tmp4_;
+	_tmp5_ = (*self).sprite;
+	_tmp6_ = width;
+	(*_tmp5_).width = _tmp6_;
+	_tmp7_ = (*self).sprite;
+	_tmp8_ = height;
+	(*_tmp7_).height = _tmp8_;
 	result = &(*self);
 	return result;
 }
@@ -2180,19 +2245,20 @@ static gpointer _entitas_text_dup0 (gpointer self) {
 }
 
 
-entitasEntity* entitas_entity_addText (entitasEntity *self, const gchar* text, SDL_Surface* surface) {
+entitasEntity* entitas_entity_addText (entitasEntity *self, const gchar* text, sdxSprite* texture) {
 	entitasEntity* result = NULL;
 	guint64 _tmp0_ = 0ULL;
 	const gchar* _tmp2_ = NULL;
 	gchar* _tmp3_ = NULL;
-	SDL_Surface* _tmp4_ = NULL;
-	entitasText _tmp5_ = {0};
+	sdxSprite* _tmp4_ = NULL;
+	sdxSprite* _tmp5_ = NULL;
 	entitasText _tmp6_ = {0};
-	entitasText* _tmp7_ = NULL;
-	guint64 _tmp8_ = 0ULL;
+	entitasText _tmp7_ = {0};
+	entitasText* _tmp8_ = NULL;
+	guint64 _tmp9_ = 0ULL;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (text != NULL, NULL);
-	g_return_val_if_fail (surface != NULL, NULL);
+	g_return_val_if_fail (texture != NULL, NULL);
 	_tmp0_ = (*self).mask;
 	if ((_tmp0_ & ENTITAS___TEXT__) != ((guint64) 0)) {
 		GError* _tmp1_ = NULL;
@@ -2204,34 +2270,37 @@ entitasEntity* entitas_entity_addText (entitasEntity *self, const gchar* text, S
 	}
 	_tmp2_ = text;
 	_tmp3_ = g_strdup (_tmp2_);
-	_tmp4_ = surface;
-	_g_free0 (_tmp5_.text);
-	_tmp5_.text = _tmp3_;
-	_tmp5_.surface = _tmp4_;
-	_tmp6_ = _tmp5_;
-	_tmp7_ = _entitas_text_dup0 (&_tmp6_);
+	_tmp4_ = texture;
+	_tmp5_ = _sdx_sprite_addRef0 (_tmp4_);
+	_g_free0 (_tmp6_.text);
+	_tmp6_.text = _tmp3_;
+	_sdx_sprite_release0 (_tmp6_.sprite);
+	_tmp6_.sprite = _tmp5_;
+	_tmp7_ = _tmp6_;
+	_tmp8_ = _entitas_text_dup0 (&_tmp7_);
 	_entitas_text_free0 ((*self).text);
-	(*self).text = _tmp7_;
-	entitas_text_destroy (&_tmp6_);
-	_tmp8_ = (*self).mask;
-	(*self).mask = _tmp8_ | ENTITAS___TEXT__;
+	(*self).text = _tmp8_;
+	entitas_text_destroy (&_tmp7_);
+	_tmp9_ = (*self).mask;
+	(*self).mask = _tmp9_ | ENTITAS___TEXT__;
 	entitas_world_onComponentAdded (&(*self), ENTITAS_COMPONENTS_TextComponent);
 	result = &(*self);
 	return result;
 }
 
 
-entitasEntity* entitas_entity_setText (entitasEntity *self, const gchar* text, SDL_Surface* surface) {
+entitasEntity* entitas_entity_setText (entitasEntity *self, const gchar* text, sdxSprite* texture) {
 	entitasEntity* result = NULL;
 	guint64 _tmp0_ = 0ULL;
 	entitasText* _tmp2_ = NULL;
 	const gchar* _tmp3_ = NULL;
 	gchar* _tmp4_ = NULL;
 	entitasText* _tmp5_ = NULL;
-	SDL_Surface* _tmp6_ = NULL;
+	sdxSprite* _tmp6_ = NULL;
+	sdxSprite* _tmp7_ = NULL;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (text != NULL, NULL);
-	g_return_val_if_fail (surface != NULL, NULL);
+	g_return_val_if_fail (texture != NULL, NULL);
 	_tmp0_ = (*self).mask;
 	if ((_tmp0_ & ENTITAS___TEXT__) == ((guint64) 0)) {
 		GError* _tmp1_ = NULL;
@@ -2247,8 +2316,10 @@ entitasEntity* entitas_entity_setText (entitasEntity *self, const gchar* text, S
 	_g_free0 ((*_tmp2_).text);
 	(*_tmp2_).text = _tmp4_;
 	_tmp5_ = (*self).text;
-	_tmp6_ = surface;
-	(*_tmp5_).surface = _tmp6_;
+	_tmp6_ = texture;
+	_tmp7_ = _sdx_sprite_addRef0 (_tmp6_);
+	_sdx_sprite_release0 ((*_tmp5_).sprite);
+	(*_tmp5_).sprite = _tmp7_;
 	result = &(*self);
 	return result;
 }

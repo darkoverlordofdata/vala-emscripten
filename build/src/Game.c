@@ -6,10 +6,14 @@
 #include <glib-object.h>
 #include <float.h>
 #include <math.h>
-#include <SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
 #include <stdlib.h>
 #include <string.h>
-#include <emscripten.h>
+#include <SDL2/SDL_timer.h>
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_rect.h>
 
 typedef struct _Game Game;
 typedef struct _entitasWorld entitasWorld;
@@ -57,6 +61,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -71,17 +76,27 @@ typedef struct _entitasTween entitasTween;
 #define ENTITAS_TYPE_VELOCITY (entitas_velocity_get_type ())
 typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
+typedef struct _sdxFont sdxFont;
 typedef struct _systemsCollision systemsCollision;
 typedef struct _systemsExpire systemsExpire;
 typedef struct _systemsInput systemsInput;
 typedef struct _systemsPhysics systemsPhysics;
 typedef struct _systemsRemove systemsRemove;
 typedef struct _systemsSpawn systemsSpawn;
+typedef struct _systemsAnimation systemsAnimation;
 void entitas_world_release (entitasWorld* self);
 void entitas_world_free (entitasWorld* self);
 entitasWorld* entitas_world_addRef (entitasWorld* self);
 #define _entitas_world_release0(var) ((var == NULL) ? NULL : (var = (entitas_world_release (var), NULL)))
 #define _g_list_free0(var) ((var == NULL) ? NULL : (var = (g_list_free (var), NULL)))
+void sdx_font_release (sdxFont* self);
+void sdx_font_free (sdxFont* self);
+sdxFont* sdx_font_addRef (sdxFont* self);
+#define _sdx_font_release0(var) ((var == NULL) ? NULL : (var = (sdx_font_release (var), NULL)))
+void sdx_sprite_release (sdxSprite* self);
+void sdx_sprite_free (sdxSprite* self);
+sdxSprite* sdx_sprite_addRef (sdxSprite* self);
+#define _sdx_sprite_release0(var) ((var == NULL) ? NULL : (var = (sdx_sprite_release (var), NULL)))
 void systems_collision_release (systemsCollision* self);
 void systems_collision_free (systemsCollision* self);
 systemsCollision* systems_collision_addRef (systemsCollision* self);
@@ -106,10 +121,18 @@ void systems_spawn_release (systemsSpawn* self);
 void systems_spawn_free (systemsSpawn* self);
 systemsSpawn* systems_spawn_addRef (systemsSpawn* self);
 #define _systems_spawn_release0(var) ((var == NULL) ? NULL : (var = (systems_spawn_release (var), NULL)))
+void systems_animation_release (systemsAnimation* self);
+void systems_animation_free (systemsAnimation* self);
+systemsAnimation* systems_animation_addRef (systemsAnimation* self);
+#define _systems_animation_release0(var) ((var == NULL) ? NULL : (var = (systems_animation_release (var), NULL)))
 void game_release (Game* self);
 void game_free (Game* self);
 Game* game_addRef (Game* self);
 #define _game_release0(var) ((var == NULL) ? NULL : (var = (game_release (var), NULL)))
+#define _g_free0(var) (var = (g_free (var), NULL))
+
+#define SDX_TYPE_SCALE (sdx_scale_get_type ())
+typedef struct _sdxScale sdxScale;
 #define _vala_assert(expr, msg) if G_LIKELY (expr) ; else g_assertion_message_expr (G_LOG_DOMAIN, __FILE__, __LINE__, G_STRFUNC, msg);
 #define _vala_return_if_fail(expr, msg) if G_LIKELY (expr) ; else { g_return_if_fail_warning (G_LOG_DOMAIN, G_STRFUNC, msg); return; }
 #define _vala_return_val_if_fail(expr, msg, val) if G_LIKELY (expr) ; else { g_return_if_fail_warning (G_LOG_DOMAIN, G_STRFUNC, msg); return val; }
@@ -176,12 +199,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -242,26 +267,50 @@ struct _Game {
 	gboolean running;
 	guint8 keys[256];
 	SDL_Event evt;
-	SDL_Surface* surface;
+	SDL_Renderer* renderer;
 	Factory* world;
 	GList* sprites;
+	sdxFont* font;
+	sdxSprite* fpsSprite;
+	gdouble fps;
+	gdouble elapsed;
+	gint frames;
 	systemsCollision* collision;
 	systemsExpire* expire;
 	systemsInput* input;
 	systemsPhysics* physics;
 	systemsRemove* remove;
 	systemsSpawn* spawn;
-	gint k;
-	gdouble t;
-	gdouble t1;
-	gdouble t2;
-	gdouble t3;
+	systemsAnimation* animate;
+	gdouble freq;
 	entitasEntity* player;
 };
 
 typedef void (*entitasEntityRemovedListener) (entitasEntity* e, void* user_data);
 typedef void (*entitasSystemInitialize) (void* user_data);
 typedef void (*entitasSystemExecute) (gdouble delta, void* user_data);
+struct _sdxScale {
+	gdouble x;
+	gdouble y;
+};
+
+struct _sdxSprite {
+	gint refCount;
+	SDL_Texture* texture;
+	SDL_Surface* surface;
+	gint width;
+	gint height;
+	gint x;
+	gint y;
+	sdxScale scale;
+	SDL_Color color;
+	gboolean centered;
+	gint layer;
+	gint id;
+	gchar* path;
+	gboolean isText;
+};
+
 
 extern Game* game_instance;
 Game* game_instance = NULL;
@@ -309,8 +358,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);
@@ -329,35 +381,40 @@ entitasEntity* entitas_entity_dup (const entitasEntity* self);
 void entitas_entity_free (entitasEntity* self);
 void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
+void sdx_font_free (sdxFont* self);
 void systems_collision_free (systemsCollision* self);
 void systems_expire_free (systemsExpire* self);
 void systems_input_free (systemsInput* self);
 void systems_physics_free (systemsPhysics* self);
 void systems_remove_free (systemsRemove* self);
 void systems_spawn_free (systemsSpawn* self);
+void systems_animation_free (systemsAnimation* self);
 static void game_instance_init (Game * self);
 Game* game_addRef (Game* self);
 void game_release (Game* self);
 void game_free (Game* self);
-Game* game_new (gint width, gint height);
+Game* game_new (gint width, gint height, SDL_Renderer* renderer);
 void game_initialize (Game* self);
 Factory* factory_new (void);
 void entitas_world_setEntityRemovedListener (entitasWorld* self, entitasEntityRemovedListener removed, void* removed_target);
 void entityRemoved (entitasEntity* e);
 static void _entityRemoved_entitas_entity_removed_listener (entitasEntity* e, gpointer self);
-entitasEntity* factory_createBackground (Factory* self, gint tile);
-entitasEntity* factory_createPlayer (Factory* self);
-entitasEntity* factory_createBullet (Factory* self);
-entitasEntity* factory_createEnemy1 (Factory* self);
-entitasEntity* factory_createEnemy2 (Factory* self);
-entitasEntity* factory_createEnemy3 (Factory* self);
-entitasEntity* factory_createParticle (Factory* self);
+entitasEntity* factory_createBackground (Factory* self, Game* game);
+entitasEntity* factory_createPlayer (Factory* self, Game* game);
+entitasEntity* factory_createBullet (Factory* self, Game* game);
+entitasEntity* factory_createEnemy1 (Factory* self, Game* game);
+entitasEntity* factory_createEnemy2 (Factory* self, Game* game);
+entitasEntity* factory_createEnemy3 (Factory* self, Game* game);
+entitasEntity* factory_createExplosion (Factory* self, Game* game);
+entitasEntity* factory_createBang (Factory* self, Game* game);
+entitasEntity* factory_createParticle (Factory* self, Game* game);
 systemsSpawn* systems_spawn_new (Game* game, Factory* factory);
 systemsInput* systems_input_new (Game* game, Factory* factory);
 systemsCollision* systems_collision_new (Game* game, Factory* factory);
 systemsPhysics* systems_physics_new (Game* game, Factory* factory);
 systemsExpire* systems_expire_new (Game* game, Factory* factory);
 systemsRemove* systems_remove_new (Game* game, Factory* factory);
+systemsAnimation* systems_animation_new (Game* game, Factory* factory);
 void entitas_world_addSystem (entitasWorld* self, entitasSystemInitialize initialize, void* initialize_target, entitasSystemExecute execute, void* execute_target);
 void systems_spawn_initialize (systemsSpawn* self);
 static void _systems_spawn_initialize_entitas_system_initialize (gpointer self);
@@ -375,6 +432,10 @@ void systems_physics_initialize (systemsPhysics* self);
 static void _systems_physics_initialize_entitas_system_initialize (gpointer self);
 void systems_physics_execute (systemsPhysics* self, gdouble delta);
 static void _systems_physics_execute_entitas_system_execute (gdouble delta, gpointer self);
+void systems_animation_initialize (systemsAnimation* self);
+static void _systems_animation_initialize_entitas_system_initialize (gpointer self);
+void systems_animation_execute (systemsAnimation* self, gdouble delta);
+static void _systems_animation_execute_entitas_system_execute (gdouble delta, gpointer self);
 void systems_expire_initialize (systemsExpire* self);
 static void _systems_expire_initialize_entitas_system_initialize (gpointer self);
 void systems_expire_execute (systemsExpire* self, gdouble delta);
@@ -384,14 +445,24 @@ static void _systems_remove_initialize_entitas_system_initialize (gpointer self)
 void systems_remove_execute (systemsRemove* self, gdouble delta);
 static void _systems_remove_execute_entitas_system_execute (gdouble delta, gpointer self);
 void entitas_world_initialize (entitasWorld* self);
+sdxFont* sdx_font_new (const gchar* path, gint size);
 void game_start (Game* self);
 void game_processEvents (Game* self);
 void game_update (Game* self);
 void entitas_world_execute (entitasWorld* self, gdouble delta);
+void game_draw (Game* self);
 gboolean entitas_entity_isActive (entitasEntity *self);
-gboolean entitas_entity_hasIndex (entitasEntity *self);
-void entityAdded (entitasEntity* e);
+gboolean game_drawEach (Game* self, entitasEntity* e);
+void game_drawFps (Game* self);
+sdxSprite* sdx_sprite_new (SDL_Renderer* renderer, const gchar* path, sdxFont* font, SDL_Color* color);
+GType sdx_scale_get_type (void) G_GNUC_CONST;
+sdxScale* sdx_scale_dup (const sdxScale* self);
+void sdx_scale_free (sdxScale* self);
+void sdx_sprite_render (sdxSprite* self, SDL_Renderer* renderer, gint x, gint y, SDL_Rect* clip);
 gboolean entitas_entity_hasSprite (entitasEntity *self);
+gboolean entitas_entity_isBackground (entitasEntity *self);
+gboolean entitas_entity_hasTint (entitasEntity *self);
+void entityAdded (entitasEntity* e);
 
 
 Game* game_addRef (Game* self) {
@@ -418,11 +489,13 @@ static gpointer _game_addRef0 (gpointer self) {
 }
 
 
-Game* game_new (gint width, gint height) {
+Game* game_new (gint width, gint height, SDL_Renderer* renderer) {
 	Game* self;
 	Game* _tmp0_ = NULL;
 	gint _tmp1_ = 0;
 	gint _tmp2_ = 0;
+	SDL_Renderer* _tmp3_ = NULL;
+	g_return_val_if_fail (renderer != NULL, NULL);
 	self = g_slice_new0 (Game);
 	game_instance_init (self);
 	_tmp0_ = _game_addRef0 (self);
@@ -432,6 +505,8 @@ Game* game_new (gint width, gint height) {
 	self->width = _tmp1_;
 	_tmp2_ = height;
 	self->height = _tmp2_;
+	_tmp3_ = renderer;
+	self->renderer = _tmp3_;
 	return self;
 }
 
@@ -481,6 +556,16 @@ static void _systems_physics_execute_entitas_system_execute (gdouble delta, gpoi
 }
 
 
+static void _systems_animation_initialize_entitas_system_initialize (gpointer self) {
+	systems_animation_initialize ((systemsAnimation*) self);
+}
+
+
+static void _systems_animation_execute_entitas_system_execute (gdouble delta, gpointer self) {
+	systems_animation_execute ((systemsAnimation*) self, delta);
+}
+
+
 static void _systems_expire_initialize_entitas_system_initialize (gpointer self) {
 	systems_expire_initialize ((systemsExpire*) self);
 }
@@ -506,39 +591,44 @@ void game_initialize (Game* self) {
 	Factory* _tmp1_ = NULL;
 	Factory* _tmp2_ = NULL;
 	Factory* _tmp3_ = NULL;
-	Factory* _tmp4_ = NULL;
-	entitasEntity* _tmp5_ = NULL;
-	Factory* _tmp21_ = NULL;
-	systemsSpawn* _tmp22_ = NULL;
-	Factory* _tmp23_ = NULL;
-	systemsInput* _tmp24_ = NULL;
-	Factory* _tmp25_ = NULL;
-	systemsCollision* _tmp26_ = NULL;
-	Factory* _tmp27_ = NULL;
-	systemsPhysics* _tmp28_ = NULL;
-	Factory* _tmp29_ = NULL;
-	systemsExpire* _tmp30_ = NULL;
-	Factory* _tmp31_ = NULL;
-	systemsRemove* _tmp32_ = NULL;
-	Factory* _tmp33_ = NULL;
-	systemsSpawn* _tmp34_ = NULL;
-	systemsSpawn* _tmp35_ = NULL;
+	entitasEntity* _tmp4_ = NULL;
+	Factory* _tmp26_ = NULL;
+	systemsSpawn* _tmp27_ = NULL;
+	Factory* _tmp28_ = NULL;
+	systemsInput* _tmp29_ = NULL;
+	Factory* _tmp30_ = NULL;
+	systemsCollision* _tmp31_ = NULL;
+	Factory* _tmp32_ = NULL;
+	systemsPhysics* _tmp33_ = NULL;
+	Factory* _tmp34_ = NULL;
+	systemsExpire* _tmp35_ = NULL;
 	Factory* _tmp36_ = NULL;
-	systemsInput* _tmp37_ = NULL;
-	systemsInput* _tmp38_ = NULL;
-	Factory* _tmp39_ = NULL;
-	systemsCollision* _tmp40_ = NULL;
-	systemsCollision* _tmp41_ = NULL;
-	Factory* _tmp42_ = NULL;
-	systemsPhysics* _tmp43_ = NULL;
-	systemsPhysics* _tmp44_ = NULL;
-	Factory* _tmp45_ = NULL;
-	systemsExpire* _tmp46_ = NULL;
-	systemsExpire* _tmp47_ = NULL;
-	Factory* _tmp48_ = NULL;
-	systemsRemove* _tmp49_ = NULL;
-	systemsRemove* _tmp50_ = NULL;
-	Factory* _tmp51_ = NULL;
+	systemsRemove* _tmp37_ = NULL;
+	Factory* _tmp38_ = NULL;
+	systemsAnimation* _tmp39_ = NULL;
+	Factory* _tmp40_ = NULL;
+	systemsSpawn* _tmp41_ = NULL;
+	systemsSpawn* _tmp42_ = NULL;
+	Factory* _tmp43_ = NULL;
+	systemsInput* _tmp44_ = NULL;
+	systemsInput* _tmp45_ = NULL;
+	Factory* _tmp46_ = NULL;
+	systemsCollision* _tmp47_ = NULL;
+	systemsCollision* _tmp48_ = NULL;
+	Factory* _tmp49_ = NULL;
+	systemsPhysics* _tmp50_ = NULL;
+	systemsPhysics* _tmp51_ = NULL;
+	Factory* _tmp52_ = NULL;
+	systemsAnimation* _tmp53_ = NULL;
+	systemsAnimation* _tmp54_ = NULL;
+	Factory* _tmp55_ = NULL;
+	systemsExpire* _tmp56_ = NULL;
+	systemsExpire* _tmp57_ = NULL;
+	Factory* _tmp58_ = NULL;
+	systemsRemove* _tmp59_ = NULL;
+	systemsRemove* _tmp60_ = NULL;
+	Factory* _tmp61_ = NULL;
+	sdxFont* _tmp62_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = factory_new ();
 	_entitas_world_release0 (self->world);
@@ -546,31 +636,29 @@ void game_initialize (Game* self) {
 	_tmp1_ = self->world;
 	entitas_world_setEntityRemovedListener ((entitasWorld*) _tmp1_, _entityRemoved_entitas_entity_removed_listener, NULL);
 	_tmp2_ = self->world;
-	factory_createBackground (_tmp2_, 0);
+	factory_createBackground (_tmp2_, self);
 	_tmp3_ = self->world;
-	factory_createBackground (_tmp3_, 1);
-	_tmp4_ = self->world;
-	_tmp5_ = factory_createPlayer (_tmp4_);
-	self->player = _tmp5_;
+	_tmp4_ = factory_createPlayer (_tmp3_, self);
+	self->player = _tmp4_;
 	{
 		gint i = 0;
 		i = 1;
 		{
-			gboolean _tmp6_ = FALSE;
-			_tmp6_ = TRUE;
+			gboolean _tmp5_ = FALSE;
+			_tmp5_ = TRUE;
 			while (TRUE) {
-				Factory* _tmp8_ = NULL;
-				if (!_tmp6_) {
-					gint _tmp7_ = 0;
-					_tmp7_ = i;
-					i = _tmp7_ + 1;
+				Factory* _tmp7_ = NULL;
+				if (!_tmp5_) {
+					gint _tmp6_ = 0;
+					_tmp6_ = i;
+					i = _tmp6_ + 1;
 				}
-				_tmp6_ = FALSE;
-				if (!(i <= 10)) {
+				_tmp5_ = FALSE;
+				if (!(i <= 20)) {
 					break;
 				}
-				_tmp8_ = self->world;
-				factory_createBullet (_tmp8_);
+				_tmp7_ = self->world;
+				factory_createBullet (_tmp7_, self);
 			}
 		}
 	}
@@ -578,21 +666,21 @@ void game_initialize (Game* self) {
 		gint i = 0;
 		i = 1;
 		{
-			gboolean _tmp9_ = FALSE;
-			_tmp9_ = TRUE;
+			gboolean _tmp8_ = FALSE;
+			_tmp8_ = TRUE;
 			while (TRUE) {
-				Factory* _tmp11_ = NULL;
-				if (!_tmp9_) {
-					gint _tmp10_ = 0;
-					_tmp10_ = i;
-					i = _tmp10_ + 1;
+				Factory* _tmp10_ = NULL;
+				if (!_tmp8_) {
+					gint _tmp9_ = 0;
+					_tmp9_ = i;
+					i = _tmp9_ + 1;
 				}
-				_tmp9_ = FALSE;
+				_tmp8_ = FALSE;
 				if (!(i <= 15)) {
 					break;
 				}
-				_tmp11_ = self->world;
-				factory_createEnemy1 (_tmp11_);
+				_tmp10_ = self->world;
+				factory_createEnemy1 (_tmp10_, self);
 			}
 		}
 	}
@@ -600,21 +688,21 @@ void game_initialize (Game* self) {
 		gint i = 0;
 		i = 1;
 		{
-			gboolean _tmp12_ = FALSE;
-			_tmp12_ = TRUE;
+			gboolean _tmp11_ = FALSE;
+			_tmp11_ = TRUE;
 			while (TRUE) {
-				Factory* _tmp14_ = NULL;
-				if (!_tmp12_) {
-					gint _tmp13_ = 0;
-					_tmp13_ = i;
-					i = _tmp13_ + 1;
+				Factory* _tmp13_ = NULL;
+				if (!_tmp11_) {
+					gint _tmp12_ = 0;
+					_tmp12_ = i;
+					i = _tmp12_ + 1;
 				}
-				_tmp12_ = FALSE;
+				_tmp11_ = FALSE;
 				if (!(i <= 10)) {
 					break;
 				}
-				_tmp14_ = self->world;
-				factory_createEnemy2 (_tmp14_);
+				_tmp13_ = self->world;
+				factory_createEnemy2 (_tmp13_, self);
 			}
 		}
 	}
@@ -622,21 +710,21 @@ void game_initialize (Game* self) {
 		gint i = 0;
 		i = 1;
 		{
-			gboolean _tmp15_ = FALSE;
-			_tmp15_ = TRUE;
+			gboolean _tmp14_ = FALSE;
+			_tmp14_ = TRUE;
 			while (TRUE) {
-				Factory* _tmp17_ = NULL;
-				if (!_tmp15_) {
-					gint _tmp16_ = 0;
-					_tmp16_ = i;
-					i = _tmp16_ + 1;
+				Factory* _tmp16_ = NULL;
+				if (!_tmp14_) {
+					gint _tmp15_ = 0;
+					_tmp15_ = i;
+					i = _tmp15_ + 1;
 				}
-				_tmp15_ = FALSE;
+				_tmp14_ = FALSE;
 				if (!(i <= 5)) {
 					break;
 				}
-				_tmp17_ = self->world;
-				factory_createEnemy3 (_tmp17_);
+				_tmp16_ = self->world;
+				factory_createEnemy3 (_tmp16_, self);
 			}
 		}
 	}
@@ -644,83 +732,140 @@ void game_initialize (Game* self) {
 		gint i = 0;
 		i = 1;
 		{
-			gboolean _tmp18_ = FALSE;
-			_tmp18_ = TRUE;
+			gboolean _tmp17_ = FALSE;
+			_tmp17_ = TRUE;
 			while (TRUE) {
-				Factory* _tmp20_ = NULL;
-				if (!_tmp18_) {
-					gint _tmp19_ = 0;
-					_tmp19_ = i;
-					i = _tmp19_ + 1;
+				Factory* _tmp19_ = NULL;
+				if (!_tmp17_) {
+					gint _tmp18_ = 0;
+					_tmp18_ = i;
+					i = _tmp18_ + 1;
 				}
-				_tmp18_ = FALSE;
-				if (!(i <= 90)) {
+				_tmp17_ = FALSE;
+				if (!(i <= 10)) {
 					break;
 				}
-				_tmp20_ = self->world;
-				factory_createParticle (_tmp20_);
+				_tmp19_ = self->world;
+				factory_createExplosion (_tmp19_, self);
 			}
 		}
 	}
-	_tmp21_ = self->world;
-	_tmp22_ = systems_spawn_new (self, _tmp21_);
+	{
+		gint i = 0;
+		i = 1;
+		{
+			gboolean _tmp20_ = FALSE;
+			_tmp20_ = TRUE;
+			while (TRUE) {
+				Factory* _tmp22_ = NULL;
+				if (!_tmp20_) {
+					gint _tmp21_ = 0;
+					_tmp21_ = i;
+					i = _tmp21_ + 1;
+				}
+				_tmp20_ = FALSE;
+				if (!(i <= 12)) {
+					break;
+				}
+				_tmp22_ = self->world;
+				factory_createBang (_tmp22_, self);
+			}
+		}
+	}
+	{
+		gint i = 0;
+		i = 1;
+		{
+			gboolean _tmp23_ = FALSE;
+			_tmp23_ = TRUE;
+			while (TRUE) {
+				Factory* _tmp25_ = NULL;
+				if (!_tmp23_) {
+					gint _tmp24_ = 0;
+					_tmp24_ = i;
+					i = _tmp24_ + 1;
+				}
+				_tmp23_ = FALSE;
+				if (!(i <= 90)) {
+					break;
+				}
+				_tmp25_ = self->world;
+				factory_createParticle (_tmp25_, self);
+			}
+		}
+	}
+	_tmp26_ = self->world;
+	_tmp27_ = systems_spawn_new (self, _tmp26_);
 	_systems_spawn_release0 (self->spawn);
-	self->spawn = _tmp22_;
-	_tmp23_ = self->world;
-	_tmp24_ = systems_input_new (self, _tmp23_);
+	self->spawn = _tmp27_;
+	_tmp28_ = self->world;
+	_tmp29_ = systems_input_new (self, _tmp28_);
 	_systems_input_release0 (self->input);
-	self->input = _tmp24_;
-	_tmp25_ = self->world;
-	_tmp26_ = systems_collision_new (self, _tmp25_);
+	self->input = _tmp29_;
+	_tmp30_ = self->world;
+	_tmp31_ = systems_collision_new (self, _tmp30_);
 	_systems_collision_release0 (self->collision);
-	self->collision = _tmp26_;
-	_tmp27_ = self->world;
-	_tmp28_ = systems_physics_new (self, _tmp27_);
+	self->collision = _tmp31_;
+	_tmp32_ = self->world;
+	_tmp33_ = systems_physics_new (self, _tmp32_);
 	_systems_physics_release0 (self->physics);
-	self->physics = _tmp28_;
-	_tmp29_ = self->world;
-	_tmp30_ = systems_expire_new (self, _tmp29_);
+	self->physics = _tmp33_;
+	_tmp34_ = self->world;
+	_tmp35_ = systems_expire_new (self, _tmp34_);
 	_systems_expire_release0 (self->expire);
-	self->expire = _tmp30_;
-	_tmp31_ = self->world;
-	_tmp32_ = systems_remove_new (self, _tmp31_);
-	_systems_remove_release0 (self->remove);
-	self->remove = _tmp32_;
-	_tmp33_ = self->world;
-	_tmp34_ = self->spawn;
-	_tmp35_ = self->spawn;
-	entitas_world_addSystem ((entitasWorld*) _tmp33_, _systems_spawn_initialize_entitas_system_initialize, _tmp34_, _systems_spawn_execute_entitas_system_execute, _tmp35_);
+	self->expire = _tmp35_;
 	_tmp36_ = self->world;
-	_tmp37_ = self->input;
-	_tmp38_ = self->input;
-	entitas_world_addSystem ((entitasWorld*) _tmp36_, _systems_input_initialize_entitas_system_initialize, _tmp37_, _systems_input_execute_entitas_system_execute, _tmp38_);
-	_tmp39_ = self->world;
-	_tmp40_ = self->collision;
-	_tmp41_ = self->collision;
-	entitas_world_addSystem ((entitasWorld*) _tmp39_, _systems_collision_initialize_entitas_system_initialize, _tmp40_, _systems_collision_execute_entitas_system_execute, _tmp41_);
-	_tmp42_ = self->world;
-	_tmp43_ = self->physics;
-	_tmp44_ = self->physics;
-	entitas_world_addSystem ((entitasWorld*) _tmp42_, _systems_physics_initialize_entitas_system_initialize, _tmp43_, _systems_physics_execute_entitas_system_execute, _tmp44_);
-	_tmp45_ = self->world;
-	_tmp46_ = self->expire;
-	_tmp47_ = self->expire;
-	entitas_world_addSystem ((entitasWorld*) _tmp45_, _systems_expire_initialize_entitas_system_initialize, _tmp46_, _systems_expire_execute_entitas_system_execute, _tmp47_);
-	_tmp48_ = self->world;
-	_tmp49_ = self->remove;
-	_tmp50_ = self->remove;
-	entitas_world_addSystem ((entitasWorld*) _tmp48_, _systems_remove_initialize_entitas_system_initialize, _tmp49_, _systems_remove_execute_entitas_system_execute, _tmp50_);
-	_tmp51_ = self->world;
-	entitas_world_initialize ((entitasWorld*) _tmp51_);
+	_tmp37_ = systems_remove_new (self, _tmp36_);
+	_systems_remove_release0 (self->remove);
+	self->remove = _tmp37_;
+	_tmp38_ = self->world;
+	_tmp39_ = systems_animation_new (self, _tmp38_);
+	_systems_animation_release0 (self->animate);
+	self->animate = _tmp39_;
+	_tmp40_ = self->world;
+	_tmp41_ = self->spawn;
+	_tmp42_ = self->spawn;
+	entitas_world_addSystem ((entitasWorld*) _tmp40_, _systems_spawn_initialize_entitas_system_initialize, _tmp41_, _systems_spawn_execute_entitas_system_execute, _tmp42_);
+	_tmp43_ = self->world;
+	_tmp44_ = self->input;
+	_tmp45_ = self->input;
+	entitas_world_addSystem ((entitasWorld*) _tmp43_, _systems_input_initialize_entitas_system_initialize, _tmp44_, _systems_input_execute_entitas_system_execute, _tmp45_);
+	_tmp46_ = self->world;
+	_tmp47_ = self->collision;
+	_tmp48_ = self->collision;
+	entitas_world_addSystem ((entitasWorld*) _tmp46_, _systems_collision_initialize_entitas_system_initialize, _tmp47_, _systems_collision_execute_entitas_system_execute, _tmp48_);
+	_tmp49_ = self->world;
+	_tmp50_ = self->physics;
+	_tmp51_ = self->physics;
+	entitas_world_addSystem ((entitasWorld*) _tmp49_, _systems_physics_initialize_entitas_system_initialize, _tmp50_, _systems_physics_execute_entitas_system_execute, _tmp51_);
+	_tmp52_ = self->world;
+	_tmp53_ = self->animate;
+	_tmp54_ = self->animate;
+	entitas_world_addSystem ((entitasWorld*) _tmp52_, _systems_animation_initialize_entitas_system_initialize, _tmp53_, _systems_animation_execute_entitas_system_execute, _tmp54_);
+	_tmp55_ = self->world;
+	_tmp56_ = self->expire;
+	_tmp57_ = self->expire;
+	entitas_world_addSystem ((entitasWorld*) _tmp55_, _systems_expire_initialize_entitas_system_initialize, _tmp56_, _systems_expire_execute_entitas_system_execute, _tmp57_);
+	_tmp58_ = self->world;
+	_tmp59_ = self->remove;
+	_tmp60_ = self->remove;
+	entitas_world_addSystem ((entitasWorld*) _tmp58_, _systems_remove_initialize_entitas_system_initialize, _tmp59_, _systems_remove_execute_entitas_system_execute, _tmp60_);
+	_tmp61_ = self->world;
+	entitas_world_initialize ((entitasWorld*) _tmp61_);
+	_tmp62_ = sdx_font_new ("assets/fonts/OpenDyslexic-Bold.otf", 16);
+	_sdx_font_release0 (self->font);
+	self->font = _tmp62_;
 }
 
 
 void game_start (Game* self) {
-	gdouble _tmp0_ = 0.0;
+	guint64 _tmp0_ = 0ULL;
+	gdouble _tmp1_ = 0.0;
 	g_return_if_fail (self != NULL);
 	self->running = TRUE;
-	_tmp0_ = emscripten_get_now ();
-	self->mark1 = _tmp0_ / 1000;
+	_tmp0_ = SDL_GetPerformanceCounter ();
+	_tmp1_ = self->freq;
+	self->mark1 = ((gdouble) _tmp0_) / _tmp1_;
 }
 
 
@@ -730,8 +875,9 @@ void game_processEvents (Game* self) {
 		SDL_Event _tmp0_ = {0};
 		gint _tmp1_ = 0;
 		SDL_Event _tmp2_ = {0};
-		gint _tmp3_ = 0;
+		SDL_EventType _tmp3_ = 0;
 		_tmp1_ = SDL_PollEvent (&_tmp0_);
+		 (self->evt);
 		self->evt = _tmp0_;
 		if (!(_tmp1_ != 0)) {
 			break;
@@ -751,8 +897,8 @@ void game_processEvents (Game* self) {
 				{
 					SDL_Event _tmp4_ = {0};
 					SDL_KeyboardEvent _tmp5_ = {0};
-					SDL_keysym _tmp6_ = {0};
-					int _tmp7_ = 0;
+					SDL_Keysym _tmp6_ = {0};
+					SDL_Keycode _tmp7_ = 0;
 					guint8 _tmp8_ = 0U;
 					_tmp4_ = self->evt;
 					_tmp5_ = _tmp4_.key;
@@ -768,8 +914,8 @@ void game_processEvents (Game* self) {
 				{
 					SDL_Event _tmp9_ = {0};
 					SDL_KeyboardEvent _tmp10_ = {0};
-					SDL_keysym _tmp11_ = {0};
-					int _tmp12_ = 0;
+					SDL_Keysym _tmp11_ = {0};
+					SDL_Keycode _tmp12_ = 0;
 					guint8 _tmp13_ = 0U;
 					_tmp9_ = self->evt;
 					_tmp10_ = _tmp9_.key;
@@ -785,10 +931,10 @@ void game_processEvents (Game* self) {
 				{
 					SDL_Event _tmp14_ = {0};
 					SDL_MouseMotionEvent _tmp15_ = {0};
-					guint16 _tmp16_ = 0U;
+					gint32 _tmp16_ = 0;
 					SDL_Event _tmp17_ = {0};
 					SDL_MouseMotionEvent _tmp18_ = {0};
-					guint16 _tmp19_ = 0U;
+					gint32 _tmp19_ = 0;
 					_tmp14_ = self->evt;
 					_tmp15_ = _tmp14_.motion;
 					_tmp16_ = _tmp15_.x;
@@ -822,226 +968,316 @@ void game_processEvents (Game* self) {
 
 
 void game_update (Game* self) {
-	gdouble _tmp0_ = 0.0;
+	guint64 _tmp0_ = 0ULL;
 	gdouble _tmp1_ = 0.0;
 	gdouble _tmp2_ = 0.0;
 	gdouble _tmp3_ = 0.0;
 	gdouble _tmp4_ = 0.0;
-	Factory* _tmp5_ = NULL;
+	gint _tmp5_ = 0;
 	gdouble _tmp6_ = 0.0;
 	gdouble _tmp7_ = 0.0;
 	gdouble _tmp8_ = 0.0;
-	gdouble _tmp9_ = 0.0;
-	gdouble _tmp10_ = 0.0;
-	gdouble _tmp11_ = 0.0;
-	gint _tmp12_ = 0;
-	gint _tmp13_ = 0;
-	SDL_Surface* _tmp16_ = NULL;
-	SDL_Surface* _tmp17_ = NULL;
-	SDL_PixelFormat* _tmp18_ = NULL;
-	guint32 _tmp19_ = 0U;
-	GList* _tmp20_ = NULL;
-	SDL_Surface* _tmp71_ = NULL;
+	Factory* _tmp11_ = NULL;
+	gdouble _tmp12_ = 0.0;
 	g_return_if_fail (self != NULL);
-	_tmp0_ = emscripten_get_now ();
-	self->mark2 = _tmp0_ / 1000;
-	_tmp1_ = self->mark2;
-	_tmp2_ = self->mark1;
-	self->delta = _tmp1_ - _tmp2_;
-	_tmp3_ = self->mark2;
-	self->mark1 = _tmp3_;
-	game_processEvents (self);
-	_tmp4_ = emscripten_get_now ();
-	self->t1 = _tmp4_ / 1000;
-	_tmp5_ = self->world;
-	_tmp6_ = self->delta;
-	entitas_world_execute ((entitasWorld*) _tmp5_, _tmp6_);
-	_tmp7_ = emscripten_get_now ();
-	self->t2 = _tmp7_ / 1000;
-	_tmp8_ = self->t2;
-	_tmp9_ = self->t1;
-	self->t3 = _tmp8_ - _tmp9_;
-	_tmp10_ = self->t;
-	_tmp11_ = self->t3;
-	self->t = _tmp10_ + _tmp11_;
-	_tmp12_ = self->k;
-	self->k = _tmp12_ + 1;
-	_tmp13_ = self->k;
-	if (_tmp13_ == 1000) {
-		gdouble _tmp14_ = 0.0;
-		gdouble _tmp15_ = 0.0;
-		self->k = 0;
-		_tmp14_ = self->t;
-		self->t = _tmp14_ / 1000.0;
-		_tmp15_ = self->t;
-		g_print ("%f\n", _tmp15_);
-		self->t = (gdouble) 0;
+	_tmp0_ = SDL_GetPerformanceCounter ();
+	_tmp1_ = self->freq;
+	self->mark2 = ((gdouble) _tmp0_) / _tmp1_;
+	_tmp2_ = self->mark2;
+	_tmp3_ = self->mark1;
+	self->delta = _tmp2_ - _tmp3_;
+	_tmp4_ = self->mark2;
+	self->mark1 = _tmp4_;
+	_tmp5_ = self->frames;
+	self->frames = _tmp5_ + 1;
+	_tmp6_ = self->elapsed;
+	_tmp7_ = self->delta;
+	self->elapsed = _tmp6_ + _tmp7_;
+	_tmp8_ = self->elapsed;
+	if (_tmp8_ > 1.0) {
+		gint _tmp9_ = 0;
+		gdouble _tmp10_ = 0.0;
+		_tmp9_ = self->frames;
+		_tmp10_ = self->elapsed;
+		self->fps = (gdouble) ((gint) (((gdouble) _tmp9_) / _tmp10_));
+		self->elapsed = 0.0;
+		self->frames = 0;
 	}
-	_tmp16_ = self->surface;
-	_tmp17_ = self->surface;
-	_tmp18_ = _tmp17_->format;
-	_tmp19_ = SDL_MapRGB (_tmp18_, (guchar) 255, (guchar) 0, (guchar) 0);
-	SDL_FillRect (_tmp16_, NULL, _tmp19_);
-	_tmp20_ = self->sprites;
+	game_processEvents (self);
+	_tmp11_ = self->world;
+	_tmp12_ = self->delta;
+	entitas_world_execute ((entitasWorld*) _tmp11_, _tmp12_);
+}
+
+
+void game_draw (Game* self) {
+	SDL_Renderer* _tmp0_ = NULL;
+	SDL_Renderer* _tmp1_ = NULL;
+	GList* _tmp2_ = NULL;
+	SDL_Renderer* _tmp5_ = NULL;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->renderer;
+	SDL_SetRenderDrawColor (_tmp0_, (guint8) 0, (guint8) 0, (guint8) 0xff, (guint8) 0);
+	_tmp1_ = self->renderer;
+	SDL_RenderClear (_tmp1_);
+	_tmp2_ = self->sprites;
 	{
-		GList* entity_collection = NULL;
-		GList* entity_it = NULL;
-		entity_collection = _tmp20_;
-		for (entity_it = entity_collection; entity_it != NULL; entity_it = entity_it->next) {
-			entitasEntity* entity = NULL;
-			entity = entity_it->data;
+		GList* sprite_collection = NULL;
+		GList* sprite_it = NULL;
+		sprite_collection = _tmp2_;
+		for (sprite_it = sprite_collection; sprite_it != NULL; sprite_it = sprite_it->next) {
+			entitasEntity* sprite = NULL;
+			sprite = sprite_it->data;
 			{
-				gboolean _tmp21_ = FALSE;
-				gboolean _tmp22_ = FALSE;
-				_tmp21_ = entitas_entity_isActive (entity);
-				if (!_tmp21_) {
-					continue;
-				}
-				_tmp22_ = entitas_entity_hasIndex (entity);
-				if (_tmp22_) {
-					gint16 w = 0;
-					entitasEntity* _tmp23_ = NULL;
-					entitasBounds* _tmp24_ = NULL;
-					gint _tmp25_ = 0;
-					entitasEntity* _tmp26_ = NULL;
-					entitasIndex* _tmp27_ = NULL;
-					gint _tmp28_ = 0;
-					gint16 h = 0;
-					entitasEntity* _tmp29_ = NULL;
-					entitasBounds* _tmp30_ = NULL;
-					gint _tmp31_ = 0;
-					gint16 x = 0;
-					gint16 y = 0;
-					entitasEntity* _tmp32_ = NULL;
-					entitasIndex* _tmp33_ = NULL;
-					gint _tmp34_ = 0;
-					gint16 _tmp35_ = 0;
-					entitasEntity* _tmp36_ = NULL;
-					entitasSprite* _tmp37_ = NULL;
-					SDL_Surface* _tmp38_ = NULL;
-					gint16 _tmp39_ = 0;
-					gint16 _tmp40_ = 0;
-					gint16 _tmp41_ = 0;
-					gint16 _tmp42_ = 0;
-					SDL_Rect _tmp43_ = {0};
-					SDL_Surface* _tmp44_ = NULL;
-					entitasEntity* _tmp45_ = NULL;
-					entitasBounds* _tmp46_ = NULL;
-					gint _tmp47_ = 0;
-					entitasEntity* _tmp48_ = NULL;
-					entitasBounds* _tmp49_ = NULL;
-					gint _tmp50_ = 0;
-					gint16 _tmp51_ = 0;
-					gint16 _tmp52_ = 0;
-					SDL_Rect _tmp53_ = {0};
-					_tmp23_ = entity;
-					_tmp24_ = (*_tmp23_).bounds;
-					_tmp25_ = (*_tmp24_).w;
-					_tmp26_ = entity;
-					_tmp27_ = (*_tmp26_).index;
-					_tmp28_ = (*_tmp27_).limit;
-					w = (gint16) (_tmp25_ / _tmp28_);
-					_tmp29_ = entity;
-					_tmp30_ = (*_tmp29_).bounds;
-					_tmp31_ = (*_tmp30_).h;
-					h = (gint16) _tmp31_;
-					x = (gint16) 0;
-					_tmp32_ = entity;
-					_tmp33_ = (*_tmp32_).index;
-					_tmp34_ = (*_tmp33_).value;
-					_tmp35_ = w;
-					y = (gint16) (_tmp34_ * _tmp35_);
-					_tmp36_ = entity;
-					_tmp37_ = (*_tmp36_).sprite;
-					_tmp38_ = (*_tmp37_).surface;
-					_tmp39_ = x;
-					_tmp40_ = y;
-					_tmp41_ = w;
-					_tmp42_ = h;
-					_tmp43_.x = _tmp39_;
-					_tmp43_.y = _tmp40_;
-					_tmp43_.w = (guint16) _tmp41_;
-					_tmp43_.h = (guint16) _tmp42_;
-					_tmp44_ = self->surface;
-					_tmp45_ = entity;
-					_tmp46_ = (*_tmp45_).bounds;
-					_tmp47_ = (*_tmp46_).x;
-					_tmp48_ = entity;
-					_tmp49_ = (*_tmp48_).bounds;
-					_tmp50_ = (*_tmp49_).y;
-					_tmp51_ = w;
-					_tmp52_ = h;
-					_tmp53_.x = (gint16) _tmp47_;
-					_tmp53_.y = (gint16) _tmp50_;
-					_tmp53_.w = (guint16) ((gint16) _tmp51_);
-					_tmp53_.h = (guint16) ((gint16) _tmp52_);
-					SDL_UpperBlit (_tmp38_, &_tmp43_, _tmp44_, &_tmp53_);
-				} else {
-					entitasEntity* _tmp54_ = NULL;
-					entitasSprite* _tmp55_ = NULL;
-					SDL_Surface* _tmp56_ = NULL;
-					SDL_Surface* _tmp57_ = NULL;
-					entitasEntity* _tmp58_ = NULL;
-					entitasBounds* _tmp59_ = NULL;
-					gint _tmp60_ = 0;
-					entitasEntity* _tmp61_ = NULL;
-					entitasBounds* _tmp62_ = NULL;
-					gint _tmp63_ = 0;
-					entitasEntity* _tmp64_ = NULL;
-					entitasBounds* _tmp65_ = NULL;
-					gint _tmp66_ = 0;
-					entitasEntity* _tmp67_ = NULL;
-					entitasBounds* _tmp68_ = NULL;
-					gint _tmp69_ = 0;
-					SDL_Rect _tmp70_ = {0};
-					_tmp54_ = entity;
-					_tmp55_ = (*_tmp54_).sprite;
-					_tmp56_ = (*_tmp55_).surface;
-					_tmp57_ = self->surface;
-					_tmp58_ = entity;
-					_tmp59_ = (*_tmp58_).bounds;
-					_tmp60_ = (*_tmp59_).x;
-					_tmp61_ = entity;
-					_tmp62_ = (*_tmp61_).bounds;
-					_tmp63_ = (*_tmp62_).y;
-					_tmp64_ = entity;
-					_tmp65_ = (*_tmp64_).bounds;
-					_tmp66_ = (*_tmp65_).w;
-					_tmp67_ = entity;
-					_tmp68_ = (*_tmp67_).bounds;
-					_tmp69_ = (*_tmp68_).h;
-					_tmp70_.x = (gint16) _tmp60_;
-					_tmp70_.y = (gint16) _tmp63_;
-					_tmp70_.w = (guint16) ((gint16) _tmp66_);
-					_tmp70_.h = (guint16) ((gint16) _tmp69_);
-					SDL_UpperBlit (_tmp56_, NULL, _tmp57_, &_tmp70_);
+				gboolean _tmp3_ = FALSE;
+				_tmp3_ = entitas_entity_isActive (sprite);
+				if (_tmp3_) {
+					entitasEntity* _tmp4_ = NULL;
+					_tmp4_ = sprite;
+					game_drawEach (self, _tmp4_);
 				}
 			}
 		}
 	}
-	_tmp71_ = self->surface;
-	SDL_Flip (_tmp71_);
+	game_drawFps (self);
+	_tmp5_ = self->renderer;
+	SDL_RenderPresent (_tmp5_);
+}
+
+
+void game_drawFps (Game* self) {
+	sdxSprite* _tmp0_ = NULL;
+	SDL_Renderer* _tmp1_ = NULL;
+	gdouble _tmp2_ = 0.0;
+	gchar* _tmp3_ = NULL;
+	gchar* _tmp4_ = NULL;
+	sdxFont* _tmp5_ = NULL;
+	SDL_Color _tmp6_ = {0};
+	sdxSprite* _tmp7_ = NULL;
+	sdxSprite* _tmp8_ = NULL;
+	sdxSprite* _tmp9_ = NULL;
+	SDL_Renderer* _tmp10_ = NULL;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = self->fpsSprite;
+	if (_tmp0_ != NULL) {
+		_sdx_sprite_release0 (self->fpsSprite);
+		self->fpsSprite = NULL;
+	}
+	_tmp1_ = self->renderer;
+	_tmp2_ = self->fps;
+	_tmp3_ = g_strdup_printf ("%2.2f", _tmp2_);
+	_tmp4_ = _tmp3_;
+	_tmp5_ = self->font;
+	_tmp6_.r = (guint8) 0xd7;
+	_tmp6_.g = (guint8) 0xeb;
+	_tmp6_.b = (guint8) 0xd7;
+	_tmp6_.a = (guint8) 0xfa;
+	_tmp7_ = sdx_sprite_new (_tmp1_, _tmp4_, _tmp5_, &_tmp6_);
+	_sdx_sprite_release0 (self->fpsSprite);
+	self->fpsSprite = _tmp7_;
+	_g_free0 (_tmp4_);
+	_tmp8_ = self->fpsSprite;
+	_tmp8_->centered = FALSE;
+	_tmp9_ = self->fpsSprite;
+	_tmp10_ = self->renderer;
+	sdx_sprite_render (_tmp9_, _tmp10_, 0, 0, NULL);
+}
+
+
+gboolean game_drawEach (Game* self, entitasEntity* e) {
+	gboolean result = FALSE;
+	gboolean _tmp0_ = FALSE;
+	g_return_val_if_fail (self != NULL, FALSE);
+	_tmp0_ = entitas_entity_hasSprite (e);
+	if (_tmp0_) {
+		entitasEntity* _tmp1_ = NULL;
+		entitasBounds* _tmp2_ = NULL;
+		entitasEntity* _tmp3_ = NULL;
+		entitasSprite* _tmp4_ = NULL;
+		gint _tmp5_ = 0;
+		entitasEntity* _tmp6_ = NULL;
+		entitasScale* _tmp7_ = NULL;
+		gdouble _tmp8_ = 0.0;
+		entitasEntity* _tmp9_ = NULL;
+		entitasBounds* _tmp10_ = NULL;
+		entitasEntity* _tmp11_ = NULL;
+		entitasSprite* _tmp12_ = NULL;
+		gint _tmp13_ = 0;
+		entitasEntity* _tmp14_ = NULL;
+		entitasScale* _tmp15_ = NULL;
+		gdouble _tmp16_ = 0.0;
+		gboolean _tmp17_ = FALSE;
+		SDL_Renderer* _tmp55_ = NULL;
+		entitasEntity* _tmp56_ = NULL;
+		entitasSprite* _tmp57_ = NULL;
+		sdxSprite* _tmp58_ = NULL;
+		SDL_Texture* _tmp59_ = NULL;
+		entitasEntity* _tmp60_ = NULL;
+		entitasBounds* _tmp61_ = NULL;
+		gint _tmp62_ = 0;
+		entitasEntity* _tmp63_ = NULL;
+		entitasBounds* _tmp64_ = NULL;
+		gint _tmp65_ = 0;
+		entitasEntity* _tmp66_ = NULL;
+		entitasBounds* _tmp67_ = NULL;
+		gint _tmp68_ = 0;
+		entitasEntity* _tmp69_ = NULL;
+		entitasBounds* _tmp70_ = NULL;
+		gint _tmp71_ = 0;
+		SDL_Rect _tmp72_ = {0};
+		_tmp1_ = e;
+		_tmp2_ = (*_tmp1_).bounds;
+		_tmp3_ = e;
+		_tmp4_ = (*_tmp3_).sprite;
+		_tmp5_ = (*_tmp4_).width;
+		_tmp6_ = e;
+		_tmp7_ = (*_tmp6_).scale;
+		_tmp8_ = (*_tmp7_).x;
+		(*_tmp2_).w = (gint) (((gdouble) _tmp5_) * _tmp8_);
+		_tmp9_ = e;
+		_tmp10_ = (*_tmp9_).bounds;
+		_tmp11_ = e;
+		_tmp12_ = (*_tmp11_).sprite;
+		_tmp13_ = (*_tmp12_).height;
+		_tmp14_ = e;
+		_tmp15_ = (*_tmp14_).scale;
+		_tmp16_ = (*_tmp15_).y;
+		(*_tmp10_).h = (gint) (((gdouble) _tmp13_) * _tmp16_);
+		_tmp17_ = entitas_entity_isBackground (e);
+		if (!_tmp17_) {
+			entitasEntity* _tmp18_ = NULL;
+			entitasBounds* _tmp19_ = NULL;
+			entitasEntity* _tmp20_ = NULL;
+			entitasPosition* _tmp21_ = NULL;
+			gdouble _tmp22_ = 0.0;
+			entitasEntity* _tmp23_ = NULL;
+			entitasBounds* _tmp24_ = NULL;
+			gint _tmp25_ = 0;
+			entitasEntity* _tmp26_ = NULL;
+			entitasBounds* _tmp27_ = NULL;
+			entitasEntity* _tmp28_ = NULL;
+			entitasPosition* _tmp29_ = NULL;
+			gdouble _tmp30_ = 0.0;
+			entitasEntity* _tmp31_ = NULL;
+			entitasBounds* _tmp32_ = NULL;
+			gint _tmp33_ = 0;
+			gboolean _tmp34_ = FALSE;
+			_tmp18_ = e;
+			_tmp19_ = (*_tmp18_).bounds;
+			_tmp20_ = e;
+			_tmp21_ = (*_tmp20_).position;
+			_tmp22_ = (*_tmp21_).x;
+			_tmp23_ = e;
+			_tmp24_ = (*_tmp23_).bounds;
+			_tmp25_ = (*_tmp24_).w;
+			(*_tmp19_).x = (gint) (((gdouble) _tmp22_) - (_tmp25_ / 2));
+			_tmp26_ = e;
+			_tmp27_ = (*_tmp26_).bounds;
+			_tmp28_ = e;
+			_tmp29_ = (*_tmp28_).position;
+			_tmp30_ = (*_tmp29_).y;
+			_tmp31_ = e;
+			_tmp32_ = (*_tmp31_).bounds;
+			_tmp33_ = (*_tmp32_).h;
+			(*_tmp27_).y = (gint) (((gdouble) _tmp30_) - (_tmp33_ / 2));
+			_tmp34_ = entitas_entity_hasTint (e);
+			if (_tmp34_) {
+				entitasEntity* _tmp35_ = NULL;
+				entitasSprite* _tmp36_ = NULL;
+				sdxSprite* _tmp37_ = NULL;
+				SDL_Texture* _tmp38_ = NULL;
+				entitasEntity* _tmp39_ = NULL;
+				entitasTint* _tmp40_ = NULL;
+				gint _tmp41_ = 0;
+				entitasEntity* _tmp42_ = NULL;
+				entitasTint* _tmp43_ = NULL;
+				gint _tmp44_ = 0;
+				entitasEntity* _tmp45_ = NULL;
+				entitasTint* _tmp46_ = NULL;
+				gint _tmp47_ = 0;
+				entitasEntity* _tmp48_ = NULL;
+				entitasSprite* _tmp49_ = NULL;
+				sdxSprite* _tmp50_ = NULL;
+				SDL_Texture* _tmp51_ = NULL;
+				entitasEntity* _tmp52_ = NULL;
+				entitasTint* _tmp53_ = NULL;
+				gint _tmp54_ = 0;
+				_tmp35_ = e;
+				_tmp36_ = (*_tmp35_).sprite;
+				_tmp37_ = (*_tmp36_).sprite;
+				_tmp38_ = _tmp37_->texture;
+				_tmp39_ = e;
+				_tmp40_ = (*_tmp39_).tint;
+				_tmp41_ = (*_tmp40_).r;
+				_tmp42_ = e;
+				_tmp43_ = (*_tmp42_).tint;
+				_tmp44_ = (*_tmp43_).g;
+				_tmp45_ = e;
+				_tmp46_ = (*_tmp45_).tint;
+				_tmp47_ = (*_tmp46_).b;
+				SDL_SetTextureColorMod (_tmp38_, (guint8) _tmp41_, (guint8) _tmp44_, (guint8) _tmp47_);
+				_tmp48_ = e;
+				_tmp49_ = (*_tmp48_).sprite;
+				_tmp50_ = (*_tmp49_).sprite;
+				_tmp51_ = _tmp50_->texture;
+				_tmp52_ = e;
+				_tmp53_ = (*_tmp52_).tint;
+				_tmp54_ = (*_tmp53_).a;
+				SDL_SetTextureAlphaMod (_tmp51_, (guint8) _tmp54_);
+			}
+		}
+		_tmp55_ = self->renderer;
+		_tmp56_ = e;
+		_tmp57_ = (*_tmp56_).sprite;
+		_tmp58_ = (*_tmp57_).sprite;
+		_tmp59_ = _tmp58_->texture;
+		_tmp60_ = e;
+		_tmp61_ = (*_tmp60_).bounds;
+		_tmp62_ = (*_tmp61_).x;
+		_tmp63_ = e;
+		_tmp64_ = (*_tmp63_).bounds;
+		_tmp65_ = (*_tmp64_).y;
+		_tmp66_ = e;
+		_tmp67_ = (*_tmp66_).bounds;
+		_tmp68_ = (*_tmp67_).w;
+		_tmp69_ = e;
+		_tmp70_ = (*_tmp69_).bounds;
+		_tmp71_ = (*_tmp70_).h;
+		_tmp72_.x = _tmp62_;
+		_tmp72_.y = _tmp65_;
+		_tmp72_.w = (guint) _tmp68_;
+		_tmp72_.h = (guint) _tmp71_;
+		SDL_RenderCopy (_tmp55_, _tmp59_, NULL, &_tmp72_);
+	}
+	result = TRUE;
+	return result;
 }
 
 
 static void game_instance_init (Game * self) {
+	guint64 _tmp0_ = 0ULL;
 	self->refCount = 1;
 	self->sprites = NULL;
-	self->t1 = 0.0;
-	self->t2 = 0.0;
-	self->t3 = 0.0;
+	self->elapsed = (gdouble) 0;
+	self->frames = 0;
+	_tmp0_ = SDL_GetPerformanceFrequency ();
+	self->freq = (gdouble) _tmp0_;
 }
 
 
 void game_free (Game* self) {
+	 (self->evt);
 	_entitas_world_release0 (self->world);
 	_g_list_free0 (self->sprites);
+	_sdx_font_release0 (self->font);
+	_sdx_sprite_release0 (self->fpsSprite);
 	_systems_collision_release0 (self->collision);
 	_systems_expire_release0 (self->expire);
 	_systems_input_release0 (self->input);
 	_systems_physics_release0 (self->physics);
 	_systems_remove_release0 (self->remove);
 	_systems_spawn_release0 (self->spawn);
+	_systems_animation_release0 (self->animate);
 	g_slice_free (Game, self);
 }
 

@@ -28,15 +28,14 @@ namespace systems
 		*/
 		def execute(delta:double)
 
-			for entity in physics.entities
-				if entity.isActive() 
+			for entity in physics.entities do if entity.isActive() 
 
-					var x = entity.position.x + entity.velocity.x * delta
-					var y = entity.position.y + entity.velocity.y * delta
+				var x = entity.position.x + entity.velocity.x * delta
+				var y = entity.position.y + entity.velocity.y * delta
 
-					entity.setPosition(x, y)
-					entity.bounds.x = (int)x
-					entity.bounds.y = (int)y
+				entity.setPosition(x, y)
+				entity.bounds.x = (int)x
+				entity.bounds.y = (int)y
 
 
 

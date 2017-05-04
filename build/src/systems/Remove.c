@@ -8,7 +8,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
 
 typedef struct _systemsRemove systemsRemove;
 typedef struct _Game Game;
@@ -77,6 +78,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -93,11 +95,13 @@ typedef struct _entitasVelocity entitasVelocity;
 typedef struct _entitasEntity entitasEntity;
 
 #define TYPE_POOL (pool_get_type ())
+typedef struct _sdxFont sdxFont;
 typedef struct _systemsCollision systemsCollision;
 typedef struct _systemsExpire systemsExpire;
 typedef struct _systemsInput systemsInput;
 typedef struct _systemsPhysics systemsPhysics;
 typedef struct _systemsSpawn systemsSpawn;
+typedef struct _systemsAnimation systemsAnimation;
 
 struct _systemsRemove {
 	gint refCount;
@@ -190,12 +194,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -276,20 +282,22 @@ struct _Game {
 	gboolean running;
 	guint8 keys[256];
 	SDL_Event evt;
-	SDL_Surface* surface;
+	SDL_Renderer* renderer;
 	Factory* world;
 	GList* sprites;
+	sdxFont* font;
+	sdxSprite* fpsSprite;
+	gdouble fps;
+	gdouble elapsed;
+	gint frames;
 	systemsCollision* collision;
 	systemsExpire* expire;
 	systemsInput* input;
 	systemsPhysics* physics;
 	systemsRemove* remove;
 	systemsSpawn* spawn;
-	gint k;
-	gdouble t;
-	gdouble t1;
-	gdouble t2;
-	gdouble t3;
+	systemsAnimation* animate;
+	gdouble freq;
 	entitasEntity* player;
 };
 
@@ -351,8 +359,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);
@@ -373,11 +384,13 @@ void entitas_entity_copy (const entitasEntity* self, entitasEntity* dest);
 void entitas_entity_destroy (entitasEntity* self);
 gboolean entitas_entity_isActive (entitasEntity *self);
 GType pool_get_type (void) G_GNUC_CONST;
+void sdx_font_free (sdxFont* self);
 void systems_collision_free (systemsCollision* self);
 void systems_expire_free (systemsExpire* self);
 void systems_input_free (systemsInput* self);
 void systems_physics_free (systemsPhysics* self);
 void systems_spawn_free (systemsSpawn* self);
+void systems_animation_free (systemsAnimation* self);
 void entitas_world_deleteEntity (entitasWorld* self, entitasEntity* entity);
 
 

@@ -24,7 +24,9 @@ THE SOFTWARE.
 //FOR: SDL2.0 - This is not official, to be futurely changed for the official binding
 //Maintainer: PedroHLC, Txasatonga, Desiderantes
 
-[CCode (cheader_filename = "SDL2/SDL_ttf.h")]
+//  [CCode (cheader_filename = "SDL2/SDL_ttf.h")]
+
+[CCode (cheader_filename = "SDL_ttf.h")]
 namespace SDLTTF {
 	[CCode (cname = "TTF_Linked_Version")]
 	public static unowned SDL.Version linked ();

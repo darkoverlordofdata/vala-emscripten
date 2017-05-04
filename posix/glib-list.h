@@ -195,14 +195,14 @@ static inline GList *_g_list_remove_link (GList *list, GList *link)
       if (link->prev->next == link)
         link->prev->next = link->next;
       else
-        printf ("corrupted double-linked list detected");
+        g_warning ("corrupted double-linked list detected");
     }
   if (link->next)
     {
       if (link->next->prev == link)
         link->next->prev = link->prev;
       else
-        printf ("corrupted double-linked list detected");
+        g_warning ("corrupted double-linked list detected");
     }
 
   if (link == list)

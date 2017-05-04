@@ -34,19 +34,18 @@ namespace systems
 		 * Remove entities that have gone off-screen
 		 */
 		def execute(delta:double)
-			for entity in movable.entities
-				if entity.isActive() 
-					case entity.pool
-						when Pool.ENEMY1
-							if entity.position.y > game.height do factory.deleteEntity(entity)
-							
-						when Pool.ENEMY2
-							if entity.position.y > game.height do factory.deleteEntity(entity)
-							
-						when Pool.ENEMY3
-							if entity.position.y > game.height do factory.deleteEntity(entity)
-							
-						when Pool.BULLET
-							if entity.position.y < 0 do factory.deleteEntity(entity)
+			for entity in movable.entities do if entity.isActive() 
+				case entity.pool
+					when Pool.ENEMY1
+						if entity.position.y > game.height do factory.deleteEntity(entity)
+						
+					when Pool.ENEMY2
+						if entity.position.y > game.height do factory.deleteEntity(entity)
+						
+					when Pool.ENEMY3
+						if entity.position.y > game.height do factory.deleteEntity(entity)
+						
+					when Pool.BULLET
+						if entity.position.y < 0 do factory.deleteEntity(entity)
 
 

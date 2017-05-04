@@ -38,30 +38,56 @@ G_BEGIN_DECLS
 #define GTypeInterface void*
 #define GQuark uintptr_t
 #define g_quark_from_static_string(x) ((GQuark)(size_t)(x))
-#define gfloat float
-#define gdouble double
-#define gchar char
-#define uchar unsigned char
-#define guchar unsigned char
-#define ushort unsigned short
-#define gushort unsigned short
-#define ulong unsigned long
-#define gulong unsigned long
-#define gpointer void*
-#define gboolean int
-#define gint8 char
-#define guint8 unsigned char
-#define gint int
-#define gint16 short
-#define guint16 unsigned short
-#define guint unsigned int
-#define gint32 int
-#define guint32 unsigned int
-#define gint64 long long
-#define guint64 unsigned long long
-#define gunichar guint32
-#define glong long
-#define gdouble double
+
+
+typedef char   gchar;
+typedef short  gshort;
+typedef long   glong;
+typedef int    gint;
+typedef gint   gboolean;
+typedef unsigned char   guchar;
+typedef unsigned short  gushort;
+typedef unsigned long   gulong;
+typedef unsigned int    guint;
+typedef float   gfloat;
+typedef double  gdouble;
+typedef void* gpointer;
+typedef signed char gint8;
+typedef unsigned char guint8;
+typedef signed short gint16;
+typedef unsigned short guint16;
+typedef signed int gint32;
+typedef unsigned int guint32;
+typedef signed long long gint64;
+typedef unsigned long long guint64;
+typedef guint32 gunichar;
+
+// #define gfloat float
+// #define gdouble double
+// #define gchar char
+// #define uchar unsigned char
+// #define guchar unsigned char
+// #define ushort unsigned short
+// #define gushort unsigned short
+//#define ulong unsigned long
+//typedef unsigned long ulong;
+// #define gulong unsigned long
+
+// #define gpointer void*
+// #define gboolean int
+// #define gint8 char
+// #define guint8 unsigned char
+// #define gint int
+// #define gint16 short
+// #define guint16 unsigned short
+// #define guint unsigned int
+// #define gint32 int
+// #define guint32 unsigned int
+// #define gint64 long long
+// #define guint64 unsigned long long
+// #define gunichar guint32
+// #define glong long
+// #define gdouble double
 #define gsize size_t
 #define gssize ssize_t
 #define g_new0(x,y) (x*)calloc (y, sizeof(x));
@@ -76,6 +102,7 @@ G_BEGIN_DECLS
 #define g_enum_register_static(x,y) 0
 
 #define g_critical printf
+#define g_warning printf
 #define TRUE 1
 #define FALSE 0
 #define G_GNUC_CONST
@@ -99,6 +126,14 @@ G_BEGIN_DECLS
 #define G_MAXINT64	G_GINT64_CONSTANT(0x7fffffffffffffff)
 // #define G_MAXUINT64	G_GUINT64_CONSTANT(0xffffffffffffffff)
 #define G_MAXUINT64	0xffffffffffffffff
+
+#define G_E     2.7182818284590452353602874713526624977572470937000
+#define G_LN2   0.69314718055994530941723212145817656807550013436026
+#define G_LN10  2.3025850929940456840179914546843642076011014886288
+#define G_PI    3.1415926535897932384626433832795028841971693993751
+#define G_PI_2  1.5707963267948966192313216916397514420985846996876
+#define G_PI_4  0.78539816339744830961566084581987572104929234984378
+#define G_SQRT2 1.4142135623730950488016887242096980785696718753769
 
 #define G_MAXSIZE	G_MAXUINT64
 

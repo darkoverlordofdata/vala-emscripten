@@ -8,7 +8,10 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include <SDL.h>
+#include <SDL2/SDL_events.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_pixels.h>
+#include <SDL2/SDL_surface.h>
 #include <emscripten.h>
 
 
@@ -58,6 +61,7 @@ typedef struct _entitasPosition entitasPosition;
 typedef struct _entitasScale entitasScale;
 
 #define ENTITAS_TYPE_SPRITE (entitas_sprite_get_type ())
+typedef struct _sdxSprite sdxSprite;
 typedef struct _entitasSprite entitasSprite;
 
 #define ENTITAS_TYPE_TEXT (entitas_text_get_type ())
@@ -76,6 +80,22 @@ typedef struct _entitasEntity entitasEntity;
 #define ENTITAS_TYPE_ISYSTEM (entitas_isystem_get_type ())
 typedef struct _entitasISystem entitasISystem;
 typedef entitasWorld Factory;
+typedef struct _Game Game;
+typedef struct _sdxFont sdxFont;
+typedef struct _systemsCollision systemsCollision;
+typedef struct _systemsExpire systemsExpire;
+typedef struct _systemsInput systemsInput;
+typedef struct _systemsPhysics systemsPhysics;
+typedef struct _systemsRemove systemsRemove;
+typedef struct _systemsSpawn systemsSpawn;
+typedef struct _systemsAnimation systemsAnimation;
+
+#define SDX_TYPE_SCALE (sdx_scale_get_type ())
+typedef struct _sdxScale sdxScale;
+void sdx_sprite_release (sdxSprite* self);
+void sdx_sprite_free (sdxSprite* self);
+sdxSprite* sdx_sprite_addRef (sdxSprite* self);
+#define _sdx_sprite_release0(var) ((var == NULL) ? NULL : (var = (sdx_sprite_release (var), NULL)))
 
 typedef enum  {
 	POOL_BACKGROUND,
@@ -152,12 +172,14 @@ struct _entitasScale {
 };
 
 struct _entitasSprite {
-	SDL_Surface* surface;
+	sdxSprite* sprite;
+	gint width;
+	gint height;
 };
 
 struct _entitasText {
 	gchar* text;
-	SDL_Surface* surface;
+	sdxSprite* sprite;
 };
 
 struct _entitasTint {
@@ -220,8 +242,6 @@ struct _entitasWorld {
 	GList* groups;
 	GList** cache;
 	gint cache_length1;
-	SDL_Surface** surface;
-	gint surface_length1;
 	gint id;
 	entitasISystem* systems[100];
 	gint count;
@@ -229,9 +249,63 @@ struct _entitasWorld {
 	gpointer entityRemoved_target;
 };
 
+struct _Game {
+	gint refCount;
+	gint width;
+	gint height;
+	gdouble mark1;
+	gdouble mark2;
+	gdouble delta;
+	gdouble mouseX;
+	gdouble mouseY;
+	gboolean mouseDown;
+	gboolean running;
+	guint8 keys[256];
+	SDL_Event evt;
+	SDL_Renderer* renderer;
+	Factory* world;
+	GList* sprites;
+	sdxFont* font;
+	sdxSprite* fpsSprite;
+	gdouble fps;
+	gdouble elapsed;
+	gint frames;
+	systemsCollision* collision;
+	systemsExpire* expire;
+	systemsInput* input;
+	systemsPhysics* physics;
+	systemsRemove* remove;
+	systemsSpawn* spawn;
+	systemsAnimation* animate;
+	gdouble freq;
+	entitasEntity* player;
+};
+
+struct _sdxScale {
+	gdouble x;
+	gdouble y;
+};
+
+struct _sdxSprite {
+	gint refCount;
+	SDL_Texture* texture;
+	SDL_Surface* surface;
+	gint width;
+	gint height;
+	gint x;
+	gint y;
+	sdxScale scale;
+	SDL_Color color;
+	gboolean centered;
+	gint layer;
+	gint id;
+	gchar* path;
+	gboolean isText;
+};
 
 
-#define TAU (2.0 * 3.15159)
+
+#define TAU (2.0 * G_PI)
 GType pool_get_type (void) G_GNUC_CONST;
 void entitas_world_free (entitasWorld* self);
 void entitas_group_free (entitasGroup* self);
@@ -276,8 +350,11 @@ GType entitas_scale_get_type (void) G_GNUC_CONST;
 entitasScale* entitas_scale_dup (const entitasScale* self);
 void entitas_scale_free (entitasScale* self);
 GType entitas_sprite_get_type (void) G_GNUC_CONST;
+void sdx_sprite_free (sdxSprite* self);
 entitasSprite* entitas_sprite_dup (const entitasSprite* self);
 void entitas_sprite_free (entitasSprite* self);
+void entitas_sprite_copy (const entitasSprite* self, entitasSprite* dest);
+void entitas_sprite_destroy (entitasSprite* self);
 GType entitas_text_get_type (void) G_GNUC_CONST;
 entitasText* entitas_text_dup (const entitasText* self);
 void entitas_text_free (entitasText* self);
@@ -299,32 +376,46 @@ void entitas_entity_destroy (entitasEntity* self);
 GType entitas_isystem_get_type (void) G_GNUC_CONST;
 entitasISystem* entitas_isystem_dup (const entitasISystem* self);
 void entitas_isystem_free (entitasISystem* self);
-Factory* factory_new (void);
-entitasWorld* entitas_world_new (void);
-entitasEntity* factory_createBase (Factory* self, const gchar* name, gint pool, SDL_Surface* s, gboolean active);
+void game_free (Game* self);
+entitasEntity* factory_createBase (Factory* self, Game* game, const gchar* name, const gchar* path, gint pool, gdouble scale, gboolean active);
+void sdx_font_free (sdxFont* self);
+void systems_collision_free (systemsCollision* self);
+void systems_expire_free (systemsExpire* self);
+void systems_input_free (systemsInput* self);
+void systems_physics_free (systemsPhysics* self);
+void systems_remove_free (systemsRemove* self);
+void systems_spawn_free (systemsSpawn* self);
+void systems_animation_free (systemsAnimation* self);
+sdxSprite* sdx_sprite_new (SDL_Renderer* renderer, const gchar* path, sdxFont* font, SDL_Color* color);
 entitasEntity* entitas_world_createEntity (entitasWorld* self, const gchar* name, gint pool, gboolean active);
 entitasEntity* entitas_entity_addPosition (entitasEntity *self, gdouble x, gdouble y);
 entitasEntity* entitas_entity_addLayer (entitasEntity *self, gint value);
 entitasEntity* entitas_entity_addBounds (entitasEntity *self, gint x, gint y, gint w, gint h);
-entitasEntity* entitas_entity_addSprite (entitasEntity *self, SDL_Surface* surface);
-entitasEntity* factory_createBackground (Factory* self, gint tile);
+GType sdx_scale_get_type (void) G_GNUC_CONST;
+sdxScale* sdx_scale_dup (const sdxScale* self);
+void sdx_scale_free (sdxScale* self);
+entitasEntity* entitas_entity_addScale (entitasEntity *self, gdouble x, gdouble y);
+entitasEntity* entitas_entity_addSprite (entitasEntity *self, sdxSprite* sprite, gint width, gint height);
+entitasEntity* factory_createBackground (Factory* self, Game* game);
 entitasEntity* entitas_entity_setBackground (entitasEntity *self, gboolean value);
 void entityAdded (entitasEntity* e);
-entitasEntity* factory_createPlayer (Factory* self);
-entitasEntity* factory_createBullet (Factory* self);
+entitasEntity* factory_createPlayer (Factory* self, Game* game);
+entitasEntity* factory_createBullet (Factory* self, Game* game);
 entitasEntity* entitas_entity_addTint (entitasEntity *self, gint r, gint g, gint b, gint a);
 entitasEntity* entitas_entity_addExpires (entitasEntity *self, gdouble value);
 entitasEntity* entitas_entity_addHealth (entitasEntity *self, gdouble current, gdouble maximum);
 entitasEntity* entitas_entity_addVelocity (entitasEntity *self, gdouble x, gdouble y);
 entitasEntity* entitas_entity_setBullet (entitasEntity *self, gboolean value);
-entitasEntity* factory_createEnemy1 (Factory* self);
+entitasEntity* factory_createEnemy1 (Factory* self, Game* game);
 entitasEntity* entitas_entity_setEnemy1 (entitasEntity *self, gboolean value);
-entitasEntity* factory_createEnemy2 (Factory* self);
+entitasEntity* factory_createEnemy2 (Factory* self, Game* game);
 entitasEntity* entitas_entity_setEnemy2 (entitasEntity *self, gboolean value);
-entitasEntity* factory_createEnemy3 (Factory* self);
+entitasEntity* factory_createEnemy3 (Factory* self, Game* game);
 entitasEntity* entitas_entity_setEnemy3 (entitasEntity *self, gboolean value);
-entitasEntity* factory_createParticle (Factory* self);
-entitasEntity* entitas_entity_addIndex (entitasEntity *self, gint value, gint limit, gboolean vertical);
+entitasEntity* factory_createExplosion (Factory* self, Game* game);
+entitasEntity* entitas_entity_addTween (entitasEntity *self, gdouble min, gdouble max, gdouble speed, gboolean repeat, gboolean active);
+entitasEntity* factory_createBang (Factory* self, Game* game);
+entitasEntity* factory_createParticle (Factory* self, Game* game);
 void factory_newBullet (Factory* self, gint x, gint y);
 entitasEntity* entitas_entity_setPosition (entitasEntity *self, gdouble x, gdouble y);
 entitasEntity* entitas_entity_setExpires (entitasEntity *self, gdouble value);
@@ -333,11 +424,15 @@ void factory_newEnemy1 (Factory* self, gint x, gint y);
 entitasEntity* entitas_entity_setHealth (entitasEntity *self, gdouble current, gdouble maximum);
 void factory_newEnemy2 (Factory* self, gint x, gint y);
 void factory_newEnemy3 (Factory* self, gint x, gint y);
+void factory_newExplosion (Factory* self, gint x, gint y);
+entitasEntity* entitas_entity_setBounds (entitasEntity *self, gint x, gint y, gint w, gint h);
+entitasEntity* entitas_entity_setTween (entitasEntity *self, gdouble min, gdouble max, gdouble speed, gboolean repeat, gboolean active);
+entitasEntity* entitas_entity_setScale (entitasEntity *self, gdouble x, gdouble y);
+void factory_newBang (Factory* self, gint x, gint y);
 void factory_newParticle (Factory* self, gint x, gint y);
-entitasEntity* entitas_entity_setIndex (entitasEntity *self, gint value, gint limit, gboolean vertical);
 entitasEntity* entitas_entity_setVelocity (entitasEntity *self, gdouble x, gdouble y);
-static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func);
-static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func);
+Factory* factory_new (void);
+entitasWorld* entitas_world_new (void);
 
 
 GType pool_get_type (void) {
@@ -353,84 +448,58 @@ GType pool_get_type (void) {
 
 
 /**
- * Load all the surface resources
- */
-Factory* factory_new (void) {
-	Factory* self;
-	SDL_Surface* _tmp0_ = NULL;
-	SDL_Surface* _tmp1_ = NULL;
-	SDL_Surface* _tmp2_ = NULL;
-	SDL_Surface* _tmp3_ = NULL;
-	SDL_Surface* _tmp4_ = NULL;
-	SDL_Surface* _tmp5_ = NULL;
-	SDL_Surface* _tmp6_ = NULL;
-	SDL_Surface* _tmp7_ = NULL;
-	SDL_Surface* _tmp8_ = NULL;
-	SDL_Surface** _tmp9_ = NULL;
-	self = (Factory*) entitas_world_new ();
-	_tmp0_ = SDL_LoadBMP ("assets/images/background.png");
-	_tmp1_ = SDL_LoadBMP ("assets/images/enemy1.png");
-	_tmp2_ = SDL_LoadBMP ("assets/images/enemy2.png");
-	_tmp3_ = SDL_LoadBMP ("assets/images/enemy3.png");
-	_tmp4_ = SDL_LoadBMP ("assets/images/spaceshipspr.png");
-	_tmp5_ = SDL_LoadBMP ("assets/images/bullet.png");
-	_tmp6_ = SDL_LoadBMP ("assets/images/boom2.png");
-	_tmp7_ = SDL_LoadBMP ("assets/images/boom1.png");
-	_tmp8_ = SDL_LoadBMP ("assets/images/particle.png");
-	_tmp9_ = g_new0 (SDL_Surface*, 9 + 1);
-	_tmp9_[0] = _tmp0_;
-	_tmp9_[1] = _tmp1_;
-	_tmp9_[2] = _tmp2_;
-	_tmp9_[3] = _tmp3_;
-	_tmp9_[4] = _tmp4_;
-	_tmp9_[5] = _tmp5_;
-	_tmp9_[6] = _tmp6_;
-	_tmp9_[7] = _tmp7_;
-	_tmp9_[8] = _tmp8_;
-	((entitasWorld*) self)->surface = (_vala_array_free (((entitasWorld*) self)->surface, ((entitasWorld*) self)->surface_length1, (GDestroyNotify) SDL_FreeSurface), NULL);
-	((entitasWorld*) self)->surface = _tmp9_;
-	((entitasWorld*) self)->surface_length1 = 9;
-	return self;
-}
-
-
-/**
  * The stuff that all entities have
  */
-entitasEntity* factory_createBase (Factory* self, const gchar* name, gint pool, SDL_Surface* s, gboolean active) {
+entitasEntity* factory_createBase (Factory* self, Game* game, const gchar* name, const gchar* path, gint pool, gdouble scale, gboolean active) {
 	entitasEntity* result = NULL;
-	const gchar* _tmp0_ = NULL;
-	gint _tmp1_ = 0;
-	gboolean _tmp2_ = FALSE;
-	entitasEntity* _tmp3_ = NULL;
-	entitasEntity* _tmp4_ = NULL;
+	sdxSprite* sprite = NULL;
+	Game* _tmp0_ = NULL;
+	SDL_Renderer* _tmp1_ = NULL;
+	const gchar* _tmp2_ = NULL;
+	sdxSprite* _tmp3_ = NULL;
+	const gchar* _tmp4_ = NULL;
 	gint _tmp5_ = 0;
-	entitasEntity* _tmp6_ = NULL;
-	SDL_Surface* _tmp7_ = NULL;
-	gint _tmp8_ = 0;
-	SDL_Surface* _tmp9_ = NULL;
-	gint _tmp10_ = 0;
-	entitasEntity* _tmp11_ = NULL;
-	SDL_Surface* _tmp12_ = NULL;
+	gboolean _tmp6_ = FALSE;
+	entitasEntity* _tmp7_ = NULL;
+	entitasEntity* _tmp8_ = NULL;
+	gint _tmp9_ = 0;
+	entitasEntity* _tmp10_ = NULL;
+	gint _tmp11_ = 0;
+	gint _tmp12_ = 0;
 	entitasEntity* _tmp13_ = NULL;
+	gdouble _tmp14_ = 0.0;
+	gdouble _tmp15_ = 0.0;
+	entitasEntity* _tmp16_ = NULL;
+	gint _tmp17_ = 0;
+	gint _tmp18_ = 0;
+	entitasEntity* _tmp19_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (game != NULL, NULL);
 	g_return_val_if_fail (name != NULL, NULL);
-	g_return_val_if_fail (s != NULL, NULL);
-	_tmp0_ = name;
-	_tmp1_ = pool;
-	_tmp2_ = active;
-	_tmp3_ = entitas_world_createEntity ((entitasWorld*) self, _tmp0_, _tmp1_, _tmp2_);
-	_tmp4_ = entitas_entity_addPosition (_tmp3_, (gdouble) 0, (gdouble) 0);
+	g_return_val_if_fail (path != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = _tmp0_->renderer;
+	_tmp2_ = path;
+	_tmp3_ = sdx_sprite_new (_tmp1_, _tmp2_, NULL, NULL);
+	sprite = _tmp3_;
+	_tmp4_ = name;
 	_tmp5_ = pool;
-	_tmp6_ = entitas_entity_addLayer (_tmp4_, _tmp5_);
-	_tmp7_ = s;
-	_tmp8_ = _tmp7_->w;
-	_tmp9_ = s;
-	_tmp10_ = _tmp9_->h;
-	_tmp11_ = entitas_entity_addBounds (_tmp6_, 0, 0, _tmp8_, _tmp10_);
-	_tmp12_ = s;
-	_tmp13_ = entitas_entity_addSprite (_tmp11_, _tmp12_);
-	result = _tmp13_;
+	_tmp6_ = active;
+	_tmp7_ = entitas_world_createEntity ((entitasWorld*) self, _tmp4_, _tmp5_, _tmp6_);
+	_tmp8_ = entitas_entity_addPosition (_tmp7_, (gdouble) 0, (gdouble) 0);
+	_tmp9_ = pool;
+	_tmp10_ = entitas_entity_addLayer (_tmp8_, _tmp9_);
+	_tmp11_ = sprite->width;
+	_tmp12_ = sprite->height;
+	_tmp13_ = entitas_entity_addBounds (_tmp10_, 0, 0, _tmp11_, _tmp12_);
+	_tmp14_ = scale;
+	_tmp15_ = scale;
+	_tmp16_ = entitas_entity_addScale (_tmp13_, _tmp14_, _tmp15_);
+	_tmp17_ = sprite->width;
+	_tmp18_ = sprite->height;
+	_tmp19_ = entitas_entity_addSprite (_tmp16_, sprite, _tmp17_, _tmp18_);
+	result = _tmp19_;
+	_sdx_sprite_release0 (sprite);
 	return result;
 }
 
@@ -438,48 +507,17 @@ entitasEntity* factory_createBase (Factory* self, const gchar* name, gint pool, 
 /**
  * specialize background
  */
-entitasEntity* factory_createBackground (Factory* self, gint tile) {
+entitasEntity* factory_createBackground (Factory* self, Game* game) {
 	entitasEntity* result = NULL;
 	entitasEntity* e = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
-	entitasEntity* _tmp2_ = NULL;
-	entitasEntity* _tmp3_ = NULL;
-	entitasBounds* _tmp4_ = NULL;
-	entitasBounds* _tmp5_ = NULL;
-	gint _tmp6_ = 0;
-	gint _tmp7_ = 0;
-	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_BACKGROUND];
-	_tmp2_ = factory_createBase (self, "background", (gint) POOL_BACKGROUND, _tmp1_, TRUE);
-	_tmp3_ = entitas_entity_setBackground (_tmp2_, TRUE);
-	e = _tmp3_;
-	_tmp4_ = (*e).bounds;
-	_tmp5_ = (*e).bounds;
-	_tmp6_ = (*_tmp5_).w;
-	_tmp7_ = tile;
-	(*_tmp4_).x = _tmp6_ * _tmp7_;
-	entityAdded (e);
-	result = e;
-	return result;
-}
-
-
-entitasEntity* factory_createPlayer (Factory* self) {
-	entitasEntity* result = NULL;
-	entitasEntity* e = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_PLAYER];
-	_tmp2_ = factory_createBase (self, "player", (gint) POOL_PLAYER, _tmp1_, TRUE);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "background", "assets/images/background.png", (gint) POOL_BACKGROUND, 2.0, TRUE);
+	_tmp2_ = entitas_entity_setBackground (_tmp1_, TRUE);
 	e = _tmp2_;
 	entityAdded (e);
 	result = e;
@@ -487,150 +525,203 @@ entitasEntity* factory_createPlayer (Factory* self) {
 }
 
 
-entitasEntity* factory_createBullet (Factory* self) {
+entitasEntity* factory_createPlayer (Factory* self, Game* game) {
+	entitasEntity* result = NULL;
+	entitasEntity* e = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "player", "assets/images/spaceshipspr.png", (gint) POOL_PLAYER, 1.0, TRUE);
+	e = _tmp1_;
+	entityAdded (e);
+	result = e;
+	return result;
+}
+
+
+entitasEntity* factory_createBullet (Factory* self, Game* game) {
 	entitasEntity* result = NULL;
 	entitasEntity* entity = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	entitasEntity* _tmp3_ = NULL;
 	entitasEntity* _tmp4_ = NULL;
 	entitasEntity* _tmp5_ = NULL;
 	entitasEntity* _tmp6_ = NULL;
-	entitasEntity* _tmp7_ = NULL;
-	GList** _tmp8_ = NULL;
-	gint _tmp8__length1 = 0;
+	GList** _tmp7_ = NULL;
+	gint _tmp7__length1 = 0;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_BULLET];
-	_tmp2_ = factory_createBase (self, "bullet", (gint) POOL_BULLET, _tmp1_, FALSE);
-	_tmp3_ = entitas_entity_addTint (_tmp2_, 0xd2, 0xfa, 0, 0xfa);
-	_tmp4_ = entitas_entity_addExpires (_tmp3_, 1.0);
-	_tmp5_ = entitas_entity_addHealth (_tmp4_, (gdouble) 2, (gdouble) 2);
-	_tmp6_ = entitas_entity_addVelocity (_tmp5_, (gdouble) 0, (gdouble) (-800));
-	_tmp7_ = entitas_entity_setBullet (_tmp6_, TRUE);
-	entity = _tmp7_;
-	_tmp8_ = ((entitasWorld*) self)->cache;
-	_tmp8__length1 = ((entitasWorld*) self)->cache_length1;
-	_tmp8_[POOL_BULLET] = g_list_prepend (_tmp8_[POOL_BULLET], entity);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "bullet", "assets/images/bullet.png", (gint) POOL_BULLET, 1.0, FALSE);
+	_tmp2_ = entitas_entity_addTint (_tmp1_, 0xd2, 0xfa, 0, 0xfa);
+	_tmp3_ = entitas_entity_addExpires (_tmp2_, 1.0);
+	_tmp4_ = entitas_entity_addHealth (_tmp3_, (gdouble) 2, (gdouble) 2);
+	_tmp5_ = entitas_entity_addVelocity (_tmp4_, (gdouble) 0, (gdouble) (-800));
+	_tmp6_ = entitas_entity_setBullet (_tmp5_, TRUE);
+	entity = _tmp6_;
+	_tmp7_ = ((entitasWorld*) self)->cache;
+	_tmp7__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp7_[POOL_BULLET] = g_list_prepend (_tmp7_[POOL_BULLET], entity);
 	result = entity;
 	return result;
 }
 
 
-entitasEntity* factory_createEnemy1 (Factory* self) {
+entitasEntity* factory_createEnemy1 (Factory* self, Game* game) {
 	entitasEntity* result = NULL;
 	entitasEntity* entity = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	entitasEntity* _tmp3_ = NULL;
 	entitasEntity* _tmp4_ = NULL;
-	entitasEntity* _tmp5_ = NULL;
-	GList** _tmp6_ = NULL;
-	gint _tmp6__length1 = 0;
+	GList** _tmp5_ = NULL;
+	gint _tmp5__length1 = 0;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_ENEMY1];
-	_tmp2_ = factory_createBase (self, "enemy1", (gint) POOL_ENEMY1, _tmp1_, FALSE);
-	_tmp3_ = entitas_entity_addHealth (_tmp2_, (gdouble) 10, (gdouble) 10);
-	_tmp4_ = entitas_entity_addVelocity (_tmp3_, (gdouble) 0, (gdouble) 40);
-	_tmp5_ = entitas_entity_setEnemy1 (_tmp4_, TRUE);
-	entity = _tmp5_;
-	_tmp6_ = ((entitasWorld*) self)->cache;
-	_tmp6__length1 = ((entitasWorld*) self)->cache_length1;
-	_tmp6_[POOL_ENEMY1] = g_list_prepend (_tmp6_[POOL_ENEMY1], entity);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "enemy1", "assets/images/enemy1.png", (gint) POOL_ENEMY1, 1.0, FALSE);
+	_tmp2_ = entitas_entity_addHealth (_tmp1_, (gdouble) 10, (gdouble) 10);
+	_tmp3_ = entitas_entity_addVelocity (_tmp2_, (gdouble) 0, (gdouble) 40);
+	_tmp4_ = entitas_entity_setEnemy1 (_tmp3_, TRUE);
+	entity = _tmp4_;
+	_tmp5_ = ((entitasWorld*) self)->cache;
+	_tmp5__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp5_[POOL_ENEMY1] = g_list_prepend (_tmp5_[POOL_ENEMY1], entity);
 	result = entity;
 	return result;
 }
 
 
-entitasEntity* factory_createEnemy2 (Factory* self) {
+entitasEntity* factory_createEnemy2 (Factory* self, Game* game) {
 	entitasEntity* result = NULL;
 	entitasEntity* entity = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	entitasEntity* _tmp3_ = NULL;
 	entitasEntity* _tmp4_ = NULL;
-	entitasEntity* _tmp5_ = NULL;
-	GList** _tmp6_ = NULL;
-	gint _tmp6__length1 = 0;
+	GList** _tmp5_ = NULL;
+	gint _tmp5__length1 = 0;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_ENEMY2];
-	_tmp2_ = factory_createBase (self, "enemy2", (gint) POOL_ENEMY2, _tmp1_, FALSE);
-	_tmp3_ = entitas_entity_addHealth (_tmp2_, (gdouble) 20, (gdouble) 20);
-	_tmp4_ = entitas_entity_addVelocity (_tmp3_, (gdouble) 0, (gdouble) 30);
-	_tmp5_ = entitas_entity_setEnemy2 (_tmp4_, TRUE);
-	entity = _tmp5_;
-	_tmp6_ = ((entitasWorld*) self)->cache;
-	_tmp6__length1 = ((entitasWorld*) self)->cache_length1;
-	_tmp6_[POOL_ENEMY2] = g_list_prepend (_tmp6_[POOL_ENEMY2], entity);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "enemy2", "assets/images/enemy2.png", (gint) POOL_ENEMY2, 1.0, FALSE);
+	_tmp2_ = entitas_entity_addHealth (_tmp1_, (gdouble) 20, (gdouble) 20);
+	_tmp3_ = entitas_entity_addVelocity (_tmp2_, (gdouble) 0, (gdouble) 30);
+	_tmp4_ = entitas_entity_setEnemy2 (_tmp3_, TRUE);
+	entity = _tmp4_;
+	_tmp5_ = ((entitasWorld*) self)->cache;
+	_tmp5__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp5_[POOL_ENEMY2] = g_list_prepend (_tmp5_[POOL_ENEMY2], entity);
 	result = entity;
 	return result;
 }
 
 
-entitasEntity* factory_createEnemy3 (Factory* self) {
+entitasEntity* factory_createEnemy3 (Factory* self, Game* game) {
 	entitasEntity* result = NULL;
 	entitasEntity* entity = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	entitasEntity* _tmp3_ = NULL;
 	entitasEntity* _tmp4_ = NULL;
-	entitasEntity* _tmp5_ = NULL;
-	GList** _tmp6_ = NULL;
-	gint _tmp6__length1 = 0;
+	GList** _tmp5_ = NULL;
+	gint _tmp5__length1 = 0;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_ENEMY3];
-	_tmp2_ = factory_createBase (self, "enemy3", (gint) POOL_ENEMY3, _tmp1_, FALSE);
-	_tmp3_ = entitas_entity_addHealth (_tmp2_, (gdouble) 60, (gdouble) 60);
-	_tmp4_ = entitas_entity_addVelocity (_tmp3_, (gdouble) 0, (gdouble) 20);
-	_tmp5_ = entitas_entity_setEnemy3 (_tmp4_, TRUE);
-	entity = _tmp5_;
-	_tmp6_ = ((entitasWorld*) self)->cache;
-	_tmp6__length1 = ((entitasWorld*) self)->cache_length1;
-	_tmp6_[POOL_ENEMY3] = g_list_prepend (_tmp6_[POOL_ENEMY3], entity);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "enemy3", "assets/images/enemy3.png", (gint) POOL_ENEMY3, 1.0, FALSE);
+	_tmp2_ = entitas_entity_addHealth (_tmp1_, (gdouble) 60, (gdouble) 60);
+	_tmp3_ = entitas_entity_addVelocity (_tmp2_, (gdouble) 0, (gdouble) 20);
+	_tmp4_ = entitas_entity_setEnemy3 (_tmp3_, TRUE);
+	entity = _tmp4_;
+	_tmp5_ = ((entitasWorld*) self)->cache;
+	_tmp5__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp5_[POOL_ENEMY3] = g_list_prepend (_tmp5_[POOL_ENEMY3], entity);
 	result = entity;
 	return result;
 }
 
 
-entitasEntity* factory_createParticle (Factory* self) {
+entitasEntity* factory_createExplosion (Factory* self, Game* game) {
 	entitasEntity* result = NULL;
 	entitasEntity* entity = NULL;
-	SDL_Surface** _tmp0_ = NULL;
-	gint _tmp0__length1 = 0;
-	SDL_Surface* _tmp1_ = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	entitasEntity* _tmp3_ = NULL;
 	entitasEntity* _tmp4_ = NULL;
-	entitasEntity* _tmp5_ = NULL;
-	GList** _tmp6_ = NULL;
-	gint _tmp6__length1 = 0;
+	GList** _tmp5_ = NULL;
+	gint _tmp5__length1 = 0;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = ((entitasWorld*) self)->surface;
-	_tmp0__length1 = ((entitasWorld*) self)->surface_length1;
-	_tmp1_ = _tmp0_[POOL_PARTICLE];
-	_tmp2_ = factory_createBase (self, "particlebang", (gint) POOL_PARTICLE, _tmp1_, FALSE);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "explosion", "assets/images/explosion.png", (gint) POOL_EXPLOSION, 0.6, FALSE);
+	_tmp2_ = entitas_entity_addTint (_tmp1_, 0xd2, 0xfa, 0xd2, 0x7f);
+	_tmp3_ = entitas_entity_addExpires (_tmp2_, 0.2);
+	_tmp4_ = entitas_entity_addTween (_tmp3_, 0.006, 0.6, (gdouble) (-3), FALSE, TRUE);
+	entity = _tmp4_;
+	_tmp5_ = ((entitasWorld*) self)->cache;
+	_tmp5__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp5_[POOL_EXPLOSION] = g_list_prepend (_tmp5_[POOL_EXPLOSION], entity);
+	result = entity;
+	return result;
+}
+
+
+entitasEntity* factory_createBang (Factory* self, Game* game) {
+	entitasEntity* result = NULL;
+	entitasEntity* entity = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
+	entitasEntity* _tmp2_ = NULL;
+	entitasEntity* _tmp3_ = NULL;
+	entitasEntity* _tmp4_ = NULL;
+	GList** _tmp5_ = NULL;
+	gint _tmp5__length1 = 0;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "bang", "assets/images/explosion.png", (gint) POOL_BANG, 0.3, FALSE);
+	_tmp2_ = entitas_entity_addTint (_tmp1_, 0xd2, 0xfa, 0xd2, 0x9f);
+	_tmp3_ = entitas_entity_addExpires (_tmp2_, 0.2);
+	_tmp4_ = entitas_entity_addTween (_tmp3_, 0.003, 0.3, (gdouble) (-3), FALSE, TRUE);
+	entity = _tmp4_;
+	_tmp5_ = ((entitasWorld*) self)->cache;
+	_tmp5__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp5_[POOL_BANG] = g_list_prepend (_tmp5_[POOL_BANG], entity);
+	result = entity;
+	return result;
+}
+
+
+entitasEntity* factory_createParticle (Factory* self, Game* game) {
+	entitasEntity* result = NULL;
+	entitasEntity* entity = NULL;
+	Game* _tmp0_ = NULL;
+	entitasEntity* _tmp1_ = NULL;
+	entitasEntity* _tmp2_ = NULL;
+	entitasEntity* _tmp3_ = NULL;
+	entitasEntity* _tmp4_ = NULL;
+	GList** _tmp5_ = NULL;
+	gint _tmp5__length1 = 0;
+	g_return_val_if_fail (self != NULL, NULL);
+	g_return_val_if_fail (game != NULL, NULL);
+	_tmp0_ = game;
+	_tmp1_ = factory_createBase (self, _tmp0_, "particle", "assets/images/star.png", (gint) POOL_PARTICLE, 1.0, FALSE);
+	_tmp2_ = entitas_entity_addTint (_tmp1_, 0xd2, 0xfa, 0xd2, 0xfa);
 	_tmp3_ = entitas_entity_addExpires (_tmp2_, 0.75);
-	_tmp4_ = entitas_entity_addIndex (_tmp3_, 0, 10, FALSE);
-	_tmp5_ = entitas_entity_addVelocity (_tmp4_, (gdouble) 0, (gdouble) 0);
-	entity = _tmp5_;
-	_tmp6_ = ((entitasWorld*) self)->cache;
-	_tmp6__length1 = ((entitasWorld*) self)->cache_length1;
-	_tmp6_[POOL_PARTICLE] = g_list_prepend (_tmp6_[POOL_PARTICLE], entity);
+	_tmp4_ = entitas_entity_addVelocity (_tmp3_, (gdouble) 0, (gdouble) 0);
+	entity = _tmp4_;
+	_tmp5_ = ((entitasWorld*) self)->cache;
+	_tmp5__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp5_[POOL_PARTICLE] = g_list_prepend (_tmp5_[POOL_PARTICLE], entity);
 	result = entity;
 	return result;
 }
@@ -840,6 +931,152 @@ void factory_newEnemy3 (Factory* self, gint x, gint y) {
 }
 
 
+void factory_newExplosion (Factory* self, gint x, gint y) {
+	GList** _tmp0_ = NULL;
+	gint _tmp0__length1 = 0;
+	GList* _tmp1_ = NULL;
+	guint _tmp2_ = 0U;
+	entitasEntity* entity = NULL;
+	GList** _tmp3_ = NULL;
+	gint _tmp3__length1 = 0;
+	GList* _tmp4_ = NULL;
+	gconstpointer _tmp5_ = NULL;
+	GList** _tmp6_ = NULL;
+	gint _tmp6__length1 = 0;
+	GList** _tmp7_ = NULL;
+	gint _tmp7__length1 = 0;
+	GList* _tmp8_ = NULL;
+	GList* _tmp9_ = NULL;
+	gint _tmp10_ = 0;
+	gint _tmp11_ = 0;
+	entitasEntity* _tmp12_ = NULL;
+	entitasBounds* _tmp13_ = NULL;
+	gint _tmp14_ = 0;
+	entitasEntity* _tmp15_ = NULL;
+	entitasBounds* _tmp16_ = NULL;
+	gint _tmp17_ = 0;
+	entitasEntity* _tmp18_ = NULL;
+	entitasEntity* _tmp19_ = NULL;
+	gint _tmp20_ = 0;
+	gint _tmp21_ = 0;
+	entitasEntity* _tmp22_ = NULL;
+	entitasEntity* _tmp23_ = NULL;
+	entitasEntity* _tmp24_ = NULL;
+	entitasEntity* _tmp25_ = NULL;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = ((entitasWorld*) self)->cache;
+	_tmp0__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp1_ = _tmp0_[POOL_EXPLOSION];
+	_tmp2_ = g_list_length (_tmp1_);
+	if (_tmp2_ == ((guint) 0)) {
+		g_print ("out of explosions\n");
+		return;
+	}
+	_tmp3_ = ((entitasWorld*) self)->cache;
+	_tmp3__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp4_ = _tmp3_[POOL_EXPLOSION];
+	_tmp5_ = g_list_nth_data (_tmp4_, (guint) 0);
+	entity = _tmp5_;
+	_tmp6_ = ((entitasWorld*) self)->cache;
+	_tmp6__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp7_ = ((entitasWorld*) self)->cache;
+	_tmp7__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp8_ = _tmp7_[POOL_EXPLOSION];
+	_tmp9_ = g_list_nth (_tmp8_, (guint) 0);
+	_tmp6_[POOL_EXPLOSION] = g_list_remove_link (_tmp6_[POOL_EXPLOSION], _tmp9_);
+	_tmp10_ = x;
+	_tmp11_ = y;
+	_tmp12_ = entity;
+	_tmp13_ = (*_tmp12_).bounds;
+	_tmp14_ = (*_tmp13_).w;
+	_tmp15_ = entity;
+	_tmp16_ = (*_tmp15_).bounds;
+	_tmp17_ = (*_tmp16_).h;
+	_tmp18_ = entitas_entity_setBounds (entity, _tmp10_, _tmp11_, (gint) _tmp14_, (gint) _tmp17_);
+	_tmp19_ = entitas_entity_setTween (_tmp18_, 0.006, 0.6, (gdouble) (-3), FALSE, TRUE);
+	_tmp20_ = x;
+	_tmp21_ = y;
+	_tmp22_ = entitas_entity_setPosition (_tmp19_, (gdouble) _tmp20_, (gdouble) _tmp21_);
+	_tmp23_ = entitas_entity_setScale (_tmp22_, 0.6, 0.6);
+	_tmp24_ = entitas_entity_setExpires (_tmp23_, 0.2);
+	_tmp25_ = entitas_entity_setActive (_tmp24_, TRUE);
+	entityAdded (_tmp25_);
+}
+
+
+void factory_newBang (Factory* self, gint x, gint y) {
+	GList** _tmp0_ = NULL;
+	gint _tmp0__length1 = 0;
+	GList* _tmp1_ = NULL;
+	guint _tmp2_ = 0U;
+	entitasEntity* entity = NULL;
+	GList** _tmp3_ = NULL;
+	gint _tmp3__length1 = 0;
+	GList* _tmp4_ = NULL;
+	gconstpointer _tmp5_ = NULL;
+	GList** _tmp6_ = NULL;
+	gint _tmp6__length1 = 0;
+	GList** _tmp7_ = NULL;
+	gint _tmp7__length1 = 0;
+	GList* _tmp8_ = NULL;
+	GList* _tmp9_ = NULL;
+	gint _tmp10_ = 0;
+	gint _tmp11_ = 0;
+	entitasEntity* _tmp12_ = NULL;
+	entitasBounds* _tmp13_ = NULL;
+	gint _tmp14_ = 0;
+	entitasEntity* _tmp15_ = NULL;
+	entitasBounds* _tmp16_ = NULL;
+	gint _tmp17_ = 0;
+	entitasEntity* _tmp18_ = NULL;
+	entitasEntity* _tmp19_ = NULL;
+	gint _tmp20_ = 0;
+	gint _tmp21_ = 0;
+	entitasEntity* _tmp22_ = NULL;
+	entitasEntity* _tmp23_ = NULL;
+	entitasEntity* _tmp24_ = NULL;
+	entitasEntity* _tmp25_ = NULL;
+	g_return_if_fail (self != NULL);
+	_tmp0_ = ((entitasWorld*) self)->cache;
+	_tmp0__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp1_ = _tmp0_[POOL_BANG];
+	_tmp2_ = g_list_length (_tmp1_);
+	if (_tmp2_ == ((guint) 0)) {
+		g_print ("out of bang\n");
+		return;
+	}
+	_tmp3_ = ((entitasWorld*) self)->cache;
+	_tmp3__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp4_ = _tmp3_[POOL_BANG];
+	_tmp5_ = g_list_nth_data (_tmp4_, (guint) 0);
+	entity = _tmp5_;
+	_tmp6_ = ((entitasWorld*) self)->cache;
+	_tmp6__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp7_ = ((entitasWorld*) self)->cache;
+	_tmp7__length1 = ((entitasWorld*) self)->cache_length1;
+	_tmp8_ = _tmp7_[POOL_BANG];
+	_tmp9_ = g_list_nth (_tmp8_, (guint) 0);
+	_tmp6_[POOL_BANG] = g_list_remove_link (_tmp6_[POOL_BANG], _tmp9_);
+	_tmp10_ = x;
+	_tmp11_ = y;
+	_tmp12_ = entity;
+	_tmp13_ = (*_tmp12_).bounds;
+	_tmp14_ = (*_tmp13_).w;
+	_tmp15_ = entity;
+	_tmp16_ = (*_tmp15_).bounds;
+	_tmp17_ = (*_tmp16_).h;
+	_tmp18_ = entitas_entity_setBounds (entity, _tmp10_, _tmp11_, (gint) _tmp14_, (gint) _tmp17_);
+	_tmp19_ = entitas_entity_setTween (_tmp18_, 0.003, 0.3, (gdouble) (-3), FALSE, TRUE);
+	_tmp20_ = x;
+	_tmp21_ = y;
+	_tmp22_ = entitas_entity_setPosition (_tmp19_, (gdouble) _tmp20_, (gdouble) _tmp21_);
+	_tmp23_ = entitas_entity_setScale (_tmp22_, 0.3, 0.3);
+	_tmp24_ = entitas_entity_setExpires (_tmp23_, 0.2);
+	_tmp25_ = entitas_entity_setActive (_tmp24_, TRUE);
+	entityAdded (_tmp25_);
+}
+
+
 void factory_newParticle (Factory* self, gint x, gint y) {
 	GList** _tmp0_ = NULL;
 	gint _tmp0__length1 = 0;
@@ -857,7 +1094,7 @@ void factory_newParticle (Factory* self, gint x, gint y) {
 	gfloat _tmp8_ = 0.0F;
 	gdouble _tmp9_ = 0.0;
 	gdouble _tmp10_ = 0.0;
-	gint scale = 0;
+	gfloat scale = 0.0F;
 	gfloat _tmp11_ = 0.0F;
 	entitasEntity* entity = NULL;
 	GList** _tmp12_ = NULL;
@@ -873,13 +1110,23 @@ void factory_newParticle (Factory* self, gint x, gint y) {
 	gint _tmp19_ = 0;
 	gint _tmp20_ = 0;
 	entitasEntity* _tmp21_ = NULL;
-	gint _tmp22_ = 0;
-	entitasEntity* _tmp23_ = NULL;
-	gdouble _tmp24_ = 0.0;
-	gdouble _tmp25_ = 0.0;
-	entitasEntity* _tmp26_ = NULL;
+	entitasBounds* _tmp22_ = NULL;
+	gint _tmp23_ = 0;
+	entitasEntity* _tmp24_ = NULL;
+	entitasBounds* _tmp25_ = NULL;
+	gint _tmp26_ = 0;
 	entitasEntity* _tmp27_ = NULL;
-	entitasEntity* _tmp28_ = NULL;
+	gint _tmp28_ = 0;
+	gint _tmp29_ = 0;
+	entitasEntity* _tmp30_ = NULL;
+	gfloat _tmp31_ = 0.0F;
+	gfloat _tmp32_ = 0.0F;
+	entitasEntity* _tmp33_ = NULL;
+	gdouble _tmp34_ = 0.0;
+	gdouble _tmp35_ = 0.0;
+	entitasEntity* _tmp36_ = NULL;
+	entitasEntity* _tmp37_ = NULL;
+	entitasEntity* _tmp38_ = NULL;
 	g_return_if_fail (self != NULL);
 	_tmp0_ = ((entitasWorld*) self)->cache;
 	_tmp0__length1 = ((entitasWorld*) self)->cache_length1;
@@ -902,7 +1149,7 @@ void factory_newParticle (Factory* self, gint x, gint y) {
 	_tmp10_ = sin (_tmp9_);
 	velocityY = _tmp8_ * _tmp10_;
 	_tmp11_ = emscripten_random ();
-	scale = (gint) (_tmp11_ * 10);
+	scale = _tmp11_;
 	_tmp12_ = ((entitasWorld*) self)->cache;
 	_tmp12__length1 = ((entitasWorld*) self)->cache_length1;
 	_tmp13_ = _tmp12_[POOL_PARTICLE];
@@ -917,33 +1164,32 @@ void factory_newParticle (Factory* self, gint x, gint y) {
 	_tmp15_[POOL_PARTICLE] = g_list_remove_link (_tmp15_[POOL_PARTICLE], _tmp18_);
 	_tmp19_ = x;
 	_tmp20_ = y;
-	_tmp21_ = entitas_entity_setPosition (entity, (gdouble) _tmp19_, (gdouble) _tmp20_);
-	_tmp22_ = scale;
-	_tmp23_ = entitas_entity_setIndex (_tmp21_, _tmp22_, 10, FALSE);
-	_tmp24_ = velocityX;
-	_tmp25_ = velocityY;
-	_tmp26_ = entitas_entity_setVelocity (_tmp23_, _tmp24_, _tmp25_);
-	_tmp27_ = entitas_entity_setExpires (_tmp26_, 0.75);
-	_tmp28_ = entitas_entity_setActive (_tmp27_, TRUE);
-	entityAdded (_tmp28_);
+	_tmp21_ = entity;
+	_tmp22_ = (*_tmp21_).bounds;
+	_tmp23_ = (*_tmp22_).w;
+	_tmp24_ = entity;
+	_tmp25_ = (*_tmp24_).bounds;
+	_tmp26_ = (*_tmp25_).h;
+	_tmp27_ = entitas_entity_setBounds (entity, _tmp19_, _tmp20_, (gint) _tmp23_, (gint) _tmp26_);
+	_tmp28_ = x;
+	_tmp29_ = y;
+	_tmp30_ = entitas_entity_setPosition (_tmp27_, (gdouble) _tmp28_, (gdouble) _tmp29_);
+	_tmp31_ = scale;
+	_tmp32_ = scale;
+	_tmp33_ = entitas_entity_setScale (_tmp30_, (gdouble) _tmp31_, (gdouble) _tmp32_);
+	_tmp34_ = velocityX;
+	_tmp35_ = velocityY;
+	_tmp36_ = entitas_entity_setVelocity (_tmp33_, _tmp34_, _tmp35_);
+	_tmp37_ = entitas_entity_setExpires (_tmp36_, 0.75);
+	_tmp38_ = entitas_entity_setActive (_tmp37_, TRUE);
+	entityAdded (_tmp38_);
 }
 
 
-static void _vala_array_destroy (gpointer array, gint array_length, GDestroyNotify destroy_func) {
-	if ((array != NULL) && (destroy_func != NULL)) {
-		int i;
-		for (i = 0; i < array_length; i = i + 1) {
-			if (((gpointer*) array)[i] != NULL) {
-				destroy_func (((gpointer*) array)[i]);
-			}
-		}
-	}
-}
-
-
-static void _vala_array_free (gpointer array, gint array_length, GDestroyNotify destroy_func) {
-	_vala_array_destroy (array, array_length, destroy_func);
-	g_free (array);
+Factory* factory_new (void) {
+	Factory* self;
+	self = (Factory*) entitas_world_new ();
+	return self;
 }
 
 
