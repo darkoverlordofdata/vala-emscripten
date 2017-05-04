@@ -100,10 +100,10 @@ namespace entitas
 		x : double 
 		y : double 
 
-	struct Entity					   /* Core component: */  
-		id		  :  int			   /* sequentially assigned id# */
+	struct Entity					   	/* Core component: */  
+		id		  	: int			   	/* sequentially assigned id# */
 		name		: string			/* display name */
-		pool		: int			   /* pool entities by type */
+		pool		: int			   	/* pool entities by type */
 		mask		: uint64			/* hasComponent bit array */
 		background  : Background?
 		bounds		: Bounds?
@@ -223,8 +223,7 @@ namespace entitas
 			return &this
 
 		def isBullet():bool
-			if this.bullet == null do return false
-			else do return true
+			return (mask & __BULLET__) != 0
 
 		def setEnemy1(value:bool):Entity*
 			if value
@@ -238,8 +237,7 @@ namespace entitas
 			return &this
 
 		def isEnemy1():bool
-			if this.enemy1 == null do return false
-			else do return true
+			return (mask & __ENEMY1__) != 0
 
 		def setEnemy2(value:bool):Entity*
 			if value
@@ -253,8 +251,7 @@ namespace entitas
 			return &this
 
 		def isEnemy2():bool
-			if this.enemy2 == null do return false
-			else do return true
+			return (mask & __ENEMY2__) != 0
 
 		def setEnemy3(value:bool):Entity*
 			if value
@@ -268,8 +265,7 @@ namespace entitas
 			return &this
 
 		def isEnemy3():bool
-			if this.enemy3 == null do return false
-			else do return true
+			return (mask & __ENEMY3__) != 0
 
 		def hasExpires():bool
 			return (mask & __EXPIRES__) != 0

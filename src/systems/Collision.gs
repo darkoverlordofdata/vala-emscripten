@@ -56,7 +56,7 @@ namespace systems
 			if a.health != null
 				var current = a.health.current - 2
 				if current < 0
-					factory.newExplosion((int)a.position.x, (int)a.position.y)
+					factory.newExplosion(x, y)
 					factory.deleteEntity(a)
 				else 
 					a.health.current = current

@@ -1,9 +1,6 @@
 /**
  * Entity Factory
  */
-uses SDL
-uses SDL.Video
-uses SDLImage
 uses Emscripten
 uses entitas
 
@@ -33,6 +30,10 @@ class Factory : World
 	 * The stuff that all entities have
 	 */
 	def createBase(game:Game, name:string, path: string, pool:int, scale:double = 1.0, active:bool = false):Entity*
+		if cache.length == 0
+			cache = new array of List of Entity*[Pool.Count]
+			sdx.Sprite.initialize(Pool.Count)
+	
 		var sprite = new sdx.Sprite(game.renderer, path)
 		return (createEntity(name, pool, active)
 			.addPosition(0, 0)

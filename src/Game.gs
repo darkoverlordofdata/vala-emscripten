@@ -23,15 +23,18 @@ class Game
 	keys		: uint8[256]
 	evt			: SDL.Event
 	renderer	: unowned SDL.Video.Renderer
-	world		: Factory
-	sprites		: List of Entity* = new List of Entity*
 	font 		: sdx.Font
 	fpsSprite	: sdx.Sprite
 	fps			: double
-	elapsed		: double  = 0
-	frames		: int  = 0
+	elapsed		: double = 0
+	frames		: int = 0
+	freq		: double = SDL.Timer.get_performance_frequency()
 
+	world		: Factory
+	sprites		: List of Entity* = new List of Entity*
+	player 		: Entity*
 
+	// systems
 	collision	: Collision
 	expire		: Expire
 	input		: Input
@@ -39,15 +42,9 @@ class Game
 	remove		: Remove
 	spawn		: Spawn
 	animate		: Animation
-
-	// freq		: double = 1000 //SDL.Timer.get_performance_frequency()
-    
-	freq		: double = SDL.Timer.get_performance_frequency()
-
-	player : Entity*
 	
 
-	construct(width:int, height:int, renderer:SDL.Video.Renderer)//, renderer:SDL.Video.Renderer)
+	construct(width:int, height:int, renderer:SDL.Video.Renderer)
 		instance = this
 		this.width = width
 		this.height = height
@@ -82,9 +79,18 @@ class Game
 		world.addSystem(animate.initialize, animate.execute)
 		world.addSystem(expire.initialize, expire.execute)
 		world.addSystem(remove.initialize, remove.execute)
-		
 		world.initialize()
+		// spawn.initialize()
+		// input.initialize()
+		// collision.initialize()
+		// physics.initialize()
+		// animate.initialize()
+		// expire.initialize()
+		// remove.initialize()
+
 		font = new sdx.Font("assets/fonts/OpenDyslexic-Bold.otf", 24)
+		fpsSprite = new sdx.Sprite(renderer, "%2.2f".printf(60), font, {0xd7, 0xeb, 0xd7, 0xfa} )
+		fpsSprite.centered = false
 
 			
 	def start()
@@ -127,6 +133,13 @@ class Game
 		
 		processEvents()
 		world.execute(delta)
+		// spawn.execute(delta)
+		// input.execute(delta)
+		// collision.execute(delta)
+		// physics.execute(delta)
+		// animate.execute(delta)
+		// expire.execute(delta)
+		// remove.execute(delta)
 		
 
 
@@ -139,9 +152,7 @@ class Game
 		renderer.present()
 
 	def drawFps()
-		if fpsSprite != null do fpsSprite = null 
-		fpsSprite = new sdx.Sprite(renderer, "%2.2f".printf(fps), font, {0xd7, 0xeb, 0xd7, 0xfa} )
-		fpsSprite.centered = false
+		fpsSprite.setText(renderer, "%2.2f".printf(fps), font, {0xd7, 0xeb, 0xd7, 0xfa} )
 		fpsSprite.render(renderer, 0, 0)
 
 	def drawEach(e:Entity*):bool
