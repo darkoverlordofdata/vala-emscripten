@@ -12,6 +12,7 @@ namespace systems
 
 		game		: Game
 		factory		: Factory
+		player		: Entity*
 		FireRate	: double = 0.1
 		timeToFire  : double = 0.0
 		shoot	   	: bool
@@ -21,7 +22,7 @@ namespace systems
 			this.factory = factory
 
 		def initialize()
-			pass
+			player = factory.createPlayer()
 
 
 		/**
@@ -30,14 +31,14 @@ namespace systems
 		def execute(delta:double)
 			var x = (int)game.mouseX
 			var y = (int)game.mouseY
-			game.player.setPosition(x, y)
-			game.player.bounds.x = x
-			game.player.bounds.y = y
+			player.setPosition(x, y)
+			player.bounds.x = x
+			player.bounds.y = y
 			shoot = game.mouseDown || (game.keys[122] == 1)
 			if shoot do timeToFire -= delta
 			if timeToFire < 0.0
-				factory.newBullet(x + 27, y + 2)
-				factory.newBullet(x - 27, y + 2)
+				var e1 = factory.newBullet(x + 27, y + 2)
+				var e2 = factory.newBullet(x - 27, y + 2)
 				timeToFire = FireRate
 
 

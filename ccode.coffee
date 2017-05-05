@@ -38,6 +38,11 @@ patch = (file, options) ->
                 dst.push "void #{mangled}_release (#{name}* self);"
                 dst.push "void #{mangled}_free (#{name}* self);"
                 dst.push "#{name}* #{mangled}_addRef (#{name}* self);"
+            else if line.indexOf("void #{mangled}_free (#{name}* self);") is 0
+                flag = true
+                console.log "#{file}: #{name}"
+                dst.push "void #{mangled}_release (#{name}* self);"
+                dst.push "#{name}* #{mangled}_addRef (#{name}* self);"
            dst.push line 
     if flag then fs.writeFileSync(file, dst.join('\n'))
 

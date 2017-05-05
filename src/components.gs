@@ -6,18 +6,18 @@
  
 namespace entitas
 
-	POOL: entitas.Entity[256]
+	//POOL: entitas.Entity[256]
 	
 	[SimpleType]
 	struct Background
 		active : bool
 
-	[SimpleType]
-	struct Bounds
-		x : int 
-		y : int 
-		w : int 
-		h : int 
+	// [SimpleType]
+	// struct Bounds
+	// 	x : int 
+	// 	y : int 
+	// 	w : int 
+	// 	h : int 
 
 	[SimpleType]
 	struct Bullet
@@ -106,7 +106,7 @@ namespace entitas
 		pool		: int			   	/* pool entities by type */
 		mask		: uint64			/* hasComponent bit array */
 		background  : Background?
-		bounds		: Bounds?
+		bounds		: SDL.Video.Rect? //Bounds?
 		bullet		: Bullet?
 		enemy1		: Enemy1?
 		enemy2		: Enemy2?
@@ -377,20 +377,20 @@ namespace entitas
 			return (mask & __POSITION__) != 0
 
 		def addPosition(x:double,y:double):Entity* 
-			if (mask & __POSITION__) != 0 do raise new Exception.EntityAlreadyHasComponent("Position")
+			if (mask & __POSITION__) != 0 do raise new Exception.EntityAlreadyHasComponent("Unable to add Position")
 			this.position = { x, y }
 			mask |= __POSITION__
 			World.onComponentAdded(&this, Components.PositionComponent)
 			return &this
 
 		def setPosition(x:double,y:double):Entity*
-			if (mask & __POSITION__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Position")
+			if (mask & __POSITION__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Unable to set Position")
 			this.position.x = x
 			this.position.y = y
 			return &this
 
 		def removePosition():Entity*
-			if (mask & __POSITION__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Position")
+			if (mask & __POSITION__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Unable to remove Position")
 			this.position = null
 			mask ^= __POSITION__
 			World.onComponentRemoved(&this, Components.PositionComponent)

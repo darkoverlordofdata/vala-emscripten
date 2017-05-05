@@ -27,7 +27,6 @@ namespace systems
 				Components.Enemy3Component
 			}))
 
-
 		/**
 		* physics system
 		* model movement
@@ -35,17 +34,23 @@ namespace systems
 		def execute(delta:double)
 			for var enemy in enemies.entities do if enemy.isActive()
 				for var bullet in bullets.entities do if bullet.isActive()
-					if intersects(ref enemy, ref bullet)
-						handleCollision(ref enemy, ref bullet)
+					if bullet.bounds.is_intersecting(enemy.bounds)
+						// handleCollision(ref enemy, ref bullet)
+						var x = (int)((double)bullet.position.x)
+						var y = (int)((double)bullet.position.y)
+						factory.newBang(x, y)
+						factory.deleteEntity(bullet)
+						for var i=0 to 3 do factory.newParticle(x, y)
+						if enemy.health != null
+							var current = enemy.health.current - 2
+							if current < 0
+								factory.newExplosion(x, y)
+								factory.deleteEntity(enemy)
+							else 
+								enemy.health.current = current
 						return
 
 
-		def intersects(ref a:Entity*, ref b:Entity*):bool 
-			return ((a.bounds.x < b.bounds.x + b.bounds.w) && 
-					(a.bounds.x + a.bounds.w > b.bounds.x) && 
-					(a.bounds.y < b.bounds.y + b.bounds.h) && 
-					(a.bounds.y + a.bounds.h > b.bounds.y)) 
-		
 
 		def handleCollision(ref a:Entity*, ref b:Entity*)
 			var x = (int)((double)a.position.x)

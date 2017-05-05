@@ -32,7 +32,7 @@ class Game
 
 	world		: Factory
 	sprites		: List of Entity* = new List of Entity*
-	player 		: Entity*
+	//player 		: Entity*
 
 	// systems
 	collision	: Collision
@@ -52,17 +52,27 @@ class Game
 
 	def initialize()
 
-		world = new Factory()
+		world = new Factory(Pool.Count)
+		// world.setPool(Pool.BACKGROUND, 1)
+		// world.setPool(Pool.ENEMY1, 30)
+		// world.setPool(Pool.ENEMY2, 20)
+		// world.setPool(Pool.ENEMY3, 10)
+		// world.setPool(Pool.PLAYER, 1)
+		// world.setPool(Pool.BULLET, 40)
+		// world.setPool(Pool.EXPLOSION, 10)
+		// world.setPool(Pool.BANG, 12)
+		// world.setPool(Pool.PARTICLE, 90)
+		// world.setPool(Pool.HUD, 5)
+
+
 		world.setEntityRemovedListener(entityRemoved)
-		world.createBackground(this)
-		player = world.createPlayer(this)
-		for var i=1 to 20 do world.createBullet(this)
-		for var i=1 to 15 do world.createEnemy1(this)
-		for var i=1 to 10 do world.createEnemy2(this)
-		for var i=1 to  5 do world.createEnemy3(this)
-		for var i=1 to 10 do world.createExplosion(this)
-		for var i=1 to 12 do world.createBang(this)
-		for var i=1 to 90 do world.createParticle(this)
+		// for var i=1 to 40 do world.createBullet()
+		// for var i=1 to 30 do world.createEnemy1()
+		// for var i=1 to 20 do world.createEnemy2()
+		// for var i=1 to 10 do world.createEnemy3()
+		// for var i=1 to 10 do world.createExplosion()
+		// for var i=1 to 12 do world.createBang()
+		// for var i=1 to 90 do world.createParticle()
 
 		spawn = new Spawn(this, world)
 		input = new Input(this, world)
@@ -74,19 +84,13 @@ class Game
 
 		world.addSystem(spawn.initialize, spawn.execute)
 		world.addSystem(input.initialize, input.execute)
-		world.addSystem(collision.initialize, collision.execute)
 		world.addSystem(physics.initialize, physics.execute)
+		world.addSystem(collision.initialize, collision.execute)
 		world.addSystem(animate.initialize, animate.execute)
 		world.addSystem(expire.initialize, expire.execute)
 		world.addSystem(remove.initialize, remove.execute)
 		world.initialize()
-		// spawn.initialize()
-		// input.initialize()
-		// collision.initialize()
-		// physics.initialize()
-		// animate.initialize()
-		// expire.initialize()
-		// remove.initialize()
+		world.createBackground()
 
 		font = new sdx.Font("assets/fonts/OpenDyslexic-Bold.otf", 24)
 		fpsSprite = new sdx.Sprite(renderer, "%2.2f".printf(60), font, {0xd7, 0xeb, 0xd7, 0xfa} )
@@ -180,8 +184,8 @@ class Game
 /**
  * add to game.sprites in layer order
  */
-def entityAdded(e:Entity*) 
-	if !e.hasSprite() do return
+def entityAdded(e:Entity*):Entity*
+	if !e.hasSprite() do return e
 
 	var layer = e.layer.value
 	if Game.instance.sprites.length() == 0
@@ -193,15 +197,17 @@ def entityAdded(e:Entity*)
 			assert(s != null)
 			if layer <= s.layer.value
 				Game.instance.sprites.insert(e, i)
-				return
+				return e
 			else
 				i++
 		Game.instance.sprites.append(e)
+	return e
 
 /**
 * remove from game.sprites
 */
-def entityRemoved(e:Entity*) 
+def entityRemoved(e:Entity*):Entity*
 	Game.instance.sprites.remove(e)
+	return e
 
 	

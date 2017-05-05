@@ -31,6 +31,7 @@ SOURCE=build/src/main.gs \
 	build/src/systems/Animation.gs \
 	build/src/entitas/entitas.gs \
 	build/src/entitas/World.gs \
+	build/src/entitas/Stack.gs \
 	build/src/entitas/Group.gs \
 	build/src/entitas/Matcher.gs \
 	build/src/sdx/Font.gs \
@@ -50,6 +51,7 @@ CCODE=build/src/main.c \
 	build/src/systems/Animation.c \
 	build/src/entitas/entitas.c \
 	build/src/entitas/World.c \
+	build/src/entitas/Stack.c \
 	build/src/entitas/Group.c \
 	build/src/entitas/Matcher.c \
 	build/src/sdx/Font.c \

@@ -1,11 +1,9 @@
 
 #### performance
-wow - as fast as desktop c/c++.
+wow - as fast as desktop!.
 
-    0.000045
-    0.000069
-    0.000052
-
+0.000074
+0.000096
 
 
 #### notes
