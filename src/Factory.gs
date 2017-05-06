@@ -3,7 +3,7 @@
  */
 uses Emscripten
 uses entitas
-
+uses systems
 
 const TAU: double = 2.0 * Math.PI 
 enum Pool
@@ -18,7 +18,6 @@ enum Pool
 	PARTICLE
 	HUD
 	Count
-
 
 /**
  * fabricate specialized entities
@@ -46,7 +45,7 @@ class Factory : World
 		if sdx.Sprite.cache.length == 0
 			sdx.Sprite.initialize(Pool.Count)
 	
-		var sprite = new sdx.Sprite(Game.instance.renderer, path)
+		var sprite = new sdx.Sprite(path)
 		return (createEntity(name, pool, active)
 			.addPosition(0, 0)
 			.addLayer(pool)
@@ -54,8 +53,8 @@ class Factory : World
             .addScale(scale, scale)
 			.addSprite(sprite, sprite.width, sprite.height))
 
-	/**
-	 * specialize background
+	/** 
+	 *	factory methods:
 	 */
 	def createBackground():Entity*
 		return entityAdded(createBase("background", "assets/images/background.png", Pool.BACKGROUND, 2.0, true)
@@ -77,7 +76,7 @@ class Factory : World
 			createBase("enemy1", "assets/images/enemy1.png", Pool.ENEMY1)
 			.addHealth(10, 10)
 			.addVelocity(0, 40)
-			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
+			.addText("100%", new sdx.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy1(true))
 
 	def createEnemy2():Entity*
@@ -85,7 +84,7 @@ class Factory : World
 			createBase("enemy2", "assets/images/enemy2.png", Pool.ENEMY2)
 			.addHealth(20, 20)
 			.addVelocity(0, 30)
-			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
+			.addText("100%", new sdx.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy2(true))
 
 	def createEnemy3():Entity*
@@ -93,7 +92,7 @@ class Factory : World
 			createBase("enemy3", "assets/images/enemy3.png", Pool.ENEMY3)
 			.addHealth(60, 60)
 			.addVelocity(0, 20)
-			// .addText("100%", new s2d.Sprite.text("100%", Sdx.app.font, Color.Lime))
+			.addText("100%", new sdx.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy3(true))
 
 	def createExplosion():Entity*
@@ -119,8 +118,11 @@ class Factory : World
 			.addExpires(0.75)
 			.addVelocity(0, 0))
 
-	def newBullet(x:int, y:int):Entity*
-		if cache[Pool.BULLET].size == 0 
+	/**
+	 * Get entity from the pool
+	 */
+	def bullet(x:int, y:int):Entity*
+		if cache[Pool.BULLET].isEmpty() 
 			print "out of bullets"
 			return null
 
@@ -128,8 +130,8 @@ class Factory : World
 			.setPosition(x, y)
 			.setActive(true))
 
-	def newEnemy1(x:int, y:int):Entity*
-		if cache[Pool.ENEMY1].size == 0
+	def enemy1(x:int, y:int):Entity*
+		if cache[Pool.ENEMY1].isEmpty()
 			print "out of enemy1"
 			return null
 
@@ -138,8 +140,8 @@ class Factory : World
 			.setHealth(10, 10)
 			.setActive(true))
 
-	def newEnemy2(x:int, y:int):Entity*
-		if cache[Pool.ENEMY2].size == 0
+	def enemy2(x:int, y:int):Entity*
+		if cache[Pool.ENEMY2].isEmpty()
 			print "out of enemy2"
 			return null
 
@@ -148,8 +150,8 @@ class Factory : World
 			.setHealth(20, 20) 
 			.setActive(true))
 
-	def newEnemy3(x:int, y:int):Entity*
-		if cache[Pool.ENEMY3].size == 0
+	def enemy3(x:int, y:int):Entity*
+		if cache[Pool.ENEMY3].isEmpty()
 			print "out of enemy3"
 			return null
 
@@ -158,8 +160,8 @@ class Factory : World
 			.setHealth(60, 60)
 			.setActive(true))
 
-	def newExplosion(x:int, y:int):Entity*
-		if cache[Pool.EXPLOSION].size == 0
+	def explosion(x:int, y:int):Entity*
+		if cache[Pool.EXPLOSION].isEmpty()
 			print "out of explosions"
 			return null
 
@@ -173,8 +175,8 @@ class Factory : World
 			.setActive(true))
 		return entity
 
-	def newBang(x:int, y:int):Entity*
-		if cache[Pool.BANG].size == 0
+	def bang(x:int, y:int):Entity*
+		if cache[Pool.BANG].isEmpty()
 			print "out of bang"
 			return null
 
@@ -188,8 +190,8 @@ class Factory : World
 			.setActive(true))
 		return entity
 
-	def newParticle(x:int, y:int):Entity*
-		if cache[Pool.PARTICLE].size == 0
+	def particle(x:int, y:int):Entity*
+		if cache[Pool.PARTICLE].isEmpty()
 			print "out of particles"
 			return null
 
@@ -198,6 +200,7 @@ class Factory : World
 		var velocityX = magnitude * Math.cos(radians)
 		var velocityY = magnitude * Math.sin(radians)
 		var scale = emscripten_random()
+
 
 		var entity = cache[Pool.PARTICLE].pop()
 		entityAdded(entity
@@ -208,3 +211,4 @@ class Factory : World
 			.setExpires(0.75)
 			.setActive(true))
 		return entity
+

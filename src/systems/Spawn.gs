@@ -38,15 +38,15 @@ namespace systems
 				case enemy
 					when 1
 						var x = (int)(emscripten_random() * (game.width-70)) + 35
-						factory.newEnemy1(x, -35)
+						factory.enemy1(x, -35)
 						return 1.0
 					when 2
 						var x = (int)(emscripten_random() * (game.width-172)) + 85
-						factory.newEnemy2(x, -85)
+						factory.enemy2(x, -85)
 						return 4.0
 					when 3
 						var x = (int)(emscripten_random() * (game.width-320)) + 160
-						factory.newEnemy3(x, -160)
+						factory.enemy3(x, -160)
 						return 6.0
 					default
 						return 0.0

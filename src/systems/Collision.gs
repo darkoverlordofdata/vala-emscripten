@@ -38,13 +38,13 @@ namespace systems
 						// handleCollision(ref enemy, ref bullet)
 						var x = (int)((double)bullet.position.x)
 						var y = (int)((double)bullet.position.y)
-						factory.newBang(x, y)
+						factory.bang(x, y)
 						factory.deleteEntity(bullet)
-						for var i=0 to 3 do factory.newParticle(x, y)
+						for var i=0 to 3 do factory.particle(x, y)
 						if enemy.health != null
 							var current = enemy.health.current - 2
 							if current < 0
-								factory.newExplosion(x, y)
+								factory.explosion(x, y)
 								factory.deleteEntity(enemy)
 							else 
 								enemy.health.current = current
@@ -52,18 +52,18 @@ namespace systems
 
 
 
-		def handleCollision(ref a:Entity*, ref b:Entity*)
-			var x = (int)((double)a.position.x)
-			var y = (int)((double)a.position.y)
-			factory.newBang(x, y)
-			factory.deleteEntity(b)
-			for var i=0 to 3 do factory.newParticle(x, y)
-			if a.health != null
-				var current = a.health.current - 2
-				if current < 0
-					factory.newExplosion(x, y)
-					factory.deleteEntity(a)
-				else 
-					a.health.current = current
+		// def handleCollision(ref a:Entity*, ref b:Entity*)
+		// 	var x = (int)((double)a.position.x)
+		// 	var y = (int)((double)a.position.y)
+		// 	factory.newBang(x, y)
+		// 	factory.deleteEntity(b)
+		// 	for var i=0 to 3 do factory.newParticle(x, y)
+		// 	if a.health != null
+		// 		var current = a.health.current - 2
+		// 		if current < 0
+		// 			factory.newExplosion(x, y)
+		// 			factory.deleteEntity(a)
+		// 		else 
+		// 			a.health.current = current
 
 

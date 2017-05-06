@@ -2,12 +2,12 @@ uses SDL
 uses SDL.Video
 uses SDLImage
 uses Emscripten
+uses sdx
 
-/**
- *	Initialize gtype
- */
 init 
+
 	pass
+
 /**
  * game
  * 
@@ -17,39 +17,30 @@ init
  */
 def game()
 
-	if SDL.init(SDL.InitFlag.VIDEO | SDL.InitFlag.TIMER | SDL.InitFlag.EVENTS) < 0
-		print "Unable to init SDL %s", SDL.get_error()
-		return 
+	// dp: Posix.Dir?
+	// ep: unowned Posix.DirEnt?
 
-	if SDLImage.init(SDLImage.InitFlags.PNG) < 0
-		print "SDL_image could not initialize %s", SDL.get_error()
-		return 
+	// if (dp = Posix.opendir("./assets")) != null
+	// 	while (ep = Posix.readdir(dp)) != null
+	// 		print "DIR: %s", (string)ep.d_name
 
-	if !SDL.Hint.set_hint(Hint.RENDER_SCALE_QUALITY, "1")	
-		print "Warning: Linear texture filtering not enabled %s", SDL.get_error()
 
-	if SDLTTF.init() == -1
-		print "SDL_ttf could not initialize %s", SDL.get_error()
-		return 
+	// buffer: char[100]
+	// buf: uint8[4096]
+	// var file = Posix.FILE.open("assets/hello.txt", "r")
+	// if file.gets(buffer) != ""
+	// 	print "READ: %s", (string)buffer
 
-	// if SDLMixer.open(22050, SDL.Audio.AudioFormat.S16LSB, 2, 4096) == -1
-	// 	print "SDL_mixer unagle to initialize!"
+	// var path = Posix.realpath("assets/hello.txt", buf)
+	// if path !=""
+	// 	print "REAl: %s", path
 
-	var name = "Shmupwarz"
-	var width = 720
-	var height = 512
+	var f = new sdx.File("assets/hello.txt")
+	print "getName = %s", f.getName()	
+	print "getParent = %s", f.getPath()	
 
-	var window = new Window(name, Window.POS_CENTERED, Window.POS_CENTERED, width, height, WindowFlags.SHOWN)
-	if window == null
-		print "Unable to open window %s", SDL.get_error()
-		return 
-	
-	var renderer = Renderer.create(window, -1, RendererFlags.ACCELERATED | RendererFlags.PRESENTVSYNC)
-	if renderer == null
-		print "Unable to get renderer %s", SDL.get_error()
-		return 
-
-	var game = new Game(width, height, renderer) 
+	var window = sdx.initialize(720, 512, "Shmupwarz")
+	var game = new Game(window) 
 	game.initialize()
 	game.start()
 	emscripten_set_main_loop_arg(mainloop, game, 0, 1)

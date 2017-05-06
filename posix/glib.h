@@ -1,4 +1,5 @@
 /* LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org */
+/* LGPL3 - posixvala glib replacement - 2017 - darkoverlordofdata */
 
 #ifndef _GLIB_H_
 #define _GLIB_H_
@@ -61,6 +62,8 @@ typedef unsigned int guint32;
 typedef signed long long gint64;
 typedef unsigned long long guint64;
 typedef guint32 gunichar;
+
+
 
 // #define gfloat float
 // #define gdouble double
@@ -294,6 +297,7 @@ static inline gboolean (g_atomic_int_dec_and_test) (volatile gint *atomic)
   return is_zero;
 }
 
+static inline void g_object_unref (gpointer object) {}
 
 #include "glib-list.h"
 #include "glib-string.h"

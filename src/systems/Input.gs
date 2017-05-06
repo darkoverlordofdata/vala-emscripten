@@ -29,16 +29,16 @@ namespace systems
 		 * get player input
 		 */
 		def execute(delta:double)
-			var x = (int)game.mouseX
-			var y = (int)game.mouseY
+			var x = (int)sdx.mouseX
+			var y = (int)sdx.mouseY
 			player.setPosition(x, y)
 			player.bounds.x = x
 			player.bounds.y = y
-			shoot = game.mouseDown || (game.keys[122] == 1)
+			shoot = sdx.mouseDown || (sdx.keys[122] == 1)
 			if shoot do timeToFire -= delta
 			if timeToFire < 0.0
-				var e1 = factory.newBullet(x + 27, y + 2)
-				var e2 = factory.newBullet(x - 27, y + 2)
+				factory.bullet(x + 27, y + 2)
+				factory.bullet(x - 27, y + 2)
 				timeToFire = FireRate
 
 
