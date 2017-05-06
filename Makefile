@@ -38,9 +38,10 @@ SOURCE=build/src/main.gs \
 	build/src/entitas/Cache.gs \
 	build/src/entitas/Group.gs \
 	build/src/entitas/Matcher.gs \
+	build/src/util/File.gs \
+	build/src/util/String.gs \
 	build/src/sdx/sdx.gs \
 	build/src/sdx/Color.gs \
-	build/src/sdx/File.gs \
 	build/src/sdx/Font.gs \
 	build/src/sdx/Sprite.gs \
 	build/src/sdx/Surface.gs 
@@ -63,9 +64,10 @@ CCODE=build/src/main.c \
 	build/src/entitas/Cache.c \
 	build/src/entitas/Group.c \
 	build/src/entitas/Matcher.c \
+	build/src/util/File.c \
+	build/src/util/String.c \
 	build/src/sdx/sdx.c \
 	build/src/sdx/Color.c \
-	build/src/sdx/File.c \
 	build/src/sdx/Font.c \
 	build/src/sdx/Sprite.c \
 	build/src/sdx/Surface.c 

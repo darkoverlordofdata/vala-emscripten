@@ -3,6 +3,7 @@ uses SDL.Video
 uses SDLImage
 uses Emscripten
 uses sdx
+uses util
 
 init 
 
@@ -16,28 +17,6 @@ init
  *
  */
 def game()
-
-	// dp: Posix.Dir?
-	// ep: unowned Posix.DirEnt?
-
-	// if (dp = Posix.opendir("./assets")) != null
-	// 	while (ep = Posix.readdir(dp)) != null
-	// 		print "DIR: %s", (string)ep.d_name
-
-
-	// buffer: char[100]
-	// buf: uint8[4096]
-	// var file = Posix.FILE.open("assets/hello.txt", "r")
-	// if file.gets(buffer) != ""
-	// 	print "READ: %s", (string)buffer
-
-	// var path = Posix.realpath("assets/hello.txt", buf)
-	// if path !=""
-	// 	print "REAl: %s", path
-
-	var f = new sdx.File("assets/hello.txt")
-	print "getName = %s", f.getName()	
-	print "getParent = %s", f.getPath()	
 
 	var window = sdx.initialize(720, 512, "Shmupwarz")
 	var game = new Game(window) 
