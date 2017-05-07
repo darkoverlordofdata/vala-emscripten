@@ -1,5 +1,3 @@
-uses SDL
-uses Emscripten
 uses entitas
 namespace systems
 

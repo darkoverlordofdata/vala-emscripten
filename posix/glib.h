@@ -1,5 +1,5 @@
 /* LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org */
-/* LGPL3 - posixvala glib replacement - 2017 - darkoverlordofdata */
+/* LGPL3 - additions - 2017 - darkoverlordofdata */
 
 #ifndef _GLIB_H_
 #define _GLIB_H_

@@ -1,7 +1,6 @@
 /**
  * Entity Factory
  */
-uses Emscripten
 uses entitas
 uses systems
 
@@ -194,11 +193,11 @@ class Factory : World
 			print "out of particles"
 			return null
 
-		var radians = emscripten_random() * TAU
-		var magnitude = emscripten_random() * 200
+		var radians = nextRand() * TAU
+		var magnitude = nextRand() * 200
 		var velocityX = magnitude * Math.cos(radians)
 		var velocityY = magnitude * Math.sin(radians)
-		var scale = emscripten_random()
+		var scale = nextRand()
 
 
 		var entity = cache[Pool.PARTICLE].pop()

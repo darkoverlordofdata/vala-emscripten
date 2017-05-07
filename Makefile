@@ -55,7 +55,7 @@ CCODE=build/src/main.c \
 	build/src/sdx/graphics/Sprite.c \
 	build/src/sdx/graphics/Surface.c 
 
-C1=posixvalac
+C1=valac
 DEPS=--vapidir ./vapis \
 	--pkg posix \
 	--pkg sdl2 \

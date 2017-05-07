@@ -1,13 +1,7 @@
-uses SDL
-uses SDL.Video
-uses SDLImage
-uses Emscripten
 uses sdx
 uses util
+uses Emscripten
 
-init 
-
-	pass
 
 /**
  * game
@@ -19,11 +13,17 @@ init
 def game()
 
 	var window = sdx.initialize(720, 512, "Shmupwarz")
-	var game = new Game(window) 
+	var game = new Game(720, 512) 
 	game.initialize()
 	game.start()
 	emscripten_set_main_loop_arg(mainloop, game, 0, 1)
 	return 
+
+/**
+ *	random number
+ */
+def nextRand(): double
+	return emscripten_random()
 
 /**
  *	profiling data

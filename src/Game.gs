@@ -1,7 +1,6 @@
 /**
  * Game controller 
  */
-uses Emscripten
 uses entitas
 uses systems
 
@@ -24,9 +23,10 @@ class Game : Object
 	score		: ScoreSystem
 
 
-	construct(window: SDL.Video.Window)
+	construct(width: int, height: int)
 		instance = this
-		window.get_size(out width, out height)
+		this.width = width
+		this.height = height
 
 	def initialize()
 
@@ -68,11 +68,10 @@ class Game : Object
 		world.execute(sdx.delta)
 
 	def draw()
-		sdx.renderer.set_draw_color(0, 0, 0, 0)
-		sdx.renderer.clear()
+		sdx.begin()
 		for sprite in display.sprites
 			if sprite.isActive() do display.draw(sprite)
 		sdx.drawFps()
-		sdx.renderer.present()
+		sdx.end()
 
 

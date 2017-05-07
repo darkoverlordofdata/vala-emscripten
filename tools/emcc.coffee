@@ -47,7 +47,8 @@ walk = (namespace = '') ->
             when '.gs' then continue
             when '.vala' then continue
             else # recurse down the tree
-                walk(namespace+(if namespace is "" then "" else '/')+file)
+                folder = namespace+(if namespace is "" then "" else '/')+file
+                if folder.indexOf('.') == -1 then walk(folder)
 
 ##
 ## inject missing forward references

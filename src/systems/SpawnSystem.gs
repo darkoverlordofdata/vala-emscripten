@@ -1,5 +1,3 @@
-uses SDL
-uses Emscripten
 uses entitas
 namespace systems
 
@@ -37,15 +35,15 @@ namespace systems
 			if (d1 < 0.0) 
 				case enemy
 					when 1
-						var x = (int)(emscripten_random() * (game.width-70)) + 35
+						var x = (int)(nextRand() * (game.width-70)) + 35
 						world.enemy1(x, -35)
 						return 1.0
 					when 2
-						var x = (int)(emscripten_random() * (game.width-172)) + 85
+						var x = (int)(nextRand() * (game.width-172)) + 85
 						world.enemy2(x, -85)
 						return 4.0
 					when 3
-						var x = (int)(emscripten_random() * (game.width-320)) + 160
+						var x = (int)(nextRand() * (game.width-320)) + 160
 						world.enemy3(x, -160)
 						return 6.0
 					default

@@ -39,7 +39,8 @@ walk = (namespace = '') ->
 
             when '.c' then continue
             else # recurse down the tree
-                walk(namespace+(if namespace is "" then "" else '/')+file)
+                folder = namespace+(if namespace is "" then "" else '/')+file
+                if folder.indexOf('.') == -1 then walk(folder)
 
 
 do ->
