@@ -41,9 +41,9 @@ npm run entitas -- create -c Health current:double maximum:double
 npm run entitas -- create -c Layer value:int
 npm run entitas -- create -c Position x:double y:double
 npm run entitas -- create -c Scale x:double y:double
-npm run entitas -- create -c Sound sound:sdx.audio.Sound
-npm run entitas -- create -c Sprite sprite:sdx.graphics.s2d.Sprite
-npm run entitas -- create -c Text text:string sprite:sdx.graphics.s2d.Sprite
+#npm run entitas -- create -c Sound sound:sdx.audio.Sound
+npm run entitas -- create -c Sprite sprite:sdx.graphics.Sprite
+npm run entitas -- create -c Text text:string sprite:sdx.graphics.Sprite
 npm run entitas -- create -c Tint r:int g:int b:int a:int
 npm run entitas -- create -c Tween min:double max:double speed:double repeat:bool active:bool
 npm run entitas -- create -c Velocity x:double y:double
@@ -60,11 +60,11 @@ npm run entitas -- create -s PhysicsSystem
 npm run entitas -- create -s RemoveSystem 
 npm run entitas -- create -s SoundSystem 
 npm run entitas -- create -s SpawnSystem 
-npm run entitas -- create -s SpriteManagerSystem 
-npm run entitas -- create -s TweenSystem 
+npm run entitas -- create -s DisplaySystem 
+npm run entitas -- create -s AnimationSystem 
 
 #
 # generate code
 #
-npm run entitas -- generate -p gs -t src/liquid
+#npm run entitas -- generate -p gs -t src/liquid
 

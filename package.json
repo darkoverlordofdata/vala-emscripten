@@ -1,21 +1,23 @@
 {
-  "name": "emvc",
+  "name": "vala-wasm",
   "version": "1.0.0",
-  "description": "valac+emcc",
+  "description": "Compile vala/genie to wasm using emscripten.  Works with SDL2.",
   "main": "index.js",
   "scripts": {
+    "entitas": "entitas"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/darkoverlordofdata/emvc.git"
+    "url": "git+https://github.com/darkoverlordofdata/vala-wasm.git"
   },
   "keywords": [],
   "author": "",
-  "license": "Apache2.0",
+  "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/darkoverlordofdata/emvc/issues"
+    "url": "https://github.com/darkoverlordofdata/vala-wasm/issues"
   },
-  "homepage": "https://github.com/darkoverlordofdata/emvc#readme",
+  "homepage": "https://github.com/darkoverlordofdata/vala-wasm#readme",
   "devDependencies": {
+    "entitas-cli": "^0.2.0"
   }
 }

@@ -1,6 +1,6 @@
 {
   "namespace": "shmupwarz",
-  "src": "src",
+  "src": "test",
   "output": {
     "systems": "systems",
     "Components": "components.gs"
@@ -10,7 +10,6 @@
     "components": 64
   },
   "components": {
-    "Background": false,
     "Bounds": [
       "x:int",
       "y:int",
@@ -28,10 +27,6 @@
       "current:double",
       "maximum:double"
     ],
-    "Hud": false,
-    "Index": [
-      "value:int"
-    ],
     "Layer": [
       "value:int"
     ],
@@ -43,15 +38,12 @@
       "x:double",
       "y:double"
     ],
-    "Sound": [
-      "sound:sdx.audio.Sound"
-    ],
     "Sprite": [
-      "sprite:sdx.graphics.s2d.Sprite"
+      "sprite:sdx.graphics.Sprite"
     ],
     "Text": [
       "text:string",
-      "sprite:sdx.graphics.s2d.Sprite"
+      "sprite:sdx.graphics.Sprite"
     ],
     "Tint": [
       "r:int",
@@ -81,29 +73,8 @@
     "RemoveSystem": [],
     "SoundSystem": [],
     "SpawnSystem": [],
-    "SpriteManagerSystem": [],
-    "TweenSystem": []
+    "DisplaySystem": [],
+    "AnimationSystem": []
   },
-  "entities": {},
-  "flags": {
-    "BACKGROUND": "0x0001",
-    "BOUNDS": "0x0002",
-    "BULLET": "0x0004",
-    "ENEMY1": "0x0008",
-    "ENEMY2": "0x0010",
-    "ENEMY3": "0x0020",
-    "EXPIRES": "0x0040",
-    "HEALTH": "0x0080",
-    "HUD": "0x0100",
-    "INDEX": "0x0200",
-    "LAYER": "0x0400",
-    "POSITION": "0x0800",
-    "SCALE": "0x1000",
-    "SOUND": "0x2000",
-    "SPRITE": "0x4000",
-    "TEXT": "0x8000",
-    "TINT": "0x10000",
-    "TWEEN": "0x20000",
-    "VELOCITY": "0x40000"
-  }
+  "entities": {}
 }
