@@ -7,18 +7,18 @@ namespace systems
 	/**
 	* game systems
 	*/
-	[Pseudo]
-	class Spawn
+	
+	class SpawnSystem : Object
 
 		game		: Game
-		factory		: Factory
+		world		: Factory
 		enemyT1     : double = 1.0
 		enemyT2     : double = 4.0
 		enemyT3     : double = 6.0
 
-		construct(game:Game, factory:Factory)
+		construct(game:Game, world:Factory)
 			this.game = game
-			this.factory = factory
+			this.world = world
 
 		def initialize()
 			pass
@@ -38,15 +38,15 @@ namespace systems
 				case enemy
 					when 1
 						var x = (int)(emscripten_random() * (game.width-70)) + 35
-						factory.newEnemy1(x, -35)
+						world.enemy1(x, -35)
 						return 1.0
 					when 2
 						var x = (int)(emscripten_random() * (game.width-172)) + 85
-						factory.newEnemy2(x, -85)
+						world.enemy2(x, -85)
 						return 4.0
 					when 3
 						var x = (int)(emscripten_random() * (game.width-320)) + 160
-						factory.newEnemy3(x, -160)
+						world.enemy3(x, -160)
 						return 6.0
 					default
 						return 0.0

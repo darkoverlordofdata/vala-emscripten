@@ -1,13 +1,68 @@
 .PHONY: build
-VALAC=posixvalac
+GSCODE=build/src/main.gs \
+	build/src/Game.gs \
+	build/src/components.gs \
+	build/src/Factory.gs \
+	build/src/systems/CollisionSystem.gs \
+	build/src/systems/DisplaySystem.gs \
+	build/src/systems/ExpireSystem.gs \
+	build/src/systems/InputSystem.gs \
+	build/src/systems/PhysicsSystem.gs \
+	build/src/systems/RemoveSystem.gs \
+	build/src/systems/ScoreSystem.gs \
+	build/src/systems/SpawnSystem.gs \
+	build/src/systems/AnimationSystem.gs \
+	build/src/entitas/entitas.gs \
+	build/src/entitas/World.gs \
+	build/src/entitas/Cache.gs \
+	build/src/entitas/Group.gs \
+	build/src/entitas/Matcher.gs \
+	build/src/util/File.gs \
+	build/src/util/String.gs \
+	build/src/sdx/sdx.gs \
+	build/src/sdx/Color.gs \
+	build/src/sdx/Files.gs \
+	build/src/sdx/Font.gs \
+	build/src/sdx/files/FileHandle.gs \
+	build/src/sdx/graphics/Sprite.gs \
+	build/src/sdx/graphics/Surface.gs 
+
+CCODE=build/src/main.c \
+	build/src/Game.c \
+	build/src/components.c \
+	build/src/Factory.c \
+	build/src/systems/CollisionSystem.c \
+	build/src/systems/DisplaySystem.c \
+	build/src/systems/ExpireSystem.c \
+	build/src/systems/InputSystem.c \
+	build/src/systems/PhysicsSystem.c \
+	build/src/systems/RemoveSystem.c \
+	build/src/systems/ScoreSystem.c \
+	build/src/systems/SpawnSystem.c \
+	build/src/systems/AnimationSystem.c  \
+	build/src/entitas/entitas.c \
+	build/src/entitas/World.c \
+	build/src/entitas/Cache.c \
+	build/src/entitas/Group.c \
+	build/src/entitas/Matcher.c \
+	build/src/util/File.c \
+	build/src/util/String.c \
+	build/src/sdx/sdx.c \
+	build/src/sdx/Color.c \
+	build/src/sdx/Files.c \
+	build/src/sdx/Font.c \
+	build/src/sdx/files/FileHandle.c \
+	build/src/sdx/graphics/Sprite.c \
+	build/src/sdx/graphics/Surface.c 
+
+C1=posixvalac
 DEPS=--vapidir ./vapis \
-	--pkg gio-2.0 \
+	--pkg posix \
 	--pkg sdl2 \
 	--pkg SDL2_image \
 	--pkg SDL2_ttf \
 	--pkg SDL2_mixer \
-	--pkg emscripten \
-	--pkg posix
+	--pkg emscripten
 CC=emcc
 INCLUDE=-Iposix 
 RESOURCES=-s USE_SDL=2 \
@@ -18,74 +73,22 @@ RESOURCES=-s USE_SDL=2 \
 
 EXPORTS=-s EXPORTED_FUNCTIONS='["_game"]'
 
-#-I/usr/local/include/SDL2 -I/usr/include/SDL2
+build: clean  all 
 
-SOURCE=build/src/main.gs \
-	build/src/Game.gs \
-	build/src/components.gs \
-	build/src/Factory.gs \
-	build/src/systems/Collision.gs \
-	build/src/systems/Display.gs \
-	build/src/systems/Expire.gs \
-	build/src/systems/Input.gs \
-	build/src/systems/Physics.gs \
-	build/src/systems/Remove.gs \
-	build/src/systems/Score.gs \
-	build/src/systems/Spawn.gs \
-	build/src/systems/Animation.gs \
-	build/src/entitas/entitas.gs \
-	build/src/entitas/World.gs \
-	build/src/entitas/Cache.gs \
-	build/src/entitas/Group.gs \
-	build/src/entitas/Matcher.gs \
-	build/src/util/File.gs \
-	build/src/util/String.gs \
-	build/src/sdx/sdx.gs \
-	build/src/sdx/Color.gs \
-	build/src/sdx/Font.gs \
-	build/src/sdx/Sprite.gs \
-	build/src/sdx/Surface.gs 
-
-CCODE=build/src/main.c \
-	build/src/Game.c \
-	build/src/components.c \
-	build/src/Factory.c \
-	build/src/systems/Collision.c \
-	build/src/systems/Display.c \
-	build/src/systems/Expire.c \
-	build/src/systems/Input.c \
-	build/src/systems/Physics.c \
-	build/src/systems/Remove.c \
-	build/src/systems/Score.c \
-	build/src/systems/Spawn.c \
-	build/src/systems/Animation.c \
-	build/src/entitas/entitas.c \
-	build/src/entitas/World.c \
-	build/src/entitas/Cache.c \
-	build/src/entitas/Group.c \
-	build/src/entitas/Matcher.c \
-	build/src/util/File.c \
-	build/src/util/String.c \
-	build/src/sdx/sdx.c \
-	build/src/sdx/Color.c \
-	build/src/sdx/Font.c \
-	build/src/sdx/Sprite.c \
-	build/src/sdx/Surface.c 
-
-
-build:
+all:
 	cp -rf src build
-	./pseudo.coffee
-	$(VALAC) -C --save-temps --disable-warnings $(DEPS) $(SOURCE)
-	./ccode.coffee
+	tools/valac.coffee
+	$(C1) -C --save-temps --disable-warnings $(DEPS) $(GSCODE)
+	tools/emcc.coffee
 	$(CC) -s WASM=1 $(INCLUDE) -O2 $(RESOURCES) $(EXPORTS) -s ASSERTIONS=1  -o web/shmupwarz.html $(CCODE)
 
 emcc:
 	$(CC) -s WASM=1 $(INCLUDE) -O2 $(RESOURCES) $(EXPORTS) -s ASSERTIONS=1  -o web/shmupwarz.html $(CCODE)
 
 clean:
-	rm -rf web/index.data
-	rm -rf web/index.js
-	rm -rf web/index.wasm
-	rm -rf web/index.html
+	rm -rf build/src
+	rm -rf web/shmupwarz.data
+	rm -rf web/shmupwarz.js
+	rm -rf web/shmupwarz.wasm
+	rm -rf web/shmupwarz.html
 

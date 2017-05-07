@@ -9,8 +9,8 @@ namespace util
      * @see utils.File 
 	 * 
 	 */
-	[Pseudo]
-	class String
+	
+	class String : Object
 
 		buf__: array of char
 

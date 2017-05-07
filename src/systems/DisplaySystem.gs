@@ -7,14 +7,14 @@ uses entitas
 */
 def entityAdded(e:Entity*):Entity*
 	if !e.hasSprite() do return e
-	systems.Display.instance.add(e)
+	systems.DisplaySystem.instance.add(e)
 	return e
 
 /**
 * remove from sprites
 */
 def entityRemoved(e:Entity*):Entity*
-	systems.Display.instance.remove(e)
+	systems.DisplaySystem.instance.remove(e)
 	return e
 
 namespace systems
@@ -23,18 +23,18 @@ namespace systems
 	/**
 	* game systems
 	*/
-	[Pseudo]
-	class Display
+	
+	class DisplaySystem : Object
 
-		instance	: static Display
+		instance	: static DisplaySystem
 		game		: Game
-		factory		: Factory
+		world		: Factory
 		sprites		: List of Entity* = new List of Entity*
 
-		construct(game:Game, factory:Factory)
+		construct(game:Game, world:Factory)
 			instance = this
 			this.game = game
-			this.factory = factory
+			this.world = world
 
 		def initialize()
 			pass

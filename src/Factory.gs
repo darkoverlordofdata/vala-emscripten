@@ -22,7 +22,6 @@ enum Pool
 /**
  * fabricate specialized entities
  */
-[Compact]
 class Factory : World
 
 	construct()
@@ -42,10 +41,10 @@ class Factory : World
 	 * The stuff that all entities have
 	 */
 	def createBase(name:string, path: string, pool:int, scale:double = 1.0, active:bool = false):Entity*
-		if sdx.Sprite.cache.length == 0
-			sdx.Sprite.initialize(Pool.Count)
+		if sdx.graphics.Sprite.cache.length == 0
+			sdx.graphics.Sprite.initialize(Pool.Count)
 	
-		var sprite = new sdx.Sprite(path)
+		var sprite = new sdx.graphics.Sprite(path)
 		return (createEntity(name, pool, active)
 			.addPosition(0, 0)
 			.addLayer(pool)
@@ -76,7 +75,7 @@ class Factory : World
 			createBase("enemy1", "assets/images/enemy1.png", Pool.ENEMY1)
 			.addHealth(10, 10)
 			.addVelocity(0, 40)
-			.addText("100%", new sdx.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
+			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy1(true))
 
 	def createEnemy2():Entity*
@@ -84,7 +83,7 @@ class Factory : World
 			createBase("enemy2", "assets/images/enemy2.png", Pool.ENEMY2)
 			.addHealth(20, 20)
 			.addVelocity(0, 30)
-			.addText("100%", new sdx.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
+			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy2(true))
 
 	def createEnemy3():Entity*
@@ -92,7 +91,7 @@ class Factory : World
 			createBase("enemy3", "assets/images/enemy3.png", Pool.ENEMY3)
 			.addHealth(60, 60)
 			.addVelocity(0, 20)
-			.addText("100%", new sdx.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
+			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy3(true))
 
 	def createExplosion():Entity*

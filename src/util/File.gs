@@ -6,8 +6,8 @@ namespace util
 	 * Simple File handler
 	 * 
 	 */
-	[Pseudo]
-	class File
+	
+	class File : Object
 
 		buf__		: uint8[4096]
 		stat__		: Posix.Stat?

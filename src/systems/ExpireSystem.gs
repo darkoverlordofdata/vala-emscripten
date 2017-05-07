@@ -7,19 +7,19 @@ namespace systems
 	/**
 	* game systems
 	*/
-	[Pseudo]
-	class Expire
+	
+	class ExpireSystem : Object
 
 		game		: Game
-		factory		: Factory
+		world		: Factory
 		expiring	: Group
 
-		construct(game:Game, factory:Factory)
+		construct(game:Game, world:Factory)
 			this.game = game
-			this.factory = factory
+			this.world = world
 
 		def initialize()
-			expiring = factory.getGroup(Matcher.AllOf({Components.ExpiresComponent}))
+			expiring = world.getGroup(Matcher.AllOf({Components.ExpiresComponent}))
 
 
 		/**
@@ -29,6 +29,6 @@ namespace systems
 			for entity in expiring.entities do if entity.isActive() 
 				var exp = entity.expires.value - delta
 				entity.expires.value = exp
-				if entity.expires.value < 0 do factory.deleteEntity(entity)
+				if entity.expires.value < 0 do world.deleteEntity(entity)
 
 

@@ -7,19 +7,19 @@ namespace systems
 	/**
 	* game systems
 	*/
-	[Pseudo]
-	class Animation
+	
+	class AnimationSystem : Object
 
 		game		: Game
-		factory		: Factory
+		world		: Factory
 		tweens		: Group
 
-		construct(game:Game, factory:Factory)
+		construct(game:Game, world:Factory)
 			this.game = game
-			this.factory = factory
+			this.world = world
 
 		def initialize()
-			tweens = factory.getGroup(Matcher.AllOf({Components.TweenComponent}))
+			tweens = world.getGroup(Matcher.AllOf({Components.TweenComponent}))
 
 
 		/**

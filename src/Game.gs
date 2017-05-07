@@ -3,23 +3,25 @@
  */
 uses Emscripten
 uses entitas
+uses systems
 
-[Pseudo]
-class Game
+
+class Game : Object
+
 	instance	: static Game
 	width		: int
 	height		: int
 	world		: Factory
 
-	collision	: systems.Collision
-	expire		: systems.Expire
-	input		: systems.Input
-	physics		: systems.Physics
-	remove		: systems.Remove
-	spawn		: systems.Spawn
-	animate		: systems.Animation
-	display		: systems.Display
-	score		: systems.Score
+	collision	: CollisionSystem
+	expire		: ExpireSystem
+	input		: InputSystem
+	physics		: PhysicsSystem
+	remove		: RemoveSystem
+	spawn		: SpawnSystem
+	animate		: AnimationSystem
+	display		: DisplaySystem
+	score		: ScoreSystem
 
 
 	construct(window: SDL.Video.Window)
@@ -35,15 +37,15 @@ class Game
 		world = new Factory()
 		world.setEntityRemovedListener(entityRemoved)
 
-		spawn = new systems.Spawn(this, world)
-		input = new systems.Input(this, world)
-		collision = new systems.Collision(this, world)
-		physics = new systems.Physics(this, world)
-		expire = new systems.Expire(this, world)
-		remove = new systems.Remove(this, world)
-		animate = new systems.Animation(this, world)
-		display = new systems.Display(this, world)
-		score = new systems.Score(this, world)
+		spawn = new SpawnSystem(this, world)
+		input = new InputSystem(this, world)
+		collision = new CollisionSystem(this, world)
+		physics = new PhysicsSystem(this, world)
+		expire = new ExpireSystem(this, world)
+		remove = new RemoveSystem(this, world)
+		animate = new AnimationSystem(this, world)
+		display = new DisplaySystem(this, world)
+		score = new ScoreSystem(this, world)
 
 		world.addSystem(spawn.initialize, spawn.execute)
 		world.addSystem(input.initialize, input.execute)

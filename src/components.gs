@@ -6,8 +6,6 @@
  
 namespace entitas
 
-	//POOL: entitas.Entity[256]
-	
 	[SimpleType]
 	struct Background
 		active : bool
@@ -72,13 +70,13 @@ namespace entitas
 	// 	sound : SDL.Chunk 
 
 	struct Sprite
-		sprite: sdx.Sprite
+		sprite: sdx.graphics.Sprite
 		width: int
 		height: int
 
 	struct Text
 		text : string 
-		sprite: sdx.Sprite
+		sprite: sdx.graphics.Sprite
 
 	[SimpleType]
 	struct Tint
@@ -444,14 +442,14 @@ namespace entitas
 		def hasSprite():bool
 			return (mask & __SPRITE__) != 0
 
-		def addSprite(sprite:sdx.Sprite, width: int, height: int):Entity* 
+		def addSprite(sprite:sdx.graphics.Sprite, width: int, height: int):Entity* 
 			if (mask & __SPRITE__) != 0 do raise new Exception.EntityAlreadyHasComponent("Sprite")
 			this.sprite = { sprite, width, height }
 			mask |= __SPRITE__
 			World.onComponentAdded(&this, Components.SpriteComponent)
 			return &this
 
-		def setSprite(sprite:sdx.Sprite, width: int, height: int):Entity*
+		def setSprite(sprite:sdx.graphics.Sprite, width: int, height: int):Entity*
 			if (mask & __SPRITE__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Sprite")
 			this.sprite.sprite = sprite
 			this.sprite.width = width
@@ -468,14 +466,14 @@ namespace entitas
 		def hasText():bool
 			return (mask & __TEXT__) != 0
 
-		def addText(text:string,texture:sdx.Sprite):Entity* 
+		def addText(text:string,texture:sdx.graphics.Sprite):Entity* 
 			if (mask & __TEXT__) != 0 do raise new Exception.EntityAlreadyHasComponent("Text")
 			this.text = { text, texture }
 			mask |= __TEXT__
 			World.onComponentAdded(&this, Components.TextComponent)
 			return &this
 
-		def setText(text:string,texture:sdx.Sprite):Entity*
+		def setText(text:string,texture:sdx.graphics.Sprite):Entity*
 			if (mask & __TEXT__) == 0 do raise new Exception.EntityDoesNotHaveComponent("Text")
 			this.text.text = text
 			this.text.sprite = texture

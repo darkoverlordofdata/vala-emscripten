@@ -7,19 +7,19 @@ namespace systems
 	/**
 	* game systems
 	*/
-	[Pseudo]
-	class Physics
+	
+	class PhysicsSystem : Object
 
 		game		: Game
-		factory		: Factory
+		world		: Factory
 		physics		: Group
 
-		construct(game:Game, factory:Factory)
+		construct(game:Game, world:Factory)
 			this.game = game
-			this.factory = factory
+			this.world = world
 
 		def initialize()
-			physics = factory.getGroup(Matcher.AllOf({Components.VelocityComponent}))
+			physics = world.getGroup(Matcher.AllOf({Components.VelocityComponent}))
 
 
 		/**

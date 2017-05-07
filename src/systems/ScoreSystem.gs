@@ -7,8 +7,8 @@ namespace systems
 	/**
 	* game systems
 	*/
-	[Pseudo]
-	class Score
+	
+	class ScoreSystem : Object
 
 		game		: Game
 		world		: Factory
