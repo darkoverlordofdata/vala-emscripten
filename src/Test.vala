@@ -7,6 +7,8 @@ public void test() {
 	var x4 = new Test("a", 45);
 	var x5 = new Test("test", 46);
 	
+	//Queue<Test> qq = new Queue<Test>();
+	
 	HashTable<string, Test> table = new HashTable<string, Test>(str_hash, str_equal);
 
 	table.insert(x1.name, x1);
@@ -16,10 +18,10 @@ public void test() {
 	table.insert(x5.name, x5);
 
 	var z = table.get("frodo");
-	stdout.printf("Found %d\n", z.value);
+	stdout.printf("Found %d\n", z.age);
 
 	table.foreach((key, val) => {
-		stdout.printf ("%s => %d\n", key, val.value);
+		stdout.printf ("%s => %d\n", key, val.age);
 	});
 
 	foreach (string key in table.get_keys ()) {
@@ -32,11 +34,22 @@ public void test() {
 
 public class Test : Object {
 
-	public string name;
-	public int value;
-	public Test(string name, int value) {
-		this.name = name;
-		this.value = value;
+    public int _age = 32;  // underscore prefix to avoid name clash with property
+	public string _name;
+
+    /* emulate readonly property */
+    public int age {
+        get { return _age; }
+        set { ; }
+    }
+    public string name {
+        get { return _name; }
+        set { ; }
+    }
+
+	public Test(string name, int age) {
+		_name = name;
+		_age = age;
 
 	}
 }

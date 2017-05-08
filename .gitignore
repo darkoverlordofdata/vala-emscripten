@@ -1,12 +1,7 @@
 node_modules
-resources.c
-resources.cc
-bin/
 build/
-*~
-*.AppImage
-install/
-build_dir
+.publish/
+web/shmupwarz.*
 # Compiled source #
 ###################
 *.com

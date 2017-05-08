@@ -1,30 +1,31 @@
 /**
  * Entity Factory
  */
-uses entitas
-uses systems
+using entitas;
+using systems;
 
-const TAU: double = 2.0 * Math.PI 
-enum Pool
-	BACKGROUND
-	ENEMY1
-	ENEMY2
-	ENEMY3
-	PLAYER
-	BULLET
-	EXPLOSION
-	BANG
-	PARTICLE
-	HUD
+const double TAU = 2.0 * Math.PI; 
+enum Pool {
+	BACKGROUND,
+	ENEMY1,
+	ENEMY2,
+	ENEMY3,
+	PLAYER,
+	BULLET,
+	EXPLOSION,
+	BANG,
+	PARTICLE,
+	HUD,
 	Count
+}
 
 /**
  * fabricate specialized entities
  */
-class Factory : World
+public class Factory : World {
 
-	construct()
-		super()
+	public Factory() {
+		base();
 		setPool(256, Pool.Count, {
 			Buffer() { pool = Pool.BULLET,      size = 20,  factory = createBullet },
 			Buffer() { pool = Pool.ENEMY1,      size = 15,  factory = createEnemy1 },
@@ -33,180 +34,197 @@ class Factory : World
 			Buffer() { pool = Pool.EXPLOSION,   size = 10,  factory = createExplosion },
 			Buffer() { pool = Pool.BANG,        size = 12,  factory = createBang },
 			Buffer() { pool = Pool.PARTICLE,    size = 100, factory = createParticle }
-		})
-
+		});
+	}
 
 	/**
 	 * The stuff that all entities have
 	 */
-	def createBase(name:string, path: string, pool:int, scale:double = 1.0, active:bool = false):Entity*
-		if sdx.graphics.Sprite.cache.length == 0
-			sdx.graphics.Sprite.initialize(Pool.Count)
+	public Entity* createBase(string name, string path, int pool, double scale = 1.0, bool active = false) {
+		if (sdx.graphics.Sprite.cache.length == 0)
+			sdx.graphics.Sprite.initialize(Pool.Count);
 	
-		var sprite = new sdx.graphics.Sprite(path)
+		var sprite = new sdx.graphics.Sprite(path);
 		return (createEntity(name, pool, active)
 			.addPosition(0, 0)
 			.addLayer(pool)
 			.addBounds(0, 0, sprite.width, sprite.height)
             .addScale(scale, scale)
-			.addSprite(sprite, sprite.width, sprite.height))
-
+			.addSprite(sprite, sprite.width, sprite.height));
+	}
 	/** 
 	 *	factory methods:
 	 */
-	def createBackground():Entity*
+	public Entity* createBackground() {
 		return entityAdded(createBase("background", "assets/images/background.png", Pool.BACKGROUND, 2.0, true)
-			.setBackground(true))
+			.setBackground(true));
+	}
 
-	def createPlayer():Entity*
-		return entityAdded(createBase("player", "assets/images/spaceshipspr.png", Pool.PLAYER, 1.0, true))
+	public Entity* createPlayer() {
+		return entityAdded(createBase("player", "assets/images/spaceshipspr.png", Pool.PLAYER, 1.0, true));
+	}
 
-	def createBullet():Entity*
+	public Entity* createBullet() {
 		return (createBase("bullet", "assets/images/bullet.png", Pool.BULLET)
 			// .addSound(new audio.Sound(Sdx.files.resource("sounds/pew.wav")))
 			.addTint(0xd2, 0xfa, 0, 0xfa)
 			.addHealth(2, 2)
 			.addVelocity(0, -800)
-			.setBullet(true))
+			.setBullet(true));
+	}
 
-	def createEnemy1():Entity*
+	public Entity* createEnemy1() {
 		return (
 			createBase("enemy1", "assets/images/enemy1.png", Pool.ENEMY1)
 			.addHealth(10, 10)
 			.addVelocity(0, 40)
 			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
-			.setEnemy1(true))
+			.setEnemy1(true));
+	}
 
-	def createEnemy2():Entity*
+	public Entity* createEnemy2() {
 		return (
 			createBase("enemy2", "assets/images/enemy2.png", Pool.ENEMY2)
 			.addHealth(20, 20)
 			.addVelocity(0, 30)
 			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
-			.setEnemy2(true))
+			.setEnemy2(true));
+	}
 
-	def createEnemy3():Entity*
+	public Entity* createEnemy3() {
 		return (
 			createBase("enemy3", "assets/images/enemy3.png", Pool.ENEMY3)
 			.addHealth(60, 60)
 			.addVelocity(0, 20)
 			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
-			.setEnemy3(true))
+			.setEnemy3(true));
+	}
 
-	def createExplosion():Entity*
+	public Entity* createExplosion() {
 		return (
 			createBase("explosion", "assets/images/explosion.png", Pool.EXPLOSION, 0.6)
 			// .addSound(new audio.Sound(Sdx.files.resource("sounds/asplode.wav")))
 			.addTint(0xd2, 0xfa, 0xd2, 0x7f)
 			.addExpires(0.2)
-			.addTween(0.006, 0.6, -3, false, true))
+			.addTween(0.006, 0.6, -3, false, true));
+	}
 
-	def createBang():Entity*
+	public Entity* createBang() {
 		return (
 			createBase("bang", "assets/images/explosion.png", Pool.BANG, 0.3)
 			// .addSound(new audio.Sound(Sdx.files.resource("sounds/smallasplode.wav")))
 			.addTint(0xd2, 0xfa, 0xd2, 0x9f)
 			.addExpires(0.2)
-			.addTween(0.003, 0.3, -3, false, true))
+			.addTween(0.003, 0.3, -3, false, true));
+	}
 
-	def createParticle():Entity*
+	public Entity* createParticle() {
 		return (
 			createBase("particle", "assets/images/star.png", Pool.PARTICLE)
 			.addTint(0xd2, 0xfa, 0xd2, 0xfa)
 			.addExpires(0.75)
-			.addVelocity(0, 0))
+			.addVelocity(0, 0));
+	}
 
 	/**
 	 * Get entity from the pool
 	 */
-	def bullet(x:int, y:int):Entity*
-		if cache[Pool.BULLET].isEmpty() 
-			print "out of bullets"
-			return null
-
+	public Entity* bullet(int x, int y) {
+		if (cache[Pool.BULLET].isEmpty()) {
+			stdout.printf("out of bullets\n");
+			return null;
+		}
 		return entityAdded(cache[Pool.BULLET].pop()
 			.setPosition(x, y)
-			.setActive(true))
+			.setActive(true));
+	}
 
-	def enemy1(x:int, y:int):Entity*
-		if cache[Pool.ENEMY1].isEmpty()
-			print "out of enemy1"
-			return null
-
+	public Entity* enemy1(int x, int y) {
+		if (cache[Pool.ENEMY1].isEmpty()) {
+			stdout.printf("out of enemy1\n");
+			return null;
+		}
 		return entityAdded(cache[Pool.ENEMY1].pop()
 			.setPosition(x, y)
 			.setHealth(10, 10)
-			.setActive(true))
+			.setActive(true));
+	}
 
-	def enemy2(x:int, y:int):Entity*
-		if cache[Pool.ENEMY2].isEmpty()
-			print "out of enemy2"
-			return null
-
+	public Entity* enemy2(int x, int y) {
+		if (cache[Pool.ENEMY2].isEmpty()) {
+			stdout.printf("out of enemy2\n");
+			return null;
+		}
 		return entityAdded(cache[Pool.ENEMY2].pop()
 			.setPosition(x, y)
 			.setHealth(20, 20) 
-			.setActive(true))
+			.setActive(true));
+	}
 
-	def enemy3(x:int, y:int):Entity*
-		if cache[Pool.ENEMY3].isEmpty()
-			print "out of enemy3"
-			return null
-
+	public Entity* enemy3(int x, int y) {
+		if (cache[Pool.ENEMY3].isEmpty()) {
+			stdout.printf("out of enemy3\n");
+			return null;
+		}
 		return entityAdded(cache[Pool.ENEMY3].pop()
 			.setPosition(x, y)
 			.setHealth(60, 60)
-			.setActive(true))
+			.setActive(true));
+	}
 
-	def explosion(x:int, y:int):Entity*
-		if cache[Pool.EXPLOSION].isEmpty()
-			print "out of explosions"
-			return null
-
-		var entity = cache[Pool.EXPLOSION].pop()
+	public Entity* explosion(int x, int y) {
+		if (cache[Pool.EXPLOSION].isEmpty()) {
+			stdout.printf("out of explosions\n");
+			return null;
+		}
+		var entity = cache[Pool.EXPLOSION].pop();
 		entityAdded(entity
 			.setBounds(x, y, (int)entity.bounds.w, (int)entity.bounds.h)
 			.setTween(0.006, 0.6, -3, false, true)
 			.setPosition(x, y)
 			.setScale(0.6, 0.6)
 			.setExpires(0.2)
-			.setActive(true))
-		return entity
+			.setActive(true));
+		return entity;
+	}
 
-	def bang(x:int, y:int):Entity*
-		if cache[Pool.BANG].isEmpty()
-			print "out of bang"
-			return null
-
-		var entity = cache[Pool.BANG].pop()
+	public Entity* bang(int x, int y) {
+		if (cache[Pool.BANG].isEmpty()) {
+			stdout.printf("out of bang\n");
+			return null;
+		}
+		var entity = cache[Pool.BANG].pop();
 		entityAdded(entity
 			.setBounds(x, y, (int)entity.bounds.w, (int)entity.bounds.h)
 			.setTween(0.003, 0.3, -3, false, true)
 			.setPosition(x, y)
 			.setScale(0.3, 0.3)
 			.setExpires(0.2)
-			.setActive(true))
-		return entity
+			.setActive(true));
+		return entity;
+	}
 
-	def particle(x:int, y:int):Entity*
-		if cache[Pool.PARTICLE].isEmpty()
-			print "out of particles"
-			return null
+	public Entity* particle(int x, int y) {
+		if (cache[Pool.PARTICLE].isEmpty()) {
+			stdout.printf("out of particles\n");
+			return null;
+		}
+		var radians = nextRand() * TAU;
+		var magnitude = nextRand() * 200;
+		var velocityX = magnitude * Math.cos(radians);
+		var velocityY = magnitude * Math.sin(radians);
+		var scale = nextRand();
 
-		var radians = nextRand() * TAU
-		var magnitude = nextRand() * 200
-		var velocityX = magnitude * Math.cos(radians)
-		var velocityY = magnitude * Math.sin(radians)
-		var scale = nextRand()
 
-
-		var entity = cache[Pool.PARTICLE].pop()
+		var entity = cache[Pool.PARTICLE].pop();
 		entityAdded(entity
 			.setBounds(x, y, (int)entity.bounds.w, (int)entity.bounds.h)
 			.setPosition(x, y)
 			.setScale(scale, scale)
 			.setVelocity(velocityX, velocityY)
 			.setExpires(0.75)
-			.setActive(true))
-		return entity
+			.setActive(true));
+		return entity;
+	}
 
+}
