@@ -23,7 +23,7 @@ module.exports = (file, options) ->
     ##
     #
     #   this is just the genie template pasted in
-    #   need to conver for vala
+    #   need to convert for vala
     #
 
 
@@ -36,46 +36,50 @@ module.exports = (file, options) ->
 
     src = fs.readFileSync(file, 'utf8')
 
-    if /^	class\s+\w*\s*:\s*Object\s*/mg.test src
-        src = src.replace(/^	class\s+(\w*)\s*:\s*(Object)\s*/mg, ($0, $1, $2) ->
+    if /^	public\s+class\s+\w*\s*:\s*Object\s{*/mg.test src
+        src = src.replace(/^	public\s+class\s+(\w*)\s*:\s*(Object)\s*{/mg, ($0, $1, $2) ->
             """
 \t[Compact, CCode ( /** reference counting */
 \t\tref_function = "#{namespace}_#{name}_addRef", 
 \t\tunref_function = "#{namespace}_#{name}_release"
 \t)]
-\tclass #{klass}
-\t\trefCount: int = 1
-\t\tdef addRef() : unowned #{klass}
-\t\t\tGLib.AtomicInt.add (ref refCount, 1)
-\t\t\treturn this
-\t\tdef release() 
-\t\t\tif GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
-\t\tdef extern free()\n\t\t
+\tpublic class #{klass} {
+\t\tpublic int refCount = 1;
+\t\tpublic unowned #{klass} addRef() {
+\t\t\tGLib.AtomicInt.add (ref refCount, 1);
+\t\t\treturn this;
+\t\t}
+\t\tpublic void release() { 
+\t\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+\t\t}
+\t\tpublic extern void free();\n\t\t
         """)
         fs.writeFileSync(file, src)
-    else if /^class\s+\w*\s*:\s*Object\s*/mg.test src
-        src = src.replace(/^class\s+(\w*)\s*:\s*(Object)\s*/mg, ($0, $1, $2) ->
+    else if /^public\s+class\s+\w*\s*:\s*Object\s*{/mg.test src
+        src = src.replace(/^public\s+class\s+(\w*)\s*:\s*(Object)\s*{/mg, ($0, $1, $2) ->
             """
 [Compact, CCode ( /** reference counting */
 	ref_function = "#{name}_addRef", 
 	unref_function = "#{name}_release"
 )]
-class #{klass}
-	refCount: int = 1
-	def addRef() : unowned #{klass}
-		GLib.AtomicInt.add (ref refCount, 1)
-		return this
-	def release() 
-		if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
-	def extern free()\n\t
+public class #{klass} {
+	public int refCount = 1;
+	public unowned #{klass} addRef() {
+		GLib.AtomicInt.add (ref refCount, 1);
+		return this;
+    }
+	public void release() { 
+		if (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+    }
+	public extern void free();\n\t
         """)
         fs.writeFileSync(file, src)
 
-    else if /^	class\s+\w*\s*:\s*\w+\s*/mg.test src
-        src = src.replace(/^	class\s+(\w*)\s*:\s*(\w+)\s*/mg, ($0, $1, $2) ->
+    else if /^	public\s+class\s+\w*\s*:\s*\w+\s*{/mg.test src
+        src = src.replace(/^	public\s+class\s+(\w*)\s*:\s*(\w+)\s*{/mg, ($0, $1, $2) ->
             """
 \t[Compact]
-\tclass #{klass} : #{$2}\n\t\t
+\tpublic class #{klass} : #{$2} {\n\t\t
         """)
         fs.writeFileSync(file, src)
 
@@ -83,7 +87,7 @@ class #{klass}
         src = src.replace(/^class\s+(\w*)\s*:\s*(\w+)\s*/mg, ($0, $1, $2) ->
             """
 [Compact]
-class #{klass} : #{$2}\n\t
+public class #{klass} : #{$2} {\n\t
         """)
         fs.writeFileSync(file, src)
 

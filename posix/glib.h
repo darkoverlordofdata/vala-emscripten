@@ -22,6 +22,27 @@ G_BEGIN_DECLS
 #include <stdint.h>
 #include <limits.h>
 
+#ifndef	FALSE
+#define	FALSE	(0)
+#endif
+
+#ifndef	TRUE
+#define	TRUE	(!FALSE)
+#endif
+
+#undef	MAX
+#define MAX(a, b)  (((a) > (b)) ? (a) : (b))
+
+#undef	MIN
+#define MIN(a, b)  (((a) < (b)) ? (a) : (b))
+
+#undef	ABS
+#define ABS(a)	   (((a) < 0) ? -(a) : (a))
+
+#undef	CLAMP
+#define CLAMP(x, low, high)  (((x) > (high)) ? (high) : (((x) < (low)) ? (low) : (x)))
+
+
 #define G_MINFLOAT	FLT_MIN
 #define G_MAXFLOAT	FLT_MAX
 #define G_MINDOUBLE	DBL_MIN
@@ -62,6 +83,10 @@ typedef unsigned int guint32;
 typedef signed long long gint64;
 typedef unsigned long long guint64;
 typedef guint32 gunichar;
+//typedef const void *gconstpointer;
+typedef void *gconstpointer; // define without 'const' becase valac uses this for non-const values... why?
+typedef signed long gintptr;
+
 
 
 
@@ -98,6 +123,7 @@ typedef guint32 gunichar;
 #define g_renew(x,m,y) (x*)realloc (m, sizeof(x)*y); 
 
 
+#define g_slice_new(x) (x*)calloc (1, sizeof(x));
 #define g_slice_new0(x) (x*)calloc (1, sizeof(x));
 #define g_return_if_fail(x) if(!(x)) return;
 #define g_return_val_if_fail(x,y) if (!(x)) return y;
@@ -106,8 +132,6 @@ typedef guint32 gunichar;
 
 #define g_critical printf
 #define g_warning printf
-#define TRUE 1
-#define FALSE 0
 #define G_GNUC_CONST
 #define GType int
 
@@ -139,6 +163,12 @@ typedef guint32 gunichar;
 #define G_SQRT2 1.4142135623730950488016887242096980785696718753769
 
 #define G_MAXSIZE	G_MAXUINT64
+
+#define GPOINTER_TO_INT(p)	((gint)   (p))
+#define GPOINTER_TO_UINT(p)	((guint)  (p))
+
+#define GINT_TO_POINTER(i)	((gpointer)  (i))
+#define GUINT_TO_POINTER(u)	((gpointer)  (u))
 
 #define G_LIKELY(expr) (expr)
 #define G_UNLIKELY(expr) (expr)
@@ -173,17 +203,19 @@ typedef struct {
 #define g_boxed_type_register_static(x, y, z) g_str_hash(x)
 
 
-
 static inline void g_type_init() {}
 static inline void g_boxed() {}
-typedef gpointer (*GBoxedCopyFunc)(gpointer s);
-typedef void (*GBoxedFreeFunc)(gpointer s);
-typedef void (*GFunc)(gpointer data, gpointer user_data);
-typedef void (*GDestroyNotify)(gpointer data);
+typedef gpointer        (*GBoxedCopyFunc)       (gpointer s);
+typedef void            (*GBoxedFreeFunc)       (gpointer s);
+typedef void            (*GFunc)                (gpointer data, gpointer user_data);
+typedef gboolean        (*GEqualFunc)           (gconstpointer  a, gconstpointer  b);
+typedef void            (*GDestroyNotify)       (gpointer data);
+typedef void            (*GFunc)                (gpointer data, gpointer user_data);
+typedef guint           (*GHashFunc)            (gconstpointer  key);
+typedef void            (*GHFunc)               (gpointer       key,
+                                                 gpointer       value,
+                                                 gpointer       user_data);
 
-//typedef const void *gconstpointer;
-typedef void *gconstpointer; // define without 'const' becase valac uses this for non-const values... why?
-typedef signed long gintptr;
 
 #define G_STRINGIFY(macro_or_string)	G_STRINGIFY_ARG (macro_or_string)
 #define	G_STRINGIFY_ARG(contents)	#contents
@@ -298,10 +330,11 @@ static inline gboolean (g_atomic_int_dec_and_test) (volatile gint *atomic)
 }
 
 static inline void g_object_unref (gpointer object) {}
-
+#include <assert.h>
 #include "glib-list.h"
 #include "glib-string.h"
 #include "glib-error.h"
+#include "glib-hash.h"
 
 G_END_DECLS
 

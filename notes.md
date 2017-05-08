@@ -2,22 +2,14 @@
 #### performance
 wow - as fast as desktop!.
 
-0.000074
-0.000096
 
 
 #### notes
-no data structs (list, dict, array are from libGee), only GList, struct and [].
-however, libGee is implemented in Vala. check dova-core for tips on integrating my own no-g version of libGee
-missing some string handling
 no regex
 no virtual or override
 no interface
 no abstract
-no for..in Iterable requres GObject
 no [Flags] enum
-
-limited generics - only primitive types except for builtins (List)
 
 Basically, anything that relies on GTypeInfo or GObject is broken. 
 Other stuff might work, and might be fixable by suplying missing runtime 
@@ -27,6 +19,7 @@ Other stuff might work, and might be fixable by suplying missing runtime
 one class per file
 namespace mirrors folder structure
 subclases cannot declare instance members
+generics are limited to builtins (List, HashTable)
 
 extend pseudo class Object to trigger reference counting code injection 
 otherwise explicitely declare [Compact] or extend an existing class.
@@ -52,8 +45,8 @@ string.join
 string.joinv
 string.split
 
-various list methods
-
+more GList methods
+HashTable
 
 
 
