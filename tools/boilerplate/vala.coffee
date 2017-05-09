@@ -18,14 +18,6 @@ snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
 ##
 module.exports = (file, options) ->
 
-    ##
-    ##  T O D O  
-    ##
-    #
-    #   this is just the genie template pasted in
-    #   need to convert for vala
-    #
-
 
     klass = options.class
     name = options.name
@@ -36,59 +28,91 @@ module.exports = (file, options) ->
 
     src = fs.readFileSync(file, 'utf8')
 
-    if /^	public\s+class\s+\w*\s*:\s*Object\s{*/mg.test src
-        src = src.replace(/^	public\s+class\s+(\w*)\s*:\s*(Object)\s*{/mg, ($0, $1, $2) ->
+    ##
+    ##  class Name <K,V> : Object {
+    ##
+    if /^(\s*)public\s+class\s+\w*\s*\<\w,\s*\w\>\s*:\s*Object\s{*/mg.test src
+        src = src.replace(/^(\s*)public\s+class\s+(\w*)\s*\<(\w,\s*\w)\>\s*:\s*(Object)\s*{/mg, ($0, $1, $2, $3, $4) ->
+            tab = $1.replace(/\n/mg, "").replace("\t", "")
+            n1 = if namespace is "" then "" else namespace+"_"
             """
-\t[Compact, CCode ( /** reference counting */
-\t\tref_function = "#{namespace}_#{name}_addRef", 
-\t\tunref_function = "#{namespace}_#{name}_release"
-\t)]
-\tpublic class #{klass} {
-\t\tpublic int refCount = 1;
-\t\tpublic unowned #{klass} addRef() {
-\t\t\tGLib.AtomicInt.add (ref refCount, 1);
-\t\t\treturn this;
-\t\t}
-\t\tpublic void release() { 
-\t\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
-\t\t}
-\t\tpublic extern void free();\n\t\t
-        """)
-        fs.writeFileSync(file, src)
-    else if /^public\s+class\s+\w*\s*:\s*Object\s*{/mg.test src
-        src = src.replace(/^public\s+class\s+(\w*)\s*:\s*(Object)\s*{/mg, ($0, $1, $2) ->
-            """
-[Compact, CCode ( /** reference counting */
-	ref_function = "#{name}_addRef", 
-	unref_function = "#{name}_release"
-)]
-public class #{klass} {
-	public int refCount = 1;
-	public unowned #{klass} addRef() {
-		GLib.AtomicInt.add (ref refCount, 1);
-		return this;
-    }
-	public void release() { 
-		if (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
-    }
-	public extern void free();\n\t
+#{tab}[Compact, CCode ( /** reference counting */
+#{tab}\tref_function = "#{n1}#{name}_addRef", 
+#{tab}\tunref_function = "#{n1}#{name}_release"
+#{tab})]
+#{tab}public class #{$2}<#{$3}> {
+#{tab}\tpublic int refCount = 1;
+#{tab}\tpublic unowned #{$2}<#{$3}> addRef() {
+#{tab}\t\tGLib.AtomicInt.add (ref refCount, 1);
+#{tab}\t\treturn this;
+#{tab}\t}
+#{tab}\tpublic void release() { 
+#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+#{tab}\t}
+#{tab}\tpublic extern void free();\n\t\t
         """)
         fs.writeFileSync(file, src)
 
-    else if /^	public\s+class\s+\w*\s*:\s*\w+\s*{/mg.test src
-        src = src.replace(/^	public\s+class\s+(\w*)\s*:\s*(\w+)\s*{/mg, ($0, $1, $2) ->
+    ##
+    ##  class Name <G> : Object {
+    ##
+    else if /^(\s*)public\s+class\s+\w*\s*\<\w\>\s*:\s*Object\s{*/mg.test src
+        src = src.replace(/^(\s*)public\s+class\s+(\w*)\s*\<(\w)\>\s*:\s*(Object)\s*{/mg, ($0, $1, $2, $3, $4) ->
+            tab = $1.replace(/\n/mg, "").replace("\t", "")
+            n1 = if namespace is "" then "" else namespace+"_"
             """
-\t[Compact]
-\tpublic class #{klass} : #{$2} {\n\t\t
+#{tab}[Compact, CCode ( /** reference counting */
+#{tab}\tref_function = "#{n1}#{name}_addRef", 
+#{tab}\tunref_function = "#{n1}#{name}_release"
+#{tab})]
+#{tab}public class #{$2}<#{$3}> {
+#{tab}\tpublic int refCount = 1;
+#{tab}\tpublic unowned #{$2}<#{$3}> addRef() {
+#{tab}\t\tGLib.AtomicInt.add (ref refCount, 1);
+#{tab}\t\treturn this;
+#{tab}\t}
+#{tab}\tpublic void release() { 
+#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+#{tab}\t}
+#{tab}\tpublic extern void free();\n\t\t
         """)
         fs.writeFileSync(file, src)
 
-    else if /^class\s+\w*\s*:\s*\w+\s*/mg.test src
-        src = src.replace(/^class\s+(\w*)\s*:\s*(\w+)\s*/mg, ($0, $1, $2) ->
+    ##
+    ##  class Name : Object {
+    ##
+    else if /^(\s*)public\s+class\s+\w*\s*:\s*Object\s{*/mg.test src
+        src = src.replace(/^(\s*)public\s+class\s+(\w*)\s*:\s*(Object)\s*{/mg, ($0, $1, $2, $3) ->
+            tab = $1.replace(/\n/mg, "").replace("\t", "")
+            n1 = if namespace is "" then "" else namespace+"_"
             """
-[Compact]
-public class #{klass} : #{$2} {\n\t
+#{tab}[Compact, CCode ( /** reference counting */
+#{tab}\tref_function = "#{n1}#{name}_addRef", 
+#{tab}\tunref_function = "#{n1}#{name}_release"
+#{tab})]
+#{tab}public class #{$2} {
+#{tab}\tpublic int refCount = 1;
+#{tab}\tpublic unowned #{$2} addRef() {
+#{tab}\t\tGLib.AtomicInt.add (ref refCount, 1);
+#{tab}\t\treturn this;
+#{tab}\t}
+#{tab}\tpublic void release() { 
+#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+#{tab}\t}
+#{tab}\tpublic extern void free();\n\t\t
         """)
         fs.writeFileSync(file, src)
 
+
+    ##
+    ##  class Name {
+    ##
+    else if /^(\s*)public\s+class\s+\w*\s*:\s*\w+\s*{/mg.test src
+        src = src.replace(/^(\s*)public\s+class\s+(\w*)\s*:\s*(\w+)\s*{/mg, ($0, $1, $2, $3) ->
+            tab = $1.replace(/\n/mg, "").replace("\t", "")
+            """
+#{tab}[Compact]
+#{tab}public class #{$2} : #{$3} {\n#{tab}\t
+        """)
+        fs.writeFileSync(file, src)
 

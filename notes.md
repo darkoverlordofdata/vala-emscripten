@@ -4,12 +4,13 @@ wow - as fast as desktop!.
 
 #### notes
 vala syntax works better:
-    properties work (genies doesn't)
-    can also simulate readonly properties
+    readonly properties
     can use _ in variable name 1st position
     
 
 ### oop limitations
+
+Compact classes are limited:
 
 no regex
 no virtual or override
@@ -31,7 +32,7 @@ otherwise explicitely declare [Compact] or extend an existing class.
 to replace an interface, make a struct of delegates
 
 ### fixed
-
+basically, I need to fullfill the GIDL: https://github.com/GNOME/vala/blob/master/vapi/glib-2.0.vapi
 array concat:
 
     var x = array of int[0]
@@ -49,7 +50,9 @@ string.join
 string.joinv
 string.split
 
-more GList methods
+GList
+SList
+Queue
 HashTable
 
 

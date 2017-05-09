@@ -205,8 +205,6 @@ typedef struct {
 
 static inline void g_type_init() {}
 static inline void g_boxed() {}
-typedef gint            (*GCompareFunc)         (gconstpointer  a, gconstpointer  b);
-typedef gint            (*GCompareDataFunc)     (gconstpointer  a, gconstpointer  b, gpointer user_data);
 typedef gpointer        (*GBoxedCopyFunc)       (gpointer s);
 typedef void            (*GBoxedFreeFunc)       (gpointer s);
 typedef void            (*GFunc)                (gpointer data, gpointer user_data);
@@ -214,8 +212,9 @@ typedef gboolean        (*GEqualFunc)           (gconstpointer  a, gconstpointer
 typedef void            (*GDestroyNotify)       (gpointer data);
 typedef void            (*GFunc)                (gpointer data, gpointer user_data);
 typedef guint           (*GHashFunc)            (gconstpointer  key);
-typedef void            (*GHFunc)               (gpointer key, gpointer  value, gpointer user_data);
-typedef gpointer	      (*GCopyFunc)            (gconstpointer  src, gpointer       data);
+typedef void            (*GHFunc)               (gpointer       key,
+                                                 gpointer       value,
+                                                 gpointer       user_data);
 
 
 #define G_STRINGIFY(macro_or_string)	G_STRINGIFY_ARG (macro_or_string)
@@ -306,35 +305,37 @@ static inline gpointer g_malloc_n (gsize n_blocks, gsize n_block_bytes)
 
 #define GLIB_CHECK_VERSION(m,n,o) TRUE
 
-static inline gint (g_atomic_int_add) (volatile gint *atomic, gint val)
+static inline gint
+(g_atomic_int_add) (volatile gint *atomic, gint val)
 {
   gint oldval;
 
+  // pthread_mutex_lock (&g_atomic_lock);
   oldval = *atomic;
   *atomic = oldval + val;
+  // pthread_mutex_unlock (&g_atomic_lock);
 
   return oldval;
-}
-static inline void (g_atomic_int_inc) (volatile gint *atomic)
-{
-  (*atomic)++;
 }
 
 static inline gboolean (g_atomic_int_dec_and_test) (volatile gint *atomic)
 {
   gboolean is_zero;
+
+  // pthread_mutex_lock (&g_atomic_lock);
   is_zero = --(*atomic) == 0;
+  // pthread_mutex_unlock (&g_atomic_lock);
+
   return is_zero;
 }
 
-
+static inline void g_object_unref (gpointer object) {}
 #include <assert.h>
 #include "glib-list.h"
-#include "glib-slist.h"
 #include "glib-string.h"
 #include "glib-error.h"
 #include "glib-hash.h"
-#include "glib-que.h"
+//#include "glib-que.h"
 
 G_END_DECLS
 

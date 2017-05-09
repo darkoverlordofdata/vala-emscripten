@@ -60,3 +60,12 @@ public void mainloop(void* arg) {
 	game->draw();
 
 }
+
+
+//  [Compact]
+//  public class Items<G> {
+//  	public string _name;
+//  	public Items(string name) {
+//  		_name = name;
+//  	}
+//  }

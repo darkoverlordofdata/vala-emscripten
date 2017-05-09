@@ -29,7 +29,7 @@ namespace entitas
 				var iSize = buffers[i].size
 				cache[iPool] = new Cache() //iSize) 
 				for var k=1 to iSize
-					cache[iPool].push(buffers[i].factory())
+					cache[iPool].enque(buffers[i].factory())
 
 				
 		def addSystem(initialize: SystemInitialize, execute: SystemExecute)
@@ -57,7 +57,7 @@ namespace entitas
 		*/		
 		def deleteEntity(entity:Entity*)
 			entity.setActive(false)
-			cache[entity.pool].push(entity)
+			cache[entity.pool].enque(entity)
 			entityRemoved(entity)
 
 		/**

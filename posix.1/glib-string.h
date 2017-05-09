@@ -19,16 +19,16 @@ static inline const gchar* g_utf8_next_char (const gchar *s) {
 	return NULL;
 }
 
-// static inline guint g_str_hash(const gpointer v) {
-// 	const char *str = v;
-// 	guint hash = 5381;
-// 	gchar c;
+static inline guint g_str_hash(const gpointer v) {
+	const char *str = v;
+	guint hash = 5381;
+	gchar c;
 
-// 	while ((c = *str++))
-// 		hash = ((hash << 5) + hash) + c;
+	while ((c = *str++))
+		hash = ((hash << 5) + hash) + c;
 
-// 	return hash;
-// }
+	return hash;
+}
 
 static inline char *g_strdup_printf(const char *fmt, ...) {
 	unsigned int length;

@@ -28,11 +28,11 @@ namespace entitas
 				return
 			items[index] = entity
 
-		def push(entity: Entity*)
+		def enque(entity: Entity*)
 			if size >= items.length do grow(items.length*2)
 			items[size++] = entity
 
-		def pop():Entity*
+		def deque():Entity*
 			if size <= 0
 				print "Unable to pop from queue"
 				return null

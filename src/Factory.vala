@@ -134,7 +134,7 @@ public class Factory : World {
 			stdout.printf("out of bullets\n");
 			return null;
 		}
-		return entityAdded(cache[Pool.BULLET].pop()
+		return entityAdded(cache[Pool.BULLET].deque()
 			.setPosition(x, y)
 			.setActive(true));
 	}
@@ -144,7 +144,7 @@ public class Factory : World {
 			stdout.printf("out of enemy1\n");
 			return null;
 		}
-		return entityAdded(cache[Pool.ENEMY1].pop()
+		return entityAdded(cache[Pool.ENEMY1].deque()
 			.setPosition(x, y)
 			.setHealth(10, 10)
 			.setActive(true));
@@ -155,7 +155,7 @@ public class Factory : World {
 			stdout.printf("out of enemy2\n");
 			return null;
 		}
-		return entityAdded(cache[Pool.ENEMY2].pop()
+		return entityAdded(cache[Pool.ENEMY2].deque()
 			.setPosition(x, y)
 			.setHealth(20, 20) 
 			.setActive(true));
@@ -166,7 +166,7 @@ public class Factory : World {
 			stdout.printf("out of enemy3\n");
 			return null;
 		}
-		return entityAdded(cache[Pool.ENEMY3].pop()
+		return entityAdded(cache[Pool.ENEMY3].deque()
 			.setPosition(x, y)
 			.setHealth(60, 60)
 			.setActive(true));
@@ -177,7 +177,7 @@ public class Factory : World {
 			stdout.printf("out of explosions\n");
 			return null;
 		}
-		var entity = cache[Pool.EXPLOSION].pop();
+		var entity = cache[Pool.EXPLOSION].deque();
 		entityAdded(entity
 			.setBounds(x, y, (int)entity.bounds.w, (int)entity.bounds.h)
 			.setTween(0.006, 0.6, -3, false, true)
@@ -193,7 +193,7 @@ public class Factory : World {
 			stdout.printf("out of bang\n");
 			return null;
 		}
-		var entity = cache[Pool.BANG].pop();
+		var entity = cache[Pool.BANG].deque();
 		entityAdded(entity
 			.setBounds(x, y, (int)entity.bounds.w, (int)entity.bounds.h)
 			.setTween(0.003, 0.3, -3, false, true)
@@ -216,7 +216,7 @@ public class Factory : World {
 		var scale = nextRand();
 
 
-		var entity = cache[Pool.PARTICLE].pop();
+		var entity = cache[Pool.PARTICLE].deque();
 		entityAdded(entity
 			.setBounds(x, y, (int)entity.bounds.w, (int)entity.bounds.h)
 			.setPosition(x, y)

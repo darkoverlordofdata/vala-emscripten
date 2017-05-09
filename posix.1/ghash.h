@@ -15,110 +15,11 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _GLIB_HASH_H_
-#define _GLIB_HASH_H_
+#ifndef _HASH_H_
+#define _HASH_H_
 
 
 typedef struct _GHashTable GHashTable;
-typedef gboolean  (*GHRFunc)  (gpointer  key,
-                               gpointer  value,
-                               gpointer  user_data);
-
-typedef struct _GHashTableIter GHashTableIter;
-
-struct _GHashTableIter
-{
-  /*< private >*/
-  gpointer      dummy1;
-  gpointer      dummy2;
-  gpointer      dummy3;
-  int           dummy4;
-  gboolean      dummy5;
-  gpointer      dummy6;
-};
-
-static GHashTable* g_hash_table_new               (GHashFunc       hash_func,
-                                            GEqualFunc      key_equal_func);
-static GHashTable* g_hash_table_new_full          (GHashFunc       hash_func,
-                                            GEqualFunc      key_equal_func,
-                                            GDestroyNotify  key_destroy_func,
-                                            GDestroyNotify  value_destroy_func);
-static void        g_hash_table_destroy           (GHashTable     *hash_table);
-static gboolean    g_hash_table_insert            (GHashTable     *hash_table,
-                                            gpointer        key,
-                                            gpointer        value);
-static gboolean    g_hash_table_replace           (GHashTable     *hash_table,
-                                            gpointer        key,
-                                            gpointer        value);
-static gboolean    g_hash_table_add               (GHashTable     *hash_table,
-                                            gpointer        key);
-static gboolean    g_hash_table_remove            (GHashTable     *hash_table,
-                                            gconstpointer   key);
-static void        g_hash_table_remove_all        (GHashTable     *hash_table);
-static gboolean    g_hash_table_steal             (GHashTable     *hash_table,
-                                            gconstpointer   key);
-static void        g_hash_table_steal_all         (GHashTable     *hash_table);
-static gpointer    g_hash_table_lookup            (GHashTable     *hash_table,
-                                            gconstpointer   key);
-static gboolean    g_hash_table_contains          (GHashTable     *hash_table,
-                                            gconstpointer   key);
-static gboolean    g_hash_table_lookup_extended   (GHashTable     *hash_table,
-                                            gconstpointer   lookup_key,
-                                            gpointer       *orig_key,
-                                            gpointer       *value);
-static void        g_hash_table_foreach           (GHashTable     *hash_table,
-                                            GHFunc          func,
-                                            gpointer        user_data);
-static gpointer    g_hash_table_find              (GHashTable     *hash_table,
-                                            GHRFunc         predicate,
-                                            gpointer        user_data);
-static guint       g_hash_table_foreach_remove    (GHashTable     *hash_table,
-                                            GHRFunc         func,
-                                            gpointer        user_data);
-static guint       g_hash_table_foreach_steal     (GHashTable     *hash_table,
-                                            GHRFunc         func,
-                                            gpointer        user_data);
-static guint       g_hash_table_size              (GHashTable     *hash_table);
-static GList *     g_hash_table_get_keys          (GHashTable     *hash_table);
-static GList *     g_hash_table_get_values        (GHashTable     *hash_table);
-static gpointer *  g_hash_table_get_keys_as_array (GHashTable     *hash_table,
-                                            guint          *length);
-
-static void        g_hash_table_iter_init         (GHashTableIter *iter,
-                                            GHashTable     *hash_table);
-static gboolean    g_hash_table_iter_next         (GHashTableIter *iter,
-                                            gpointer       *key,
-                                            gpointer       *value);
-static GHashTable* g_hash_table_iter_get_hash_table (GHashTableIter *iter);
-static void        g_hash_table_iter_remove       (GHashTableIter *iter);
-static void        g_hash_table_iter_replace      (GHashTableIter *iter,
-                                            gpointer        value);
-static void        g_hash_table_iter_steal        (GHashTableIter *iter);
-
-static GHashTable* g_hash_table_ref               (GHashTable     *hash_table);
-static void        g_hash_table_unref             (GHashTable     *hash_table);
-
-/* Hash Functions
- */
-static gboolean g_str_equal    (gconstpointer  v1,
-                         gconstpointer  v2);
-static guint    g_str_hash     (gconstpointer  v);
-
-static gboolean g_int_equal    (gconstpointer  v1,
-                         gconstpointer  v2);
-static guint    g_int_hash     (gconstpointer  v);
-
-static gboolean g_int64_equal  (gconstpointer  v1,
-                         gconstpointer  v2);
-static guint    g_int64_hash   (gconstpointer  v);
-
-static gboolean g_double_equal (gconstpointer  v1,
-                         gconstpointer  v2);
-static guint    g_double_hash  (gconstpointer  v);
-
-static guint    g_direct_hash  (gconstpointer  v) G_GNUC_CONST;
-static gboolean g_direct_equal (gconstpointer  v1,
-                         gconstpointer  v2) G_GNUC_CONST;
 
 /**
  * SECTION:hash_tables
@@ -282,7 +183,6 @@ static gboolean g_direct_equal (gconstpointer  v1,
  * release of GLib. It does nothing.
  */
 
-
 #define HASH_TABLE_MIN_SHIFT 3  /* 1 << 3 == 8 buckets */
 
 #define UNUSED_HASH_VALUE 0
@@ -328,8 +228,8 @@ typedef struct
   int          version;
 } RealIter;
 
-// assert (sizeof (GHashTableIter) == sizeof (RealIter));
-// assert (_g_alignof (GHashTableIter) >= _g_alignof (RealIter));
+G_STATIC_ASSERT (sizeof (GHashTableIter) == sizeof (RealIter));
+G_STATIC_ASSERT (_g_alignof (GHashTableIter) >= _g_alignof (RealIter));
 
 /* Each table size has an associated prime modulo (the first prime
  * lower than the table size) used to find the initial bucket. Probing
@@ -452,7 +352,7 @@ g_hash_table_lookup_node (GHashTable    *hash_table,
    * (as keys, etc. will be NULL).
    * Applications need to either use g_hash_table_destroy, or ensure the hash
    * table is empty prior to removing the last reference using g_hash_table_unref(). */
-  assert (hash_table->ref_count > 0);
+  g_assert (hash_table->ref_count > 0);
 
   hash_value = hash_table->hash_func (key);
   if (G_UNLIKELY (!HASH_IS_REAL (hash_value)))
@@ -1856,7 +1756,7 @@ g_hash_table_get_keys_as_array (GHashTable *hash_table,
       if (HASH_IS_REAL (hash_table->hashes[i]))
         result[j++] = hash_table->keys[i];
     }
-  assert (j == hash_table->nnodes);
+  g_assert_cmpint (j, ==, hash_table->nnodes);
   result[j] = NULL;
 
   if (length)
@@ -2132,4 +2032,4 @@ g_double_hash (gconstpointer v)
   return (guint) *(const gdouble*) v;
 }
 
-#endif /* _GLIB_HASH_H_ */
+#endif /* _HASH_H_ */
