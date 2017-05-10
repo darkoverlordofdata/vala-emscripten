@@ -29,10 +29,6 @@
  * targeting Emscripten or Android
  * LGPL3 - the dark vala - 2017 - darkoverlordofdata 
  */
-
-/* LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org */
-/* LGPL3 - additions - 2017 - darkoverlordofdata */
-
 #ifndef _GLIB_H_
 #define _GLIB_H_
 
@@ -44,34 +40,7 @@
  #define G_END_DECLS
 #endif /* __cplusplus */
 
-#define emscripten_eval(x) eval(x)
-
 G_BEGIN_DECLS
-
-// glib.config.h.emscripten:
-
-
-#define G_MINFLOAT	FLT_MIN
-#define G_MAXFLOAT	FLT_MAX
-#define G_MINDOUBLE	DBL_MIN
-#define G_MAXDOUBLE	DBL_MAX
-#define G_MINSHORT	SHRT_MIN
-#define G_MAXSHORT	SHRT_MAX
-#define G_MAXUSHORT	USHRT_MAX
-#define G_MININT	INT_MIN
-#define G_MAXINT	INT_MAX
-#define G_MAXUINT	UINT_MAX
-#define G_MINLONG	LONG_MIN
-#define G_MAXLONG	LONG_MAX
-#define G_MAXULONG	ULONG_MAX
-#define G_MAXSIZE	G_MAXUINT64
-#define GPOINTER_TO_INT(p)	((gint)   (p))
-#define GPOINTER_TO_UINT(p)	((guint)  (p))
-#define GINT_TO_POINTER(i)	((gpointer)  (i))
-#define GUINT_TO_POINTER(u)	((gpointer)  (u))
-
-#define gsize size_t
-#define gssize ssize_t
 
 #include <stdio.h>
 #include <string.h>
@@ -80,12 +49,19 @@ G_BEGIN_DECLS
 #include <limits.h>
 #include <assert.h>
 #include <time.h>
-
 #include <glib/gmacros.h>
+#include <glibconfig.h>
 #include <glib/gversionmacros.h>
 #include <glib/gtypes.h>
 #include <glib/gatomic.h>
-#include <glib/misc.h>
+#include <glib/gquark.h>
+#include <glib/gtestutils.h>
+#include <glib/gmessages.h>
+#include <glib/gstrfuncs.h>
+#include <glib/gthread.h>
+#include <glib/gnode.h>
+#include <glib/gslice.h>
+#include <glib/gmem.h>
 #include <glib/glist.h>
 #include <glib/gslist.h>
 #include <glib/gstring.h>
