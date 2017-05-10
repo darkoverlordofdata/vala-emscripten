@@ -21,6 +21,7 @@ fs = require 'fs'
 path = require 'path'
 list = []
 options = {}
+SRC = process.argv[2] || 'src'
 
 lcfirst = (str) -> str.charAt(0).toLowerCase() + str.substr(1)
 snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
@@ -29,7 +30,7 @@ snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
 ## walk the folder, gather list of files, and load mangle options
 ##
 walk = (namespace = '') ->
-    source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
+    source = if namespace is "" then "./build/#{SRC}" else "./build/#{SRC}/#{namespace}"
     for file in fs.readdirSync(source)
         switch path.extname(file)
 

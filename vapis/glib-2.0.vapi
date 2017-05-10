@@ -1,5 +1,13 @@
 /* glib-2.0.vala
  *
+ * DarkVala - Copyright (C) 2017 Dark Overlord of Data
+ * 	
+ * 	Taking the snake case out of vala
+ * Emscripten compatible
+ * 
+ * 
+ * 
+ * 
  * Copyright (C) 2006-2014  Jürg Billeter
  * Copyright (C) 2006-2008  Raffaele Sandrini
  * Copyright (C) 2007  Mathias Hasselmann
@@ -33,7 +41,7 @@
 [CCode (cname = "gboolean", cheader_filename = "glib.h", type_id = "G_TYPE_BOOLEAN", marshaller_type_name = "BOOLEAN", get_value_function = "g_value_get_boolean", set_value_function = "g_value_set_boolean", default_value = "FALSE", type_signature = "b")]
 [BooleanType]
 public struct bool {
-	public string to_string () {
+	public string toString () {
 		if (this) {
 			return "true";
 		} else {
@@ -68,7 +76,7 @@ public struct bool {
 [IntegerType (rank = 2, min = 0, max = 127)]
 public struct char {
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%c");
+	public string toString (string format = "%c");
 	public bool isalnum ();
 	public bool isalpha ();
 	public bool iscntrl ();
@@ -99,7 +107,7 @@ public struct char {
 [IntegerType (rank = 3, min = 0, max = 255)]
 public struct uchar {
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%hhu");
+	public string toString (string format = "%hhu");
 
 	[CCode (cname = "MIN")]
 	public static uchar min (uchar a, uchar b);
@@ -120,7 +128,7 @@ public struct int {
 	public const int MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%i");
+	public string toString (string format = "%i");
 
 	[CCode (cname = "MIN")]
 	public static int min (int a, int b);
@@ -162,7 +170,7 @@ public struct uint {
 	public const uint MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%u");
+	public string toString (string format = "%u");
 
 	[CCode (cname = "MIN")]
 	public static uint min (uint a, uint b);
@@ -198,7 +206,7 @@ public struct short {
 	public const short MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%hi");
+	public string toString (string format = "%hi");
 
 	[CCode (cname = "MIN")]
 	public static short min (short a, short b);
@@ -221,7 +229,7 @@ public struct ushort {
 	public const ushort MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%hu");
+	public string toString (string format = "%hu");
 
 	[CCode (cname = "MIN")]
 	public static ushort min (ushort a, ushort b);
@@ -242,7 +250,7 @@ public struct long {
 	public const long MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%li");
+	public string toString (string format = "%li");
 
 	[CCode (cname = "MIN")]
 	public static long min (long a, long b);
@@ -278,7 +286,7 @@ public struct ulong {
 	public const ulong MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%lu");
+	public string toString (string format = "%lu");
 
 	[CCode (cname = "MIN")]
 	public static ulong min (ulong a, ulong b);
@@ -317,7 +325,7 @@ public struct size_t {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "GSIZE_TO_POINTER")]
 	public void* to_pointer ();
@@ -351,7 +359,7 @@ public struct ssize_t {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "MIN")]
 	public static ssize_t min (ssize_t a, ssize_t b);
@@ -377,7 +385,7 @@ public struct uintptr {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "GSIZE_TO_POINTER")]
 	public void* to_pointer ();
@@ -408,7 +416,7 @@ public struct intptr {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "MIN")]
 	public static intptr min (intptr a, intptr b);
@@ -431,7 +439,7 @@ public struct int8 {
 	public const int8 MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%hhi");
+	public string toString (string format = "%hhi");
 
 	[CCode (cname = "MIN")]
 	public static int8 min (int8 a, int8 b);
@@ -453,7 +461,7 @@ public struct uint8 {
 	public const uint8 MAX;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%hhu");
+	public string toString (string format = "%hhu");
 
 	[CCode (cname = "MIN")]
 	public static uint8 min (uint8 a, uint8 b);
@@ -482,7 +490,7 @@ public struct int16 {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "MIN")]
 	public static int16 min (int16 a, int16 b);
@@ -519,7 +527,7 @@ public struct uint16 {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%hu");
+	public string toString (string format = "%hu");
 
 	[CCode (cname = "MIN")]
 	public static uint16 min (uint16 a, uint16 b);
@@ -570,7 +578,7 @@ public struct int32 {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%i");
+	public string toString (string format = "%i");
 
 	[CCode (cname = "MIN")]
 	public static int32 min (int32 a, int32 b);
@@ -607,7 +615,7 @@ public struct uint32 {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%u");
+	public string toString (string format = "%u");
 
 	[CCode (cname = "MIN")]
 	public static uint32 min (uint32 a, uint32 b);
@@ -656,7 +664,7 @@ public struct int64 {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "MIN")]
 	public static int64 min (int64 a, int64 b);
@@ -716,7 +724,7 @@ public struct uint64 {
 	public const string FORMAT_MODIFIER;
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%" + FORMAT);
+	public string toString (string format = "%" + FORMAT);
 
 	[CCode (cname = "MIN")]
 	public static uint64 min (uint64 a, uint64 b);
@@ -798,7 +806,7 @@ public struct float {
 	public int is_infinity ();
 
 	[CCode (cname = "g_strdup_printf", instance_pos = -1)]
-	public string to_string (string format = "%g");
+	public string toString (string format = "%g");
 
 	[CCode (cname = "MIN")]
 	public static float min (float a, float b);
@@ -867,7 +875,7 @@ public struct double {
 	[CCode (cname = "g_ascii_formatd", instance_pos = -1)]
 	public unowned string format (char[] buffer, string format = "%g");
 
-	public string to_string () {
+	public string toString () {
 		return this.to_str(new char[DTOSTR_BUF_SIZE]);
 	}
 
@@ -945,7 +953,7 @@ public struct unichar {
 
 	public int to_utf8 (string? outbuf);
 
-	public string to_string () {
+	public string toString () {
 		string str = (string) new char[7];
 		this.to_utf8 (str);
 		return str;
@@ -990,10 +998,10 @@ public struct unichar2 {
 [GIR (name = "utf8")]
 [CCode (cname = "gchar", const_cname = "const gchar", copy_function = "g_strdup", free_function = "g_free", cheader_filename = "stdlib.h,string.h,glib.h", type_id = "G_TYPE_STRING", marshaller_type_name = "STRING", param_spec_function = "g_param_spec_string", get_value_function = "g_value_get_string", set_value_function = "g_value_set_string", take_value_function = "g_value_take_string", type_signature = "s")]
 public class string {
-	[Version (replacement = "string.index_of")]
+	[Version (replacement = "string.indexOf")]
 	[CCode (cname = "strstr")]
 	public unowned string? str (string needle);
-	[Version (replacement = "string.last_index_of")]
+	[Version (replacement = "string.lastIndexOf")]
 	[CCode (cname = "g_strrstr")]
 	public unowned string? rstr (string needle);
 	[CCode (cname = "g_strrstr_len")]
@@ -1008,8 +1016,9 @@ public class string {
 	[CCode (cname = "g_utf8_strrchr")]
 	static char* utf8_strrchr (char* str, ssize_t len, unichar c);
 
-	public int index_of (string needle, int start_index = 0) {
+	public int indexOf (string needle, int start_index = 0) {
 		char* result = strstr ((char*) this + start_index, (char*) needle);
+
 
 		if (result != null) {
 			return (int) (result - (char*) this);
@@ -1018,7 +1027,7 @@ public class string {
 		}
 	}
 
-	public int last_index_of (string needle, int start_index = 0) {
+	public int lastIndexOf (string needle, int start_index = 0) {
 		char* result = strrstr ((char*) this + start_index, (char*) needle);
 
 		if (result != null) {
@@ -1028,7 +1037,7 @@ public class string {
 		}
 	}
 
-	public int index_of_char (unichar c, int start_index = 0) {
+	public int indexOfChar (unichar c, int start_index = 0) {
 		char* result = utf8_strchr ((char*) this + start_index, -1, c);
 
 		if (result != null) {
@@ -1038,7 +1047,7 @@ public class string {
 		}
 	}
 
-	public int last_index_of_char (unichar c, int start_index = 0) {
+	public int lastIndexOfChar (unichar c, int start_index = 0) {
 		char* result = utf8_strrchr ((char*) this + start_index, -1, c);
 
 		if (result != null) {
@@ -1179,10 +1188,10 @@ public class string {
 	[Version (replacement = "string.length")]
 	[CCode (cname = "strlen")]
 	public long len ();
-	[Version (replacement = "string.index_of_char")]
+	[Version (replacement = "string.indexOfChar")]
 	[CCode (cname = "g_utf8_strchr")]
 	public unowned string chr (ssize_t len, unichar c);
-	[Version (replacement = "string.last_index_of_char")]
+	[Version (replacement = "string.lastIndexOfChar")]
 	[CCode (cname = "g_utf8_strrchr")]
 	public unowned string rchr (ssize_t len, unichar c);
 	[Version (since = "2.2")]
@@ -1197,9 +1206,9 @@ public class string {
 	public string normalize (ssize_t len = -1, GLib.NormalizeMode mode = GLib.NormalizeMode.DEFAULT);
 
 	[CCode (cname = "g_utf8_strup")]
-	public string up (ssize_t len = -1);
+	public string toUpper (ssize_t len = -1);
 	[CCode (cname = "g_utf8_strdown")]
-	public string down (ssize_t len = -1);
+	public string toLower (ssize_t len = -1);
 	[CCode (cname = "g_utf8_casefold")]
 	public string casefold (ssize_t len = -1);
 	[CCode (cname = "g_utf8_collate")]
@@ -1439,7 +1448,7 @@ public class string {
 		return result;
 	}
 
-	public unowned string to_string () {
+	public unowned string toString () {
 		return this;
 	}
 
@@ -1462,7 +1471,7 @@ public class string32 {
 	[CCode (cname = "g_ucs4_to_utf8")]
 	public string to_utf8 (long len = -1, out long? items_read = null, out long? items_written = null) throws GLib.ConvertError;
 
-	public string? to_string () {
+	public string? toString () {
 		try {
 			return this.to_utf8 ();
 		} catch (GLib.ConvertError e) {
@@ -1481,7 +1490,7 @@ public class string16 {
 	[CCode (cname = "g_utf16_to_utf8")]
 	public string to_utf8 (long len = -1, out long? items_read = null, out long? items_written = null) throws GLib.ConvertError;
 
-	public string? to_string () {
+	public string? toString () {
 		try {
 			return this.to_utf8 ();
 		} catch (GLib.ConvertError e) {
@@ -2846,7 +2855,7 @@ namespace GLib {
 			return result;
 		}
 
-		public string to_string () {
+		public string toString () {
 			return "%04d-%02d-%02d %02d:%02d:%02d".printf (year + 1900, month + 1, day, hour, minute, second);
 		}
 
@@ -2926,7 +2935,7 @@ namespace GLib {
 		public DateTime to_local ();
 		public DateTime to_utc ();
 		public string format (string format);
-		public string to_string () {
+		public string toString () {
 			return this.format ("%FT%H:%M:%S%z");
 		}
 	}
@@ -5133,7 +5142,7 @@ namespace GLib {
 	public struct Quark : uint32 {
 		public static Quark from_string (string str);
 		public static Quark try_string (string str);
-		public unowned string to_string ();
+		public unowned string toString ();
 	}
 
 	/* Keyed Data Lists */

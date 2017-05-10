@@ -217,6 +217,27 @@ typedef guint           (*GHashFunc)            (gconstpointer  key);
 typedef void            (*GHFunc)               (gpointer key, gpointer  value, gpointer user_data);
 typedef gpointer	      (*GCopyFunc)            (gconstpointer  src, gpointer       data);
 
+// static void
+// g_warn_message (const char     *domain,
+//                 const char     *file,
+//                 int             line,
+//                 const char     *func,
+//                 const char     *warnexpr)
+// {
+//   char *s, lstr[32];
+//   g_snprintf (lstr, 32, "%d", line);
+//   if (warnexpr)
+//     s = g_strconcat ("(", file, ":", lstr, "):",
+//                      func, func[0] ? ":" : "",
+//                      " runtime check failed: (", warnexpr, ")", NULL);
+//   else
+//     s = g_strconcat ("(", file, ":", lstr, "):",
+//                      func, func[0] ? ":" : "",
+//                      " ", "code should not be reached", NULL);
+//   g_log (domain, G_LOG_LEVEL_WARNING, "%s", s);
+//   g_free (s);
+// }
+
 
 #define G_STRINGIFY(macro_or_string)	G_STRINGIFY_ARG (macro_or_string)
 #define	G_STRINGIFY_ARG(contents)	#contents
@@ -228,7 +249,16 @@ typedef gpointer	      (*GCopyFunc)            (gconstpointer  src, gpointer    
 #define G_STRLOC	__FILE__ ":" G_STRINGIFY (__LINE__)
 #endif
 
-//gpointer g_memdup (gconstpointer mem, guint byte_size);
+// #define G_GNUC_PRINTF( format_idx, arg_idx )    \
+//   __attribute__((__format__ (__printf__, format_idx, arg_idx)))
+
+// #define g_warn_if_fail(expr) \
+//   do { \
+//     if G_LIKELY (expr) ; \
+//     else g_warn_message (G_LOG_DOMAIN, __FILE__, __LINE__, G_STRFUNC, #expr); \
+//   } while (0)
+
+
 /**
  * g_malloc:
  * @n_bytes: the number of bytes to allocate

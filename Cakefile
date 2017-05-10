@@ -17,7 +17,7 @@ valac = [
 emcc = [
     "emcc"
     "--preload-file assets" 
-    "-Iposix" 
+    "-Iinclude" 
     "-O2" 
     "-s WASM=1"
     "-s USE_SDL=2" 
@@ -29,6 +29,7 @@ emcc = [
     "-o web/shmupwarz.html" 
 ]
 
+
 fs = require 'fs'
 path = require 'path'
 vala_code = []
@@ -37,8 +38,8 @@ c_code = []
 ##
 ## find all of the source files
 ##
-walk = (namespace = '') ->
-    source = if namespace is "" then "src" else "src/#{namespace}"
+walk = (src, namespace = '') ->
+    source = if namespace is "" then src else "#{src}/#{namespace}"
     for file in fs.readdirSync(source)
         switch path.extname(file)
 
@@ -52,21 +53,58 @@ walk = (namespace = '') ->
 
             else # recurse down the tree
                 f = namespace+(if namespace is "" then "" else '/')+file
-                if f.indexOf('.') is -1 then walk(f)
+                if f.indexOf('.') is -1 then walk(src, f)
 
 
 ##
 ## Task: update the build script
+## set the build cycle to 'src'
 ##
 task 'configure', 'configure the build scrpt', ->
 
-    walk()
+    walk('src')
 
     cmd = [
         "cp -rf src build"
         "tools/valac.coffee"
         valac.concat(vala_code).join(" ")
         "tools/emcc.coffee"
+        emcc.concat(c_code).join(" ")
+    ].join(" && ")
+
+    tasks = {
+        "version": "0.1.0",
+        "command": "/bin/sh",
+        "cwd": "${workspaceRoot}",
+        "isShellCommand": true,
+        "args": ["-c"],
+        "showOutput": "always",
+        "echoCommand": true,
+        "suppressTaskName": true,
+        "tasks": [
+            {
+                "isBuildCommand": true,
+                "taskName": "build",
+                "args": [cmd]
+            }
+        ]
+    }
+
+    fs.writeFileSync('./.vscode/tasks.json', JSON.stringify(tasks, null, 2))
+
+##
+## Task: update the build script
+## set the build cycle to 'test'
+##
+task 'test', 'configure the test build scrpt', ->
+
+    walk('test')
+
+    cmd = [
+        "cp -rf test build"
+        "tools/valac.coffee test"
+        valac.concat(vala_code).join(" ")
+        "tools/emcc.coffee test"
         emcc.concat(c_code).join(" ")
     ].join(" && ")
 

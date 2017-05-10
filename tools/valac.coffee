@@ -14,12 +14,13 @@ list = []
 options = {}
 lcfirst = (str) -> str.charAt(0).toLowerCase() + str.substr(1)
 snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
+SRC = process.argv[2] || 'src'
 
 ##
 ## walk the folder, gather list of files
 ##
 walk = (namespace = '') ->
-    source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
+    source = if namespace is "" then "./build/#{SRC}" else "./build/#{SRC}/#{namespace}"
     for file in fs.readdirSync(source)
         switch path.extname(file)
 
