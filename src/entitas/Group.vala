@@ -1,7 +1,7 @@
 namespace entitas {
 
 	public class Group : Object {
-		public unowned Matcher matcher;
+		public Matcher matcher;
 		public List<Entity*> entities;
 		
 		public Group(Matcher matcher) {

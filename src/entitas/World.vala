@@ -1,14 +1,14 @@
 namespace entitas {
 	
 	public class World : Object {
-		public static unowned World instance;
+		public static World instance;
 		public List<Group> groups;
 		public Entity[] pool;
 		public Cache[] cache;
 		public int id = 0;
 		public ISystem?[] systems = new ISystem?[100];
 		public int count = 0;
-		public unowned EntityRemovedListener entityRemoved;
+		public  EntityRemovedListener entityRemoved;
 
 		public World() {
 			instance = this;
@@ -80,17 +80,10 @@ namespace entitas {
 		}
 
 		public Group getGroup(Matcher matcher) {
-			matcher.addRef();
 			if (groups.length() > matcher.id ) {
 				return groups.nth_data(matcher.id);
 			} else {
 				groups.prepend(new Group(matcher));
-				/**
-				 * according to the docs, GLib.List doesn't referece count, therefore
-				 * due to switching from Gee.ArrayList go GLib.List, we are required
-				 * to manually bump the refCount
-				 */
-				// matcher.addRef()
 				for (var i = 0; i < this.id-1; i++) 
 					groups.nth_data(0).handleEntitySilently(&pool[i]);
 				return groups.nth_data(0);

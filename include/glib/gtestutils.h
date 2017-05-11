@@ -1,3 +1,5 @@
+/* LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org */
+
 #define g_assertion_message_expr(domain,file,line,func,expr)		\
 do {									\
 	if (!expr) {							\

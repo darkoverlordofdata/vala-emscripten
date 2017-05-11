@@ -31,16 +31,16 @@ module.exports = (file, options) ->
         src = src.replace(/^	class\s+(\w*)\s*:\s*(Object)\s*/mg, ($0, $1, $2) ->
             """
 \t[Compact, CCode ( /** reference counting */
-\t\tref_function = "#{namespace}_#{name}_addRef", 
+\t\tref_function = "#{namespace}_#{name}_retain", 
 \t\tunref_function = "#{namespace}_#{name}_release"
 \t)]
 \tclass #{klass}
 \t\trefCount: int = 1
-\t\tdef addRef() : unowned #{klass}
-\t\t\tGLib.AtomicInt.add (ref refCount, 1)
+\t\tdef retain() : unowned #{klass}
+\t\t\tGLib.AtomicInt.add (ref retainCount__, 1)
 \t\t\treturn this
 \t\tdef release() 
-\t\t\tif GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
+\t\t\tif GLib.AtomicInt.dec_and_test (ref retainCount__) do this.free ()
 \t\tdef extern free()\n\t\t
         """)
         fs.writeFileSync(file, src)
@@ -48,16 +48,16 @@ module.exports = (file, options) ->
         src = src.replace(/^class\s+(\w*)\s*:\s*(Object)\s*/mg, ($0, $1, $2) ->
             """
 [Compact, CCode ( /** reference counting */
-	ref_function = "#{name}_addRef", 
+	ref_function = "#{name}_retain", 
 	unref_function = "#{name}_release"
 )]
 class #{klass}
-	refCount: int = 1
-	def addRef() : unowned #{klass}
-		GLib.AtomicInt.add (ref refCount, 1)
+	retainCount__: int = 1
+	def retain() : unowned #{klass}
+		GLib.AtomicInt.add (ref retainCount__, 1)
 		return this
 	def release() 
-		if GLib.AtomicInt.dec_and_test (ref refCount) do this.free ()
+		if GLib.AtomicInt.dec_and_test (ref retainCount__) do this.free ()
 	def extern free()\n\t
         """)
         fs.writeFileSync(file, src)

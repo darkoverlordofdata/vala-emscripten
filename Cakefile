@@ -29,6 +29,24 @@ emcc = [
     "-o web/shmupwarz.html" 
 ]
 
+valac_test = [
+    "valac"
+    "-C"
+    "--save-temps"
+    "--disable-warnings"
+    "--vapidir ./vapis" 
+    "--pkg posix" 
+    "--pkg emscripten"
+]
+emcc_test = [
+    "emcc"
+    "--preload-file assets" 
+    "-Iinclude" 
+    "-O2" 
+    "-s WASM=1"
+    "-s ASSERTIONS=1"  
+    "-o web/shmupwarz.html" 
+]
 
 fs = require 'fs'
 path = require 'path'
@@ -103,9 +121,9 @@ task 'test', 'configure the test build scrpt', ->
     cmd = [
         "cp -rf test build"
         "tools/valac.coffee test"
-        valac.concat(vala_code).join(" ")
+        valac_test.concat(vala_code).join(" ")
         "tools/emcc.coffee test"
-        emcc.concat(c_code).join(" ")
+        emcc_test.concat(c_code).join(" ")
     ].join(" && ")
 
     tasks = {

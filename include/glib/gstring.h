@@ -1,3 +1,5 @@
+/* LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org */
+
 #ifndef _GLIB_STRING_H_
 #define _GLIB_STRING_H_
 

@@ -6,11 +6,12 @@
 ## Inject missing forward references for boilerplate code
 ##      <class_name>_release
 ##      <class_name>_free
-##      <class_name>_addRef
+##      <class_name>_retain
 ##
-##  CCode atrribute forward referenes are not propogated to other outputs
-##  in the same compilation unit. This fixes the intermediate c files before
-##  final compilation.
+## Problem:
+##      CCode atrribute forward referenes are not propogated to other outputs
+##      in the same compilation unit. This fixes the intermediate c files before
+##      final compilation.
 ##
 ##  Assumptions: 
 ##      a folder corresponds to a namespace
@@ -53,7 +54,7 @@ walk = (namespace = '') ->
 
 ##
 ## inject missing forward references
-## for reference counting
+## for automatic reference counting
 ##
 inject = (file, options) ->
     src = fs.readFileSync(file, 'utf8').split('\n')
@@ -64,11 +65,11 @@ inject = (file, options) ->
                 flag = true
                 dst.push "void #{mangled}_release (#{name}* self);"
                 dst.push "void #{mangled}_free (#{name}* self);"
-                dst.push "#{name}* #{mangled}_addRef (#{name}* self);"
+                dst.push "#{name}* #{mangled}_retain (#{name}* self);"
             else if line.indexOf("void #{mangled}_free (#{name}* self);") is 0
                 flag = true
                 dst.push "void #{mangled}_release (#{name}* self);"
-                dst.push "#{name}* #{mangled}_addRef (#{name}* self);"
+                dst.push "#{name}* #{mangled}_retain (#{name}* self);"
            dst.push line 
     if flag then fs.writeFileSync(file, dst.join('\n'))
 

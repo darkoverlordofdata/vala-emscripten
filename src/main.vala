@@ -23,16 +23,6 @@ errordomain TestError {
  */
 public void game() {
 
-	test();
-
-	stdout.printf("indexOf = %d\n", "this is a test".indexOf("is"));
-
-	try {
-		throw new TestError.Wow("it works");
-	} catch (TestError e) {
-		stdout.printf("Error Message %s\n", e.message);
-	}
-
 	var window = sdx.initialize(720, 512, "Shmupwarz");
 	var game = new Game(720, 512);
 	game.initialize();

@@ -1,3 +1,5 @@
+/* LGPL3 - posixvala glib replacement - 2013 - pancake@nopcode.org */
+
 #define SIZE_OVERFLOWS(a,b) (G_UNLIKELY ((b) > 0 && (a) > G_MAXSIZE / (b)))
 
 #define g_free free

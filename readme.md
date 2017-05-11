@@ -4,16 +4,18 @@
 * Works with SDL2. 
 * Both vala and genie, but vala has fewer limitations.
 
-Vala compiles to C, so it can target emscripten. The problem is, there is no GLib, or GObject.
+Vala compiles to C, so it can target emscripten. That seems like a no brainer. 
+The problem is, there is no runtime - Vala uses GLib for it's runtime, and there is no glib port for Emscripten. 
 
-using https://github.com/radare/posixvala to show the way, we can hack parts of GLib back to life.
+https://github.com/radare/posixvala shows how we can hack the runtime back to life, by supplying missing GLib implementation.
 
+I'm taking this hack further, re-fitting selected glib modules to work in emscripten. 
+There is also no GObject in Emscripten. This limits it to compact class. so I've added a preprocessing step to inject automatic reference counting into classes tagged by 'subclassing' Object.
 
-## performance
-wow - as fast as desktop!
+## status
+work in progress. my game compiles and runs on both desktop and escriptem, same code except the main loop.
 
 ## oop limitations
-Compact classes are limited:
 
 * no regex
 * no virtual or override
@@ -35,11 +37,11 @@ Vala still has lambdas.
 to replace interface, make a struct of delegates
 
 ## notes
-
-preprocessing checks for Object superclass to inject reference counting into the class definition.
-
 one class per file
 namespace must mirror folder structure
+
+preprocessing checks for Object superclass to inject reference counting into the class definition.
+2nd pass is done to fix missing forward references when multiple files are used (also noted by https://github.com/xdave/pvala)
 
 
 

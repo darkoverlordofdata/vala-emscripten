@@ -37,17 +37,17 @@ module.exports = (file, options) ->
             n1 = if namespace is "" then "" else namespace+"_"
             """
 #{tab}[Compact, CCode ( /** reference counting */
-#{tab}\tref_function = "#{n1}#{name}_addRef", 
+#{tab}\tref_function = "#{n1}#{name}_retain", 
 #{tab}\tunref_function = "#{n1}#{name}_release"
 #{tab})]
 #{tab}public class #{$2}<#{$3}> {
-#{tab}\tpublic int refCount = 1;
-#{tab}\tpublic unowned #{$2}<#{$3}> addRef() {
-#{tab}\t\tGLib.AtomicInt.add (ref refCount, 1);
+#{tab}\tpublic int _retainCount = 1;
+#{tab}\tpublic unowned #{$2}<#{$3}> retain() {
+#{tab}\t\tGLib.AtomicInt.add (ref _retainCount, 1);
 #{tab}\t\treturn this;
 #{tab}\t}
 #{tab}\tpublic void release() { 
-#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref _retainCount)) this.free ();
 #{tab}\t}
 #{tab}\tpublic extern void free();\n\t\t
         """)
@@ -62,17 +62,17 @@ module.exports = (file, options) ->
             n1 = if namespace is "" then "" else namespace+"_"
             """
 #{tab}[Compact, CCode ( /** reference counting */
-#{tab}\tref_function = "#{n1}#{name}_addRef", 
+#{tab}\tref_function = "#{n1}#{name}_retain", 
 #{tab}\tunref_function = "#{n1}#{name}_release"
 #{tab})]
 #{tab}public class #{$2}<#{$3}> {
-#{tab}\tpublic int refCount = 1;
-#{tab}\tpublic unowned #{$2}<#{$3}> addRef() {
-#{tab}\t\tGLib.AtomicInt.add (ref refCount, 1);
+#{tab}\tpublic int _retainCount = 1;
+#{tab}\tpublic unowned #{$2}<#{$3}> retain() {
+#{tab}\t\tGLib.AtomicInt.add (ref _retainCount, 1);
 #{tab}\t\treturn this;
 #{tab}\t}
 #{tab}\tpublic void release() { 
-#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref _retainCount)) this.free ();
 #{tab}\t}
 #{tab}\tpublic extern void free();\n\t\t
         """)
@@ -87,17 +87,17 @@ module.exports = (file, options) ->
             n1 = if namespace is "" then "" else namespace+"_"
             """
 #{tab}[Compact, CCode ( /** reference counting */
-#{tab}\tref_function = "#{n1}#{name}_addRef", 
+#{tab}\tref_function = "#{n1}#{name}_retain", 
 #{tab}\tunref_function = "#{n1}#{name}_release"
 #{tab})]
 #{tab}public class #{$2} {
-#{tab}\tpublic int refCount = 1;
-#{tab}\tpublic unowned #{$2} addRef() {
-#{tab}\t\tGLib.AtomicInt.add (ref refCount, 1);
+#{tab}\tpublic int _retainCount = 1;
+#{tab}\tpublic unowned #{$2} retain() {
+#{tab}\t\tGLib.AtomicInt.add (ref _retainCount, 1);
 #{tab}\t\treturn this;
 #{tab}\t}
 #{tab}\tpublic void release() { 
-#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref refCount)) this.free ();
+#{tab}\t\tif (GLib.AtomicInt.dec_and_test (ref _retainCount)) this.free ();
 #{tab}\t}
 #{tab}\tpublic extern void free();\n\t\t
         """)
