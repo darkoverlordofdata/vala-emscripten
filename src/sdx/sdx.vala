@@ -40,6 +40,8 @@ namespace sdx {
 	double _mark1;
 	double _mark2;
 
+
+
 	/**
 	 * Initialization
 	 * 
@@ -71,7 +73,12 @@ namespace sdx {
 		_freq = SDL.Timer.get_performance_frequency();
 		fpsColor = sdx.Color.AntiqueWhite;
 
+		MersenneTwister.init_genrand((ulong)SDL.Timer.get_performance_counter());
 		return window;
+	}
+
+	double getRandom() {
+		return MersenneTwister.genrand_real2();
 	}
 
 	void setDefaultFont(string path, int size) {
@@ -103,6 +110,10 @@ namespace sdx {
 		}
 	}
 
+	double getNow() {
+		return (double)SDL.Timer.get_performance_counter()/_freq;
+	} 
+
 	void start() {
 		running = true;
 		_mark1 = (double)SDL.Timer.get_performance_counter()/_freq;
@@ -129,9 +140,11 @@ namespace sdx {
 					running = false;
 					break;
 				case SDL.EventType.KEYDOWN:
+					if (_evt.key.keysym.sym < 0 || _evt.key.keysym.sym > 255) break;
 					keys[_evt.key.keysym.sym] = 1;
 					break;
 				case SDL.EventType.KEYUP:
+					if (_evt.key.keysym.sym < 0 || _evt.key.keysym.sym > 255) break;
 					keys[_evt.key.keysym.sym] = 0;
 					break;
 				case SDL.EventType.MOUSEMOTION:

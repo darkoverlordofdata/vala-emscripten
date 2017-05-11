@@ -1,23 +1,6 @@
 
 [CCode (cheader_filename = "emscripten.h")]
 namespace Emscripten {
-
-	/**
-	 * Friendly
-	 */
-
-	[CCode (cname="emscripten_set_main_loop_arg")]
-	public void setMainLoopArg(em_arg_callback_func fnc, void* arg, int fps=0, int simulate_infinite_loop=1);
-
-	[CCode (cname="emscripten_get_now")]
-	public double getNow();
-
-	[CCode (cname="emscripten_random")]
-	public float random();
-	/**
-	 * Un-Friendly
-	 */
-
 	[CCode (cname="em_callback_func", has_target=false)]
 	public delegate void em_callback_func();
 

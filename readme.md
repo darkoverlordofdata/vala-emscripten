@@ -15,6 +15,9 @@ There is also no GObject in Emscripten. This limits it to compact class. so I've
 ## status
 work in progress. my game compiles and runs on both desktop and escriptem, same code except the main loop.
 
+## build
+see Cakefile
+
 ## oop limitations
 
 * no regex
@@ -24,27 +27,8 @@ work in progress. my game compiles and runs on both desktop and escriptem, same 
 * no [Flags] enum
 * subclases cannot declare instance members
 
-it's unfortunate, but genie doesn't work as well, it has more dependancies on GObject,
-so these are also broken:
-
-* no Gee 
-* no Properties
-* no underscore in first char
-
-Vala still has lambdas.
-
 ## workarounds
 to replace interface, make a struct of delegates
-
-## notes
-one class per file
-namespace must mirror folder structure
-
-preprocessing checks for Object superclass to inject reference counting into the class definition.
-2nd pass is done to fix missing forward references when multiple files are used (also noted by https://github.com/xdave/pvala)
-
-
-
 
 ### example
 the main loop is simple:

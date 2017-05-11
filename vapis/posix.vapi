@@ -26,6 +26,12 @@
 
 [CCode (cprefix = "", lower_case_cprefix = "")]
 namespace Posix {
+	[CCode (cheader_filename = "stdlib.h")]
+	public int rand ();
+	[CCode (cheader_filename = "stdlib.h")]
+	public void srand(uint seed);
+
+
 	[CCode (cheader_filename = "assert.h")]
 	public void assert (bool expression);
 

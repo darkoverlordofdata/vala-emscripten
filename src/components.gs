@@ -236,7 +236,7 @@ namespace entitas
 
 		def toString():string
 			var sb = ""
-			sb = sb + id.toString() + "(" + name + ")"
+			sb = sb + id.to_string() + "(" + name + ")"
 			var seperator = false
 			for var i = 1 to Components.COUNT
 				if hasComponent(i)
