@@ -2,12 +2,11 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
-      "type": "lldb",
+      "name": "Launch localhost",
+      "type": "chrome",
       "request": "launch",
-      "cwd": "${workspaceRoot}/build",
-      "program": "${workspaceRoot}/build/shmupwarz",
-      "args": []
+      "url": "http://localhost:8088",
+      "webRoot": "${workspaceRoot}/web"
     }
   ]
 }

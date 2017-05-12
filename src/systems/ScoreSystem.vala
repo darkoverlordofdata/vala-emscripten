@@ -28,7 +28,6 @@ namespace systems {
 			foreach (var entity in group.entities) {
 				if (entity.isActive()) {
 					var pct = "%d%%".printf((int)Math.fmin(100, (double)entity.health.current/(double)entity.health.maximum*100.0));
-
 					if (pct != entity.text.text) {
 						entity.text.text = pct;
 						entity.text.sprite.setText(pct, sdx.smallFont, sdx.Color.LimeGreen);

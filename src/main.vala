@@ -1,26 +1,27 @@
-using sdx;
-using util;
 /**
  *	profiling data
  */
 public int k;
 public double t;
-public double t1 = 0.0;
-public double t2 = 0.0;
-public double t3 = 0.0;
-
+public double t1;
+public double t2;
+public double t3;
 /**
- *	random number
+ * gameloop
+ * 
+ * process each frame
+ * 
+ * @param game Game object
+ * 
  */
-public double nextRand() {
-	return sdx.getRandom();
-}
-
 public void gameloop(Game game) {
 
-	t1 = getNow();
+#if (PROFILING)
+	t1 = sdx.getNow();
+#endif
 	game.update();
-	t2 = getNow();
+#if (PROFILING)
+	t2 = sdx.getNow();
 	t3 = t2 - t1;
 	t = t + t3;
 	k += 1;
@@ -30,14 +31,15 @@ public void gameloop(Game game) {
 		stdout.printf("%f\n", t);
 		t = 0;
 	}
-	
+#endif
 	game.draw();
 
 }
 
+
 #if (DESKTOP)
 // hide GLib.Object
-public class Object {}
+//public class Object {}
 
 /**
  * Start the game
@@ -66,7 +68,7 @@ public int main(string args[]) {
  *
  */
 public void game() {
-
+	
 	var window = sdx.initialize(720, 512, "Shmupwarz");
 	var game = new Game(720, 512);
 	game.initialize();

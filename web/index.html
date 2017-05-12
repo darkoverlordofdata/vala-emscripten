@@ -87,6 +87,7 @@
     }
     #loadingDiv {
         text-align: center;
+        background-color : transparent;
         color: antiquewhite;
     }
     
@@ -96,7 +97,7 @@
       <div id="loadingDiv">ShmupWarz is loading...</div>
       <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
       <div style="width:200px; margin-left:auto; margin-right:auto">
-      <p id="startButton" onclick="start_function(this)">Click to start</p>
+      <!--<p id="startButton" onclick="start_function(this)">Click to start</p>-->
       <p id="fullScreenButton" onclick="Module.requestFullScreen(true, false)">Click for full-screen</p>
       </div>
 </body>

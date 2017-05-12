@@ -203,11 +203,11 @@ public class Factory : World {
 			stdout.printf("out of particles\n");
 			return null;
 		}
-		var radians = nextRand() * TAU;
-		var magnitude = nextRand() * 200;
+		var radians = sdx.getRandom() * TAU;
+		var magnitude = sdx.getRandom() * 200;
 		var velocityX = magnitude * Math.cos(radians);
 		var velocityY = magnitude * Math.sin(radians);
-		var scale = nextRand();
+		var scale = sdx.getRandom();
 
 
 		var entity = cache[Pool.PARTICLE].deque();

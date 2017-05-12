@@ -36,15 +36,15 @@ namespace systems {
 			if (d1 < 0.0) {
 				switch (enemy) {
 					case 1:
-						var x = (int)(nextRand() * (game.width-70)) + 35;
+						var x = (int)(sdx.getRandom() * (game.width-70)) + 35;
 						world.enemy1(x, -35);
 						return 1.0;
 					case 2:
-						var x = (int)(nextRand() * (game.width-172)) + 85;
+						var x = (int)(sdx.getRandom() * (game.width-172)) + 85;
 						world.enemy2(x, -85);
 						return 4.0;
 					case 3:
-						var x = (int)(nextRand() * (game.width-320)) + 160;
+						var x = (int)(sdx.getRandom() * (game.width-320)) + 160;
 						world.enemy3(x, -160);
 						return 6.0;
 					default:

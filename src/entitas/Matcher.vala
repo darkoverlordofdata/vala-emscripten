@@ -4,11 +4,6 @@ namespace entitas {
 	 * Match entities by component
 	 * complile list of components to bit array for fast comparison
 	 *
-	 * modules that call this code need to add these forward declarations:
-	 * 
-	 *	void entitas_matcher_release (entitasMatcher* self);
-	 *	void entitas_matcher_free (entitasMatcher* self);
-	 *
 	 */
 	public class Matcher : Object {
 		/**
@@ -169,12 +164,10 @@ namespace entitas {
 			return sb;
 		}
 
-		public static int[] listToArray(List<int> l) {
-			var size = 0;
-			foreach (var x in l) size++;
-			var a = new int[size];
+		public static int[] listToArray(List<int> list) {
+			var a = new int[list.length()];
 			var i = 0;
-			foreach (var x in l) a[i++] = x;
+			foreach (var x in list) a[i++] = x;
 			return a;
 		}
 		/**

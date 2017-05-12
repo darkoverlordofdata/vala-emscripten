@@ -2,14 +2,6 @@ using Emscripten;
 using bunny;
 using util;
 
-public struct Data {
-	Person x1;// = new Person("frodo", 42);
-	Person x2;// = new Person("this", 43);
-	Person x3;// = new Person("is", 44);
-	Person x4;// = new Person("a", 45);
-	Person x5;// = new Person("test", 46);
-}
-
 
 namespace test {
 
