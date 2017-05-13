@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+e14b1386b4f7a73025d3704cf19ef60a src/Config.c
+2b8b66606d933208bdb72b114d4dad34 src/vala-emscripten_valac.stamp

@@ -33,11 +33,10 @@ public void gameloop(Game game) {
 	}
 #endif
 	game.draw();
-
 }
 
-
 #if (DESKTOP)
+
 // hide GLib.Object
 //public class Object {}
 

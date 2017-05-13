@@ -1,12 +1,7 @@
 ###
 
-generate the build task & launch configration for vscode
-access via crtrl-B / F5
-
-    cake em                   # set vscode to build & run the emscripten version
-    cake test                 # set vscode to build & run the tests
-    cake desktop              # set vscode to build & run the desktop version
-    cake gobject              # set vscode to build & run the gobject version
+    cake em                   # build the emscripten version
+    cake test                 # build the tests
 
 preprocessing checks for Object superclass to inject reference counting into the class definition.
 2nd pass is done to fix missing forward references when multiple files are used
@@ -17,22 +12,12 @@ namespace must mirror folder structure
 other classes should be unchanged.
 
 ###
-PROFILING = '--define=PROFILING'
-DEPS=[
-        "--vapidir ./vapis"
-        "--pkg sdl2"
-        "--pkg SDL2_image"
-        "--pkg SDL2_ttf"
-        "--pkg SDL2_mixer"
-        "--pkg posix"
-        "--pkg emscripten"  
-        "--pkg mt19937ar"
-    ]
 
 fs = require 'fs'
 path = require 'path'
-Makefile = require './Makefile.coffee'
+{ exec } = require 'child_process'
 
+PROFILING = '--define=PROFILING'
 C_CODE = []     # list of *.c source files
 VALA_CODE = []  # list of *.vala source files
 
@@ -57,16 +42,21 @@ walk = (src, namespace = '') ->
                 if f.indexOf('.') is -1 then walk(src, f)
 
 ##
-## Task: update the build script
-## set the build cycle to 'em'
+## Check for problem and bail
 ##
+bail = (error, stdout, stderr) ->
+    console.log error if error
+    console.log stdout if stdout
+    console.log stderr if stderr
+    process.exit() if error
+
 valac_em = [ 
     "valac"
     "-C"
     "#{PROFILING}"
     "--save-temps"
     "--disable-warnings"
-    "--vapidir ./vapis" 
+    "--vapidir src/vapis" 
     "--pkg mt19937ar"
     "--pkg posix" 
     "--pkg sdl2" 
@@ -89,52 +79,37 @@ emcc_em = [
     "-s ASSERTIONS=1"  
     "-o web/shmupwarz.html" 
 ]
+
+##
+## Task: update the build script
+## set the build cycle to 'em'
+##
 task 'em', 'set vscode to build & run the emscripten version', ->
 
-    walk('src')
+    walk 'src'
 
-    cmd = [
-        "cp -rf src build"
-        "tools/valac.coffee"
-        valac_em.concat(VALA_CODE).join(" ")
-        "tools/emcc.coffee"
-        emcc_em.concat(C_CODE).join(" ")
-    ].join(" && ")
+    ## out of tree build
+    exec 'cp -rf src build', (error, stdout, stderr) -> 
+        bail error, stdout, stderr
 
-    tasks = {
-        "version": "0.1.0",
-        "command": "/bin/sh",
-        "cwd": "${workspaceRoot}",
-        "isShellCommand": true,
-        "args": ["-c"],
-        "showOutput": "always",
-        "echoCommand": true,
-        "suppressTaskName": true,
-        "tasks": [
-            {
-                "isBuildCommand": true,
-                "taskName": "build",
-                "args": [cmd]
-            }
-        ]
-    }
+        # pre-process vala 
+        exec 'tools/valac.coffee', (error, stdout, stderr) -> 
+            bail error, stdout, stderr
 
-    fs.writeFileSync('./.vscode/tasks.json', JSON.stringify(tasks, null, 2))
+            # valac -C ...
+            exec valac_em.concat(VALA_CODE).join(' '), (error, stdout, stderr) -> 
+                bail error, stdout, stderr
 
-    launch =  {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "Launch localhost",
-                "type": "chrome",
-                "request": "launch",
-                "url": "http://localhost:8088",
-                "webRoot": "${workspaceRoot}/web"
-            },
-        ]
-    }
+                # pre-process c
+                exec 'tools/emcc.coffee', (error, stdout, stderr) -> 
+                    bail error, stdout, stderr
+                        
+                    # emcc ... -o web/shmupwarz.html
+                    exec emcc_em.concat(C_CODE).join(' '), (error, stdout, stderr) -> 
+                        bail error, stdout, stderr
+                        console.log "Ok!"
 
-    fs.writeFileSync('./.vscode/launch.json', JSON.stringify(launch, null, 2))
+
 
 ##
 ## Task: update the build script
@@ -171,218 +146,5 @@ task 'test', 'set vscode to build & run the tests', ->
         emcc_test.concat(C_CODE).join(" ")
     ].join(" && ")
 
-    tasks = {
-        "version": "0.1.0",
-        "command": "/bin/sh",
-        "cwd": "${workspaceRoot}",
-        "isShellCommand": true,
-        "args": ["-c"],
-        "showOutput": "always",
-        "echoCommand": true,
-        "suppressTaskName": true,
-        "tasks": [
-            {
-                "isBuildCommand": true,
-                "taskName": "build",
-                "args": [cmd]
-            }
-        ]
-    }
-
-    fs.writeFileSync('./.vscode/tasks.json', JSON.stringify(tasks, null, 2))
-    launch =  {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "Launch localhost",
-                "type": "chrome",
-                "request": "launch",
-                "url": "http://localhost:8088/shmupwarz.html",
-                "webRoot": "${workspaceRoot}/web"
-            },
-        ]
-    }
-
-    fs.writeFileSync('./.vscode/launch.json', JSON.stringify(launch, null, 2))
-
-##
-## Task: update the build script
-## set the build cycle to 'desktop'
-##
-valac_desktop = [
-    "valac "
-    "-C"
-    "--save-temps"
-    "--define=DESKTOP"
-    "#{PROFILING}"
-    "--disable-warnings"
-    "--vapidir ./vapis"
-    "--pkg mt19937ar"
-    "--pkg posix"
-    "--pkg sdl2"
-    "--pkg SDL2_image"
-    "--pkg SDL2_ttf"
-]            #.replace("src/main.vala", "desktop.vala")
-
-cc_desktop = [
-    "clang"
-    "-lm"
-    "-lSDL2"
-    "-lSDL2_image"
-    "-lSDL2_ttf"
-    "-Iinclude" 
-    "-I/usr/include/SDL2"
-    "-O3" 
-    "-o build/shmupwarz"
-]
-task 'desktop', 'set vscode to build & run the desktop compact class version', ->
-
-    walk('src')
-
-    cmd = [
-        "cp -rf src build"
-        "tools/valac.coffee src"
-        valac_desktop.concat(VALA_CODE).join(" ")
-        "tools/emcc.coffee src"
-        cc_desktop.concat(C_CODE).join(" ")
-    ].join(" && ")
-
-    tasks = {
-        "version": "0.1.0",
-        "command": "/bin/sh",
-        "cwd": "${workspaceRoot}",
-        "isShellCommand": true,
-        "args": ["-c"],
-        "showOutput": "always",
-        "echoCommand": true,
-        "suppressTaskName": true,
-        "tasks": [
-            {
-                "isBuildCommand": true,
-                "taskName": "build",
-                "args": [cmd]
-            }
-        ]
-    }
-
-    fs.writeFileSync('./.vscode/tasks.json', JSON.stringify(tasks, null, 2))
-
-    launch =  {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "Debug",
-                "type": "lldb",
-                "request": "launch",
-                "cwd": "${workspaceRoot}/build",
-                "program": "${workspaceRoot}/build/shmupwarz",
-                "args": []
-            }
-        ]
-    }
-
-    fs.writeFileSync('./.vscode/launch.json', JSON.stringify(launch, null, 2))
-
-    fs.writeFileSync './Makefile', Makefile.profile.compact
-        valac: 'valac'
-        flags: '--save-temps --disable-warnings'
-        defines: "--define=DESKTOP #{PROFILING}"
-        dependancies: DEPS.join(" \\\n")
-        code: VALA_CODE.join(" \\\n")
-        cc: 'clang'
-        c_code: C_CODE.join(" \\\n")
-        optimize: '-O3'
-        include: '-Iinclude'
-        libraries: '-lm'
-        resources: ''
-        exporting: ''
-        src: 'src'
-        output: '-o build/shmupwarz'
-
-
-##
-## Task: update the build script
-## set the build cycle to 'gobject'
-##
-gobject = [
-    "valac "
-    "--cc=clang"
-    "#{PROFILING}"
-    "--define=DESKTOP"
-    "--disable-warnings"
-    "--vapidir ./vapis"
-    "--pkg mt19937ar"
-    "--pkg posix"
-    "--pkg sdl2"
-    "--pkg SDL2_image"
-    "--pkg SDL2_ttf"
-    "--pkg SDL2_mixer"
-    "-X -lm"
-    "-X -g"
-    "-X -O3"
-    "-X -Wno-everything"
-    "-X -Iinc"
-    "-o build/shmupwarz"
-]
-
-task 'gobject', 'set vscode to build & run the gobject version', ->
-
-    walk('src')
-
-    cmd = [
-        gobject.concat(VALA_CODE).join(" ")
-            .replace(/build\/src/g, "src")
-    ].join("")
-
-    tasks = {
-        "version": "0.1.0",
-        "command": "/bin/sh",
-        "cwd": "${workspaceRoot}",
-        "isShellCommand": true,
-        "args": ["-c"],
-        "showOutput": "always",
-        "echoCommand": true,
-        "suppressTaskName": true,
-        "tasks": [
-            {
-                "isBuildCommand": true,
-                "taskName": "build",
-                "args": [cmd]
-            }
-        ]
-    }
-
-    fs.writeFileSync('./.vscode/tasks.json', JSON.stringify(tasks, null, 2))
-
-    launch =  {
-        "version": "0.2.0",
-        "configurations": [
-            {
-                "name": "Debug",
-                "type": "lldb",
-                "request": "launch",
-                "cwd": "${workspaceRoot}/build",
-                "program": "${workspaceRoot}/build/shmupwarz",
-                "args": []
-            }
-        ]
-    }
-
-    fs.writeFileSync('./.vscode/launch.json', JSON.stringify(launch, null, 2))
-
-    fs.writeFileSync './Makefile', Makefile.profile.gobject
-        valac: 'valac --cc=clang'
-        flags: '--disable-warnings'
-        defines: "--define=DESKTOP #{PROFILING}"
-        dependancies: DEPS.join(" \\\n")
-        code: VALA_CODE.join(" \\\n").replace(/build\/src/g, "src")
-        optimize: '-X -O3'
-        include: '-X -Iinc'
-        libraries: '-X -lm'
-        resources: ''
-        exporting: ''
-        src: 'src'
-        output: '-o build/shmupwarz'
-
-
+    exec(cmd, puts);
 

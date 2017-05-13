@@ -16,7 +16,15 @@ There is also no GObject in Emscripten. This limits it to compact class. so I've
 work in progress. my game compiles and runs on both desktop and escriptem, same code except the main loop.
 
 ## build
-see Cakefile
+
+deskstop:
+mkdir install
+cd install
+cmake .. -DDESKTOP=ON -DPROFILING=ON
+make
+
+emscripten
+cake em
 
 ## oop limitations
 
@@ -49,9 +57,3 @@ public void mainloop(void* arg) {
 
 }
 ```
-### Licences
-
-LGPL3 - posixvala glib replacement (C) 2013 - pancake@nopcode.org
-LPGL2 - other misc glib code (C) 1991 Free Software Foundation, Inc.
-
-everything else copyright 2017 darkoverlordofdata - Apache 2.0 License

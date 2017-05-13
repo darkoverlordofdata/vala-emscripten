@@ -3,6 +3,7 @@
  */
 using entitas;
 using systems;
+using GLib.Math;
 
 const double TAU = 2.0 * Math.PI; 
 enum Pool {
