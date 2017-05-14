@@ -2,8 +2,10 @@ var Module = {
     onRuntimeInitialized: function() {
         var e = document.getElementById('loadingDiv');
         e.style.visibility = 'hidden';
-        var e = document.getElementById('startButton');
-        e.style.visibility = 'visible';
+        // var e = document.getElementById('startButton');
+        // e.style.visibility = 'visible';
+        document.getElementById("fullScreenButton").style.visibility="visible";
+        Module.ccall('game', null, null);
     }, 
     canvas: (function() {
         var canvas = document.getElementById('canvas');
@@ -36,4 +38,3 @@ var start_function = function(o) {
     script.src = "shmupwarz.js";
     document.body.appendChild(script);
 })();
-
