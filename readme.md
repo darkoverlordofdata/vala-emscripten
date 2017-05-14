@@ -24,7 +24,7 @@ cmake .. -DDESKTOP=ON -DPROFILING=ON
 make
 
 emscripten
-cake em
+./build.sh
 
 ## oop limitations
 
