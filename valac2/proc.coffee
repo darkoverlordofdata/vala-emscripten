@@ -13,7 +13,7 @@ cmd = decodeURIComponent(process.argv[2])
 cmd = cmd[1...-1] if cmd[0] is '"' 
 
 exec cmd, (error, stdout, stderr) -> 
-    console.log error if error
+    #console.log error if error
     console.log stdout if stdout
-    console.log stderr if stderr
-    process.exit() if error
+    console.error stderr if stderr
+    process.exit(1) if error

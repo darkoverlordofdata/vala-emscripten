@@ -33,7 +33,7 @@ snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
 ## walk the folder, gather list of files, and load mangle options
 ##
 walk = (namespace = '') ->
-    source = if namespace is "" then "./build/#{SRC}" else "./build/#{SRC}/#{namespace}"
+    source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
     for file in fs.readdirSync(source)
         switch path.extname(file)
 

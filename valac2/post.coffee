@@ -29,31 +29,6 @@ lcfirst = (str) -> str.charAt(0).toLowerCase() + str.substr(1)
 snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
 
 ##
-## walk the folder, gather list of files, and load mangle options
-##
-walk = (namespace = '') ->
-    source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
-    for file in fs.readdirSync(source)
-        switch path.extname(file)
-
-            when '.c'
-                list.push "#{source}/#{file}"
-                klass = file.replace('.c','')
-                if klass[0] >='A' && klass[0] <= 'Z'
-                    name = klass.toLowerCase()
-                    fixed = snakeCase(lcfirst(klass))
-                    ns = namespace.replace(/\//g, "_")
-                    mangled = if ns is "" then fixed else "#{ns}_#{fixed}"
-                    mangled = mangled.replace(/\//g, "_")
-                    options[mangled] = (ns+klass).replace(/\_/g, "")
-
-            when '.gs' then continue
-            when '.vala' then continue
-            else # recurse down the tree
-                folder = namespace+(if namespace is "" then "" else '/')+file
-                if folder.indexOf('.') == -1 then walk(folder)
-
-##
 ## inject missing forward references
 ## for automatic reference counting
 ##
@@ -74,7 +49,26 @@ inject = (file, options) ->
            dst.push line 
     if flag then fs.writeFileSync(file, dst.join('\n'))
 
-do ->
-    walk()
-    inject(file, options) for file in list
+##
+## cross reference _release & _free
+##
+files = decodeURIComponent(process.argv[2])
+files = files[1...-1] if files[0] is '"' 
+for file in files.split(" ")
+    if path.extname(file) is  '.c'
+        klass = path.basename(file, '.c')
+        if klass[0] >='A' && klass[0] <= 'Z'
+            name = klass.toLowerCase()
+            namespace = path.dirname(file).substring(10)
+            fixed = snakeCase(lcfirst(klass))
+            ns = namespace.replace(/\//g, "_")
+            mangled = if ns is "" then fixed else "#{ns}_#{fixed}"
+            mangled = mangled.replace(/\//g, "_")
+            options[mangled] = (ns+klass).replace(/\_/g, "")
+
+
+for file in files.split(" ")
+    if path.extname(file) is  '.c'
+        inject(file, options) 
+                
 

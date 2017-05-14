@@ -579,6 +579,34 @@ void sdx_processEvents (void) {
 				sdx_mouseDown = FALSE;
 				break;
 			}
+			case SDL_FINGERMOTION:
+			{
+				SDL_Event _tmp40_ = {0};
+				SDL_TouchFingerEvent _tmp41_ = {0};
+				gfloat _tmp42_ = 0.0F;
+				SDL_Event _tmp43_ = {0};
+				SDL_TouchFingerEvent _tmp44_ = {0};
+				gfloat _tmp45_ = 0.0F;
+				_tmp40_ = sdx__evt;
+				_tmp41_ = _tmp40_.tfinger;
+				_tmp42_ = _tmp41_.x;
+				sdx_mouseX = (gdouble) _tmp42_;
+				_tmp43_ = sdx__evt;
+				_tmp44_ = _tmp43_.tfinger;
+				_tmp45_ = _tmp44_.y;
+				sdx_mouseY = (gdouble) _tmp45_;
+				break;
+			}
+			case SDL_FINGERDOWN:
+			{
+				sdx_mouseDown = TRUE;
+				break;
+			}
+			case SDL_FINGERUP:
+			{
+				sdx_mouseDown = FALSE;
+				break;
+			}
 			default:
 			break;
 		}

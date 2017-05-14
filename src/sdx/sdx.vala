@@ -39,6 +39,8 @@ namespace sdx {
 	double _freq;
 	double _mark1;
 	double _mark2;
+	int _width;
+	int _height;
 
 
 
@@ -47,6 +49,9 @@ namespace sdx {
 	 * 
 	 */
 	Window initialize(int width, int height, string name) {
+		_width = width;
+		_height = height;
+
 		keys = new uint8[256]; 
 
 		if (SDL.init(SDL.InitFlag.VIDEO | SDL.InitFlag.TIMER | SDL.InitFlag.EVENTS) < 0)
@@ -148,13 +153,29 @@ namespace sdx {
 					keys[_evt.key.keysym.sym] = 0;
 					break;
 				case SDL.EventType.MOUSEMOTION:
+					//  stdout.printf("MOUSEMOTION %f,%f\n", _evt.motion.x, _evt.motion.y);
 					mouseX = _evt.motion.x;
 					mouseY = _evt.motion.y;
 					break;
 				case SDL.EventType.MOUSEBUTTONDOWN:
+					//  stdout.printf("MOUSEBUTTONDOWN %f,%f\n", _evt.motion.x, _evt.motion.y);
 					mouseDown = true;
 					break;
 				case SDL.EventType.MOUSEBUTTONUP:
+					//  stdout.printf("MOUSEBUTTONUP %f,%f\n", _evt.motion.x, _evt.motion.y);
+					mouseDown = false;
+					break;
+				case SDL.EventType.FINGERMOTION:
+					//  stdout.printf("FINGERMOTION %d,%f\n", _evt.tfinger.x, _evt.tfinger.y);
+					mouseX = _evt.tfinger.x * (double)_width;
+					mouseY = _evt.tfinger.y * (double)_height;
+					break;
+				case SDL.EventType.FINGERDOWN:
+					//  stdout.printf("FINGERDOWN %f,%f\n", _evt.tfinger.x, _evt.tfinger.y);
+					mouseDown = true;
+					break;
+				case SDL.EventType.FINGERUP:
+					//  stdout.printf("FINGERUP %f,%f\n", _evt.tfinger.x, _evt.tfinger.y);
 					mouseDown = false;
 					break;
 			}

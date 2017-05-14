@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
 
+
 ./valac2/valac2  \
     --plugin ./valac2 \
     --builddir build \
-    --verbose \
     --cc=emcc \
     --define PROFILING \
-    --disable-warnings \
     --vapidir src/vapis \
     --pkg sdl2 \
     --pkg SDL2_image \

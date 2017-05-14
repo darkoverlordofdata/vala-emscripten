@@ -207,16 +207,13 @@ class Valac2 {
 			return 1;
 		}
 		build();
-		/** Ok, call the back end  */
-		stdout.printf("%s\n", uriEncode(vala_files.str));
-		var s1 = spawn(@"cp -rf src $(builddir)");
-		//  var s2 = spawn(@"$(plugin)/pre.old.coffee ");
-		var s2 = spawn(@"$(plugin)/pre.coffee \"$(uriEncode(vala_files.str))\"");
-		var s3 = spawn(@"$(plugin)/proc.coffee \"$(uriEncode(valac.str))\"");
-		var s4 = spawn(@"$(plugin)/post.old.coffee ");
-		//  var s4 = spawn(@"$(plugin)/post.coffee \"$(uriEncode(c_files.str))\"");
-		var s5 = spawn(@"$(plugin)/proc.coffee \"$(uriEncode(cc.str))\"");
-		stdout.printf("Ok!");
+		/** Call the back end to do the work  */
+		if (!spawn(@"cp -rf src $(builddir)")) return 1;
+		if (!spawn(@"$(plugin)/pre.coffee \"$(encodeURIComponent(vala_files.str))\"")) return 1;
+		if (!spawn(@"$(plugin)/proc.coffee \"$(encodeURIComponent(valac.str))\"")) return 1;
+		if (!spawn(@"$(plugin)/post.coffee \"$(encodeURIComponent(c_files.str))\"")) return 1;
+		if (!spawn(@"$(plugin)/proc.coffee \"$(encodeURIComponent(cc.str))\"")) return 1;
+		stdout.printf("Valac2 complete.\n");
 		return 0;
 	}
 
@@ -229,10 +226,13 @@ class Valac2 {
 		c_files = new StringBuilder();
 
 		valac.append("-C ");
-		//valac.append("--save-temps ");
+		valac.append("--save-temps ");
 
 		if (quiet_mode) valac.append("--quiet ");
-		if (verbose_mode) valac.append("--verbose ");
+		if (verbose_mode)  {
+			valac.append("--verbose ");
+			cc.append("-v ");
+		}
 		if (vapi_comments) valac.append("--vapi-comments ");
 		if (compile_only) valac.append("--compile-only ");
 		if (api_version) valac.append("--api-version ");
@@ -248,7 +248,7 @@ class Valac2 {
 		if (experimental_non_null) valac.append("--enable-experimental-non-null ");
 		if (gobject_tracing) valac.append("--enable-gobject-tracing ");
 		if (disable_since_check) valac.append("--disable-since-check ");
-		//  if (disable_warnings) valac.append("--disable-warnings ");
+		if (disable_warnings) valac.append("--disable-warnings ");
 		if (nostdpkg) valac.append("--nostdpkg ");
 		if (enable_version_header) valac.append("--enable-version-header ");
 		if (disable_version_header) valac.append("--disable-version-header ");
@@ -458,8 +458,9 @@ class Valac2 {
 								out cmd_stderr,
 								out cmd_status);
 
+			if (cmd_status != 0)
+				stdout.puts(cmd_stderr);
 			stdout.puts(cmd_stdout);
-			stdout.puts(cmd_stderr);
 			result = cmd_status == 0;
 
 		} catch (SpawnError e) {
@@ -470,7 +471,12 @@ class Valac2 {
 	}
 
 
-	static string uriEncode(string str) {
+	/**
+	 * Quick & Dirty encodeURIComponent
+	 * 
+	 * prevents the cli from expanding flags, quotes and paths in parameter list
+	 */
+	static string encodeURIComponent(string str) {
 		//  SPACE  %20
 		//  SLASH  %2F
 		//  HYPHEN %2D

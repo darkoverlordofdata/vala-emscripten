@@ -21,8 +21,9 @@ SRC = 'src'
 ##
 ## walk the folder, gather list of files
 ##
+
 walk = (namespace = '') ->
-    source = if namespace is "" then "./build/#{SRC}" else "./build/#{SRC}/#{namespace}"
+    source = if namespace is "" then "./build/src" else "./build/src/#{namespace}"
     for file in fs.readdirSync(source)
         switch path.extname(file)
 
