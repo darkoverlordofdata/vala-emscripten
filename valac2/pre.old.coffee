@@ -16,7 +16,7 @@ list = []
 options = {}
 lcfirst = (str) -> str.charAt(0).toLowerCase() + str.substr(1)
 snakeCase = (str) ->  str.replace(/([A-Z])/g, ($0) -> "_"+$0.toLowerCase())
-SRC = process.argv[2] || 'src'
+SRC = 'src'
 
 ##
 ## walk the folder, gather list of files
@@ -32,6 +32,7 @@ walk = (namespace = '') ->
                     list.push "#{source}/#{file}"
                     name = klass.toLowerCase()
                     options["#{source}/#{file}"] = { 'ext':'gs', 'class': klass, 'name': name, 'namespace': namespace }
+                    console.log "#{source}/#{file}"
 
             when '.vala' 
                 klass = file.replace('.vala','')
@@ -39,6 +40,7 @@ walk = (namespace = '') ->
                     list.push "#{source}/#{file}"
                     name = klass.toLowerCase()
                     options["#{source}/#{file}"] = { 'ext':'vala', 'class': klass, 'name': name, 'namespace': namespace }
+                    console.log "#{source}/#{file}"
 
             when '.c' then continue
             else # recurse down the tree
