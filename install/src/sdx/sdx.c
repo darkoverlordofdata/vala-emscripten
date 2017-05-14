@@ -131,6 +131,10 @@ extern gdouble sdx__mark1;
 gdouble sdx__mark1 = 0.0;
 extern gdouble sdx__mark2;
 gdouble sdx__mark2 = 0.0;
+extern gint sdx__width;
+gint sdx__width = 0;
+extern gint sdx__height;
+gint sdx__height = 0;
 
 GQuark sdx_sdl_exception_quark (void);
 GType sdx_font_get_type (void) G_GNUC_CONST;
@@ -171,111 +175,117 @@ GQuark sdx_sdl_exception_quark (void) {
  */
 SDL_Window* sdx_initialize (gint width, gint height, const gchar* name) {
 	SDL_Window* result = NULL;
-	guint8* _tmp0_ = NULL;
+	gint _tmp0_ = 0;
 	gint _tmp1_ = 0;
-	gint _tmp4_ = 0;
-	gboolean _tmp7_ = FALSE;
-	gint _tmp10_ = 0;
+	guint8* _tmp2_ = NULL;
+	gint _tmp3_ = 0;
+	gint _tmp6_ = 0;
+	gboolean _tmp9_ = FALSE;
+	gint _tmp12_ = 0;
 	SDL_Window* window = NULL;
-	const gchar* _tmp13_ = NULL;
-	gint _tmp14_ = 0;
-	gint _tmp15_ = 0;
-	SDL_Window* _tmp16_ = NULL;
-	SDL_Window* _tmp17_ = NULL;
-	SDL_Window* _tmp20_ = NULL;
-	SDL_Renderer* _tmp21_ = NULL;
-	SDL_Renderer* _tmp22_ = NULL;
-	guint64 _tmp25_ = 0ULL;
-	guint64 _tmp26_ = 0ULL;
+	const gchar* _tmp15_ = NULL;
+	gint _tmp16_ = 0;
+	gint _tmp17_ = 0;
+	SDL_Window* _tmp18_ = NULL;
+	SDL_Window* _tmp19_ = NULL;
+	SDL_Window* _tmp22_ = NULL;
+	SDL_Renderer* _tmp23_ = NULL;
+	SDL_Renderer* _tmp24_ = NULL;
+	guint64 _tmp27_ = 0ULL;
+	guint64 _tmp28_ = 0ULL;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (name != NULL, NULL);
-	_tmp0_ = g_new0 (guint8, 256);
+	_tmp0_ = width;
+	sdx__width = _tmp0_;
+	_tmp1_ = height;
+	sdx__height = _tmp1_;
+	_tmp2_ = g_new0 (guint8, 256);
 	sdx_keys = (g_free (sdx_keys), NULL);
-	sdx_keys = _tmp0_;
+	sdx_keys = _tmp2_;
 	sdx_keys_length1 = 256;
 	_sdx_keys_size_ = sdx_keys_length1;
-	_tmp1_ = SDL_Init ((guint32) ((SDL_INIT_VIDEO | SDL_INIT_TIMER) | SDL_INIT_EVENTS));
-	if (_tmp1_ < 0) {
-		const gchar* _tmp2_ = NULL;
-		GError* _tmp3_ = NULL;
-		_tmp2_ = SDL_GetError ();
-		_tmp3_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_Initialization, _tmp2_);
-		_inner_error_ = _tmp3_;
+	_tmp3_ = SDL_Init ((guint32) ((SDL_INIT_VIDEO | SDL_INIT_TIMER) | SDL_INIT_EVENTS));
+	if (_tmp3_ < 0) {
+		const gchar* _tmp4_ = NULL;
+		GError* _tmp5_ = NULL;
+		_tmp4_ = SDL_GetError ();
+		_tmp5_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_Initialization, _tmp4_);
+		_inner_error_ = _tmp5_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp4_ = IMG_Init ((gint) IMG_INIT_PNG);
-	if (_tmp4_ < 0) {
-		const gchar* _tmp5_ = NULL;
-		GError* _tmp6_ = NULL;
-		_tmp5_ = SDL_GetError ();
-		_tmp6_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_ImageInitialization, _tmp5_);
-		_inner_error_ = _tmp6_;
+	_tmp6_ = IMG_Init ((gint) IMG_INIT_PNG);
+	if (_tmp6_ < 0) {
+		const gchar* _tmp7_ = NULL;
+		GError* _tmp8_ = NULL;
+		_tmp7_ = SDL_GetError ();
+		_tmp8_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_ImageInitialization, _tmp7_);
+		_inner_error_ = _tmp8_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp7_ = SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	if (!_tmp7_) {
-		const gchar* _tmp8_ = NULL;
-		GError* _tmp9_ = NULL;
-		_tmp8_ = SDL_GetError ();
-		_tmp9_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TextureFilteringNotEnabled, _tmp8_);
-		_inner_error_ = _tmp9_;
+	_tmp9_ = SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	if (!_tmp9_) {
+		const gchar* _tmp10_ = NULL;
+		GError* _tmp11_ = NULL;
+		_tmp10_ = SDL_GetError ();
+		_tmp11_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TextureFilteringNotEnabled, _tmp10_);
+		_inner_error_ = _tmp11_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp10_ = TTF_Init ();
-	if (_tmp10_ == -1) {
-		const gchar* _tmp11_ = NULL;
-		GError* _tmp12_ = NULL;
-		_tmp11_ = SDL_GetError ();
-		_tmp12_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TtfInitialization, _tmp11_);
-		_inner_error_ = _tmp12_;
+	_tmp12_ = TTF_Init ();
+	if (_tmp12_ == -1) {
+		const gchar* _tmp13_ = NULL;
+		GError* _tmp14_ = NULL;
+		_tmp13_ = SDL_GetError ();
+		_tmp14_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TtfInitialization, _tmp13_);
+		_inner_error_ = _tmp14_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp13_ = name;
-	_tmp14_ = width;
-	_tmp15_ = height;
-	_tmp16_ = SDL_CreateWindow (_tmp13_, (gint) SDL_WINDOWPOS_CENTERED_MASK, (gint) SDL_WINDOWPOS_CENTERED_MASK, _tmp14_, _tmp15_, (guint32) SDL_WINDOW_SHOWN);
-	window = _tmp16_;
-	_tmp17_ = window;
-	if (_tmp17_ == NULL) {
-		const gchar* _tmp18_ = NULL;
-		GError* _tmp19_ = NULL;
-		_tmp18_ = SDL_GetError ();
-		_tmp19_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_OpenWindow, _tmp18_);
-		_inner_error_ = _tmp19_;
+	_tmp15_ = name;
+	_tmp16_ = width;
+	_tmp17_ = height;
+	_tmp18_ = SDL_CreateWindow (_tmp15_, (gint) SDL_WINDOWPOS_CENTERED_MASK, (gint) SDL_WINDOWPOS_CENTERED_MASK, _tmp16_, _tmp17_, (guint32) SDL_WINDOW_SHOWN);
+	window = _tmp18_;
+	_tmp19_ = window;
+	if (_tmp19_ == NULL) {
+		const gchar* _tmp20_ = NULL;
+		GError* _tmp21_ = NULL;
+		_tmp20_ = SDL_GetError ();
+		_tmp21_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_OpenWindow, _tmp20_);
+		_inner_error_ = _tmp21_;
 		_SDL_DestroyWindow0 (window);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp20_ = window;
-	_tmp21_ = SDL_CreateRenderer (_tmp20_, -1, (guint32) (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+	_tmp22_ = window;
+	_tmp23_ = SDL_CreateRenderer (_tmp22_, -1, (guint32) (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
 	_SDL_DestroyRenderer0 (sdx_renderer);
-	sdx_renderer = _tmp21_;
-	_tmp22_ = sdx_renderer;
-	if (_tmp22_ == NULL) {
-		const gchar* _tmp23_ = NULL;
-		GError* _tmp24_ = NULL;
-		_tmp23_ = SDL_GetError ();
-		_tmp24_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_CreateRenderer, _tmp23_);
-		_inner_error_ = _tmp24_;
+	sdx_renderer = _tmp23_;
+	_tmp24_ = sdx_renderer;
+	if (_tmp24_ == NULL) {
+		const gchar* _tmp25_ = NULL;
+		GError* _tmp26_ = NULL;
+		_tmp25_ = SDL_GetError ();
+		_tmp26_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_CreateRenderer, _tmp25_);
+		_inner_error_ = _tmp26_;
 		_SDL_DestroyWindow0 (window);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp25_ = SDL_GetPerformanceFrequency ();
-	sdx__freq = (gdouble) _tmp25_;
+	_tmp27_ = SDL_GetPerformanceFrequency ();
+	sdx__freq = (gdouble) _tmp27_;
 	sdx_fpsColor = SDX_COLOR_AntiqueWhite;
-	_tmp26_ = SDL_GetPerformanceCounter ();
-	init_genrand ((gulong) _tmp26_);
+	_tmp28_ = SDL_GetPerformanceCounter ();
+	init_genrand ((gulong) _tmp28_);
 	result = window;
 	return result;
 }

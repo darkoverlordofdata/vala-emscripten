@@ -153,29 +153,28 @@ namespace sdx {
 					keys[_evt.key.keysym.sym] = 0;
 					break;
 				case SDL.EventType.MOUSEMOTION:
-					//  stdout.printf("MOUSEMOTION %f,%f\n", _evt.motion.x, _evt.motion.y);
 					mouseX = _evt.motion.x;
 					mouseY = _evt.motion.y;
 					break;
 				case SDL.EventType.MOUSEBUTTONDOWN:
-					//  stdout.printf("MOUSEBUTTONDOWN %f,%f\n", _evt.motion.x, _evt.motion.y);
 					mouseDown = true;
 					break;
 				case SDL.EventType.MOUSEBUTTONUP:
-					//  stdout.printf("MOUSEBUTTONUP %f,%f\n", _evt.motion.x, _evt.motion.y);
 					mouseDown = false;
 					break;
 				case SDL.EventType.FINGERMOTION:
-					//  stdout.printf("FINGERMOTION %d,%f\n", _evt.tfinger.x, _evt.tfinger.y);
+#if (DESKTOP)					
+					mouseX = _evt.tfinger.x;
+					mouseY = _evt.tfinger.y;
+#else
 					mouseX = _evt.tfinger.x * (double)_width;
 					mouseY = _evt.tfinger.y * (double)_height;
+#endif
 					break;
 				case SDL.EventType.FINGERDOWN:
-					//  stdout.printf("FINGERDOWN %f,%f\n", _evt.tfinger.x, _evt.tfinger.y);
 					mouseDown = true;
 					break;
 				case SDL.EventType.FINGERUP:
-					//  stdout.printf("FINGERUP %f,%f\n", _evt.tfinger.x, _evt.tfinger.y);
 					mouseDown = false;
 					break;
 			}
