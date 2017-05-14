@@ -68,7 +68,7 @@ valac_em = [
 emcc_em = [
     "emcc"
     "--preload-file assets" 
-    "-Iinclude" 
+    "-I include" 
     "-O2" 
     "-s WASM=1"
     "-s USE_SDL=2" 

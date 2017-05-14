@@ -1,14 +1,14 @@
-# tools
+# valac2
 
-## valac.coffee
+## step 1
 
 preprocess vala/genie source code 
 inject reference counting boilerplate for classes
 
-## emcc.coffee
+## step 2
 
 preprocess intermediate c code
-inject missing forward references induced by valac.coffee
+inject missing forward references induced step 1
 
 
 # Apache 2.0 License

@@ -5,7 +5,7 @@
 ##
 ##  Phase I - preprocess for valac
 ##
-## Injects reference counting boilerplate into classes declared as:
+## Injects reference counting boilerplate into classes that sublcass Object
 ##
 ##  <ClassName> : Object
 ##
