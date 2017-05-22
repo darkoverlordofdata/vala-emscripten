@@ -289,6 +289,7 @@ entitasBuffer* entitas_buffer_dup (const entitasBuffer* self);
 void entitas_buffer_free (entitasBuffer* self);
 void entitas_buffer_copy (const entitasBuffer* self, entitasBuffer* dest);
 void entitas_buffer_destroy (entitasBuffer* self);
+void entitas_buffer_init (entitasBuffer *self, gint pool, gint size, entitasFactory factory, void* factory_target);
 GType entitas_isystem_get_type (void) G_GNUC_CONST;
 entitasISystem* entitas_isystem_dup (const entitasISystem* self);
 void entitas_isystem_free (entitasISystem* self);
@@ -297,6 +298,28 @@ const guint64 ENTITAS_POW2[65] = {(guint64) 0x0000000000000000, (guint64) 0x0000
 
 GQuark entitas_exception_quark (void) {
 	return g_quark_from_static_string ("entitas_exception-quark");
+}
+
+
+void entitas_buffer_init (entitasBuffer *self, gint pool, gint size, entitasFactory factory, void* factory_target) {
+	gint _tmp0_ = 0;
+	gint _tmp1_ = 0;
+	entitasFactory _tmp2_ = NULL;
+	void* _tmp2__target = NULL;
+	memset (self, 0, sizeof (entitasBuffer));
+	_tmp0_ = pool;
+	(*self).pool = _tmp0_;
+	_tmp1_ = size;
+	(*self).size = _tmp1_;
+	_tmp2_ = factory;
+	_tmp2__target = factory_target;
+	((*self).factory_target_destroy_notify == NULL) ? NULL : ((*self).factory_target_destroy_notify ((*self).factory_target), NULL);
+	(*self).factory = NULL;
+	(*self).factory_target = NULL;
+	(*self).factory_target_destroy_notify = NULL;
+	(*self).factory = _tmp2_;
+	(*self).factory_target = _tmp2__target;
+	(*self).factory_target_destroy_notify = NULL;
 }
 
 

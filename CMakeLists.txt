@@ -36,18 +36,26 @@ find_package(PkgConfig)
 
 set(MODULES_TO_CHECK ${MODULES_TO_CHECK} SDL2_image)
 set(MODULES_TO_CHECK ${MODULES_TO_CHECK} SDL2_ttf)
+set(MODULES_TO_CHECK ${MODULES_TO_CHECK} gio-2.0)
 set(MODULES_TO_CHECK ${MODULES_TO_CHECK} glib-2.0)
 set(MODULES_TO_CHECK ${MODULES_TO_CHECK} gobject-2.0)
+set(MODULES_TO_CHECK ${MODULES_TO_CHECK} json-glib-1.0)
 set(MODULES_TO_CHECK ${MODULES_TO_CHECK} sdl2)
 
 pkg_check_modules(DEPS REQUIRED ${MODULES_TO_CHECK})
 
+
+find_program ( WHERE_GRESOURCE glib-compile-resources )
+if ( NOT WHERE_GRESOURCE )
+	MESSAGE(FATAL_ERROR "Error! GLIB-COMPILE-RESOURCES is not installed.")
+endif()
 
 add_subdirectory(src/vapis)
 add_subdirectory(src/systems)
 add_subdirectory(po)
 add_subdirectory(src/util)
 add_subdirectory(src/sdx/graphics)
+add_subdirectory(data)
 add_subdirectory(src/entitas)
 add_subdirectory(src/sdx)
 add_subdirectory(src/sdx/files)

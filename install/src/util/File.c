@@ -40,14 +40,10 @@ typedef struct _utilStringClass utilStringClass;
 struct _utilFile {
 	GObject parent_instance;
 	utilFilePrivate * priv;
-	guint8* buf;
-	gint buf_length1;
 	struct stat* stat;
 	gchar* path;
 	gchar** files;
 	gint files_length1;
-	gchar* ioBuff;
-	gint ioBuff_length1;
 	GList* fileList;
 };
 
@@ -103,17 +99,13 @@ static void _g_list_free__g_object_unref0_ (GList* self) {
 utilFile* util_file_construct (GType object_type, const gchar* path) {
 	utilFile * self = NULL;
 	const gchar* _tmp0_ = NULL;
-	guint8* _tmp1_ = NULL;
-	gint _tmp1__length1 = 0;
-	gchar* _tmp2_ = NULL;
+	gchar* _tmp1_ = NULL;
 	g_return_val_if_fail (path != NULL, NULL);
 	self = (utilFile*) g_object_new (object_type, NULL);
 	_tmp0_ = path;
-	_tmp1_ = self->buf;
-	_tmp1__length1 = self->buf_length1;
-	_tmp2_ = realpath (_tmp0_, _tmp1_);
+	_tmp1_ = realpath (_tmp0_, NULL);
 	_g_free0 (self->path);
-	self->path = (gchar*) _tmp2_;
+	self->path = (gchar*) _tmp1_;
 	return self;
 }
 
@@ -310,55 +302,60 @@ gchar* util_file_getName (utilFile* self) {
 /**
  * the parent is everything prior to the final separator
  */
+static gint string_last_index_of (const gchar* self, const gchar* needle, gint start_index) {
+	gint result = 0;
+	gchar* _result_ = NULL;
+	gint _tmp0_ = 0;
+	const gchar* _tmp1_ = NULL;
+	gchar* _tmp2_ = NULL;
+	gchar* _tmp3_ = NULL;
+	g_return_val_if_fail (self != NULL, 0);
+	g_return_val_if_fail (needle != NULL, 0);
+	_tmp0_ = start_index;
+	_tmp1_ = needle;
+	_tmp2_ = g_strrstr (((gchar*) self) + _tmp0_, (gchar*) _tmp1_);
+	_result_ = _tmp2_;
+	_tmp3_ = _result_;
+	if (_tmp3_ != NULL) {
+		gchar* _tmp4_ = NULL;
+		_tmp4_ = _result_;
+		result = (gint) (_tmp4_ - ((gchar*) self));
+		return result;
+	} else {
+		result = -1;
+		return result;
+	}
+}
+
+
 gchar* util_file_getParent (utilFile* self) {
 	gchar* result = NULL;
-	gchar* _tmp12_ = NULL;
+	gint i = 0;
+	const gchar* _tmp0_ = NULL;
+	gint _tmp1_ = 0;
+	gchar* _tmp2_ = NULL;
+	gint _tmp3_ = 0;
 	g_return_val_if_fail (self != NULL, NULL);
-	{
-		gint i = 0;
-		const gchar* _tmp0_ = NULL;
-		gint _tmp1_ = 0;
-		gint _tmp2_ = 0;
-		_tmp0_ = self->path;
-		_tmp1_ = strlen (_tmp0_);
-		_tmp2_ = _tmp1_;
-		i = _tmp2_ - 1;
-		{
-			gboolean _tmp3_ = FALSE;
-			_tmp3_ = TRUE;
-			while (TRUE) {
-				gint _tmp5_ = 0;
-				const gchar* _tmp6_ = NULL;
-				gint _tmp7_ = 0;
-				gchar _tmp8_ = '\0';
-				if (!_tmp3_) {
-					gint _tmp4_ = 0;
-					_tmp4_ = i;
-					i = _tmp4_ - 1;
-				}
-				_tmp3_ = FALSE;
-				_tmp5_ = i;
-				if (!(_tmp5_ > 0)) {
-					break;
-				}
-				_tmp6_ = self->path;
-				_tmp7_ = i;
-				_tmp8_ = string_get (_tmp6_, (glong) _tmp7_);
-				if (_tmp8_ == UTIL_pathSeparatorChar) {
-					const gchar* _tmp9_ = NULL;
-					gint _tmp10_ = 0;
-					gchar* _tmp11_ = NULL;
-					_tmp9_ = self->path;
-					_tmp10_ = i;
-					_tmp11_ = string_substring (_tmp9_, (glong) 0, (glong) (_tmp10_ - 1));
-					result = _tmp11_;
-					return result;
-				}
-			}
-		}
+	_tmp0_ = self->path;
+	_tmp1_ = string_last_index_of (_tmp0_, UTIL_pathSeparator, 0);
+	i = _tmp1_;
+	_tmp3_ = i;
+	if (_tmp3_ < 0) {
+		gchar* _tmp4_ = NULL;
+		_tmp4_ = g_strdup ("");
+		_g_free0 (_tmp2_);
+		_tmp2_ = _tmp4_;
+	} else {
+		const gchar* _tmp5_ = NULL;
+		gint _tmp6_ = 0;
+		gchar* _tmp7_ = NULL;
+		_tmp5_ = self->path;
+		_tmp6_ = i;
+		_tmp7_ = string_substring (_tmp5_, (glong) 0, (glong) _tmp6_);
+		_g_free0 (_tmp2_);
+		_tmp2_ = _tmp7_;
 	}
-	_tmp12_ = g_strdup ("");
-	result = _tmp12_;
+	result = _tmp2_;
 	return result;
 }
 
@@ -448,6 +445,9 @@ gboolean util_file_isDirectory (utilFile* self) {
 }
 
 
+/**
+ * get the length of the file
+ */
 gint util_file_length (utilFile* self) {
 	gint result = 0;
 	gint _tmp0_ = 0;
@@ -468,55 +468,76 @@ gint util_file_length (utilFile* self) {
 }
 
 
+/**
+ * read the contents into a string buffer
+ */
 gchar* util_file_read (utilFile* self) {
 	gchar* result = NULL;
 	gboolean _tmp0_ = FALSE;
-	gint l = 0;
-	gint _tmp2_ = 0;
-	gint _tmp3_ = 0;
-	gchar* _tmp4_ = NULL;
-	gchar* _tmp5_ = NULL;
-	gint _tmp5__length1 = 0;
+	FILE* hFile = NULL;
+	const gchar* _tmp2_ = NULL;
+	FILE* _tmp3_ = NULL;
+	gint size = 0;
+	struct stat* _tmp4_ = NULL;
+	gsize _tmp5_ = 0UL;
+	gchar* ioBuff = NULL;
 	gint _tmp6_ = 0;
-	gchar _tmp7_ = '\0';
-	FILE* f = NULL;
-	const gchar* _tmp8_ = NULL;
-	FILE* _tmp9_ = NULL;
-	FILE* _tmp10_ = NULL;
-	gchar* _tmp11_ = NULL;
-	gint _tmp11__length1 = 0;
-	const gchar* _tmp12_ = NULL;
-	gchar* _tmp13_ = NULL;
+	gchar* _tmp7_ = NULL;
+	gint ioBuff_length1 = 0;
+	gint _ioBuff_size_ = 0;
+	gchar* lines = NULL;
+	gchar* _tmp8_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
-	_tmp0_ = util_file_isFile (self);
+	_tmp0_ = util_file_exists (self);
 	if (!_tmp0_) {
 		gchar* _tmp1_ = NULL;
 		_tmp1_ = g_strdup ("");
 		result = _tmp1_;
 		return result;
 	}
-	_tmp2_ = util_file_length (self);
-	l = _tmp2_;
-	_tmp3_ = l;
-	_tmp4_ = g_new0 (gchar, _tmp3_ + 1);
-	self->ioBuff = (g_free (self->ioBuff), NULL);
-	self->ioBuff = _tmp4_;
-	self->ioBuff_length1 = _tmp3_ + 1;
-	_tmp5_ = self->ioBuff;
-	_tmp5__length1 = self->ioBuff_length1;
-	_tmp6_ = l;
-	_tmp5_[_tmp6_] = (gchar) 0;
-	_tmp7_ = _tmp5_[_tmp6_];
-	_tmp8_ = self->path;
-	_tmp9_ = fopen (_tmp8_, "r");
-	f = _tmp9_;
-	_tmp10_ = f;
-	_tmp11_ = self->ioBuff;
-	_tmp11__length1 = self->ioBuff_length1;
-	_tmp12_ = fgets (_tmp11_, _tmp11__length1, _tmp10_);
-	_tmp13_ = g_strdup (_tmp12_);
-	result = _tmp13_;
-	_fclose0 (f);
+	_tmp2_ = self->path;
+	_tmp3_ = fopen (_tmp2_, "r");
+	hFile = _tmp3_;
+	_tmp4_ = self->stat;
+	_tmp5_ = (*_tmp4_).st_size;
+	size = (gint) _tmp5_;
+	_tmp6_ = size;
+	_tmp7_ = g_new0 (gchar, _tmp6_);
+	ioBuff = _tmp7_;
+	ioBuff_length1 = _tmp6_;
+	_ioBuff_size_ = ioBuff_length1;
+	_tmp8_ = g_strdup ("");
+	lines = _tmp8_;
+	while (TRUE) {
+		const gchar* _tmp9_ = NULL;
+		gint _tmp10_ = 0;
+		gint _tmp11_ = 0;
+		gint _tmp12_ = 0;
+		const gchar* _tmp13_ = NULL;
+		FILE* _tmp14_ = NULL;
+		gchar* _tmp15_ = NULL;
+		gint _tmp15__length1 = 0;
+		const gchar* _tmp16_ = NULL;
+		gchar* _tmp17_ = NULL;
+		_tmp9_ = lines;
+		_tmp10_ = strlen (_tmp9_);
+		_tmp11_ = _tmp10_;
+		_tmp12_ = size;
+		if (!(_tmp11_ < _tmp12_)) {
+			break;
+		}
+		_tmp13_ = lines;
+		_tmp14_ = hFile;
+		_tmp15_ = ioBuff;
+		_tmp15__length1 = ioBuff_length1;
+		_tmp16_ = fgets (_tmp15_, _tmp15__length1, _tmp14_);
+		_tmp17_ = g_strconcat (_tmp13_, (const gchar*) _tmp16_, NULL);
+		_g_free0 (lines);
+		lines = _tmp17_;
+	}
+	result = lines;
+	ioBuff = (g_free (ioBuff), NULL);
+	_fclose0 (hFile);
 	return result;
 }
 
@@ -692,21 +713,15 @@ static void util_file_class_init (utilFileClass * klass) {
 
 
 static void util_file_instance_init (utilFile * self) {
-	guint8* _tmp0_ = NULL;
-	_tmp0_ = g_new0 (guint8, 4096);
-	self->buf = _tmp0_;
-	self->buf_length1 = 4096;
 }
 
 
 static void util_file_finalize (GObject* obj) {
 	utilFile * self;
 	self = G_TYPE_CHECK_INSTANCE_CAST (obj, UTIL_TYPE_FILE, utilFile);
-	self->buf = (g_free (self->buf), NULL);
 	_g_free0 (self->stat);
 	_g_free0 (self->path);
 	self->files = (_vala_array_free (self->files, self->files_length1, (GDestroyNotify) g_free), NULL);
-	self->ioBuff = (g_free (self->ioBuff), NULL);
 	__g_list_free__g_object_unref0_0 (self->fileList);
 	G_OBJECT_CLASS (util_file_parent_class)->finalize (obj);
 }

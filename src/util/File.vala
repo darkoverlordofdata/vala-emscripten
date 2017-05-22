@@ -9,15 +9,13 @@ namespace util {
 	
 	public class File : Object {
 
-		public uint8[] buf = new uint8[4096];
 		public Posix.Stat? stat;
 		public string path;
 		public string[] files;
-		public char[] ioBuff;
 		public List<String> fileList; 
 
 		public File(string path) {
-			this.path = (string)Posix.realpath(path, buf);
+			this.path = (string)Posix.realpath(path);
 		} 
 
 		public string getPath() {
@@ -38,10 +36,8 @@ namespace util {
 		 * the parent is everything prior to the final separator
 		 */
 		public string getParent() {
-			for (var i=path.length-1; i>0; i--)
-				if (path[i] == pathSeparatorChar) 
-					return path.substring(0, i-1);
-			return "";
+			var i = path.last_index_of(pathSeparator);
+			return i < 0 ? "" : path.substring(0, i);
 		}
 
 		/**
@@ -65,21 +61,28 @@ namespace util {
 			return exists() ? Posix.S_ISDIR(stat.st_mode) : false;
 		}
 
+		/**
+		 * get the length of the file
+		 */
 		public int length() {
 			return exists() ? (int)stat.st_size : 0;
 		}
 		
-		public string read() {
-			if (!isFile()) return "";
-
-			var l = length();
-			ioBuff = new char[l+1];
-			ioBuff[l] = 0;
-			Posix.FILE f = Posix.FILE.open(path, "r");
-			return f.gets(ioBuff);
-		}
-
 		/**
+		 * read the contents into a string buffer
+		 */
+		public string read() {
+			if (!exists()) return "";
+			Posix.FILE hFile = Posix.FILE.open(path, "r");
+			var size = (int)stat.st_size;
+			var ioBuff = new char[size];
+			var lines = "";
+			while (lines.length < size)
+				lines += (string)hFile.gets(ioBuff);
+			return lines;
+		}
+		
+			/**
 		 * return the list of files in the folder
 		 */
 		public string[] list() {

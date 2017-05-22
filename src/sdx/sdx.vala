@@ -13,6 +13,13 @@ namespace sdx {
 		CreateRenderer
 	}
 
+	public struct Blit {
+		SDL.Video.Rect source;
+		SDL.Video.Rect dest;
+		SDL.Video.RendererFlip flip;
+	}
+	
+	public delegate Blit[] Compositor(int x, int y);	
 
 	/**
 	 * Global vars
@@ -24,6 +31,7 @@ namespace sdx {
 	sdx.Font largeFont;
 	sdx.graphics.Sprite fpsSprite;
 	SDL.Video.Color fpsColor;
+	SDL.Video.Color bgdColor;
 	bool showFps;
 	double fps;
 	double delta;
@@ -32,6 +40,7 @@ namespace sdx {
 	bool mouseDown;
 	bool running;
 	uint8[] keys;
+	bool[] dir;
 
 	int _frames;
 	Event _evt;
@@ -42,7 +51,9 @@ namespace sdx {
 	int _width;
 	int _height;
 
-
+	public enum Direction {
+		NONE, LEFT, RIGHT, UP, DOWN
+	}
 
 	/**
 	 * Initialization
@@ -52,7 +63,8 @@ namespace sdx {
 		_width = width;
 		_height = height;
 
-		keys = new uint8[256]; 
+		keys = new uint8[256];
+		dir = new bool[5];
 
 		if (SDL.init(SDL.InitFlag.VIDEO | SDL.InitFlag.TIMER | SDL.InitFlag.EVENTS) < 0)
 			throw new SdlException.Initialization(SDL.get_error());
@@ -77,6 +89,7 @@ namespace sdx {
 
 		_freq = SDL.Timer.get_performance_frequency();
 		fpsColor = sdx.Color.AntiqueWhite;
+		bgdColor = { 0, 0, 0, 0 };
 
 		MersenneTwister.init_genrand((ulong)SDL.Timer.get_performance_counter());
 		return window;
@@ -101,7 +114,7 @@ namespace sdx {
 	void setShowFps(bool value) {
 		showFps = value;
 		if (showFps == true) {
-			fpsSprite = new sdx.graphics.Sprite("%2.2f".printf(60), font, fpsColor);
+			fpsSprite = sdx.graphics.Sprite.fromText("%2.2f".printf(60), font, fpsColor);
 			fpsSprite.centered = false;
 		} else {
 			fpsSprite = null;
@@ -111,7 +124,7 @@ namespace sdx {
 	void drawFps() {
 		if (showFps) {
 			fpsSprite.setText("%2.2f".printf(fps), font, fpsColor);
-			fpsSprite.render(renderer, 0, 0);
+			fpsSprite.render(0, 0);
 		}
 	}
 
@@ -145,10 +158,22 @@ namespace sdx {
 					running = false;
 					break;
 				case SDL.EventType.KEYDOWN:
+					switch (_evt.key.keysym.scancode) {
+						case SDL.Input.Scancode.LEFT: 	dir[Direction.LEFT] = true; break;
+						case SDL.Input.Scancode.RIGHT: 	dir[Direction.RIGHT] = true; break;
+						case SDL.Input.Scancode.UP: 	dir[Direction.UP] = true; break;
+						case SDL.Input.Scancode.DOWN: 	dir[Direction.DOWN] = true; break;
+					}
 					if (_evt.key.keysym.sym < 0 || _evt.key.keysym.sym > 255) break;
 					keys[_evt.key.keysym.sym] = 1;
 					break;
 				case SDL.EventType.KEYUP:
+					switch (_evt.key.keysym.scancode) {
+						case SDL.Input.Scancode.LEFT: 	dir[Direction.LEFT] = false; break;
+						case SDL.Input.Scancode.RIGHT: 	dir[Direction.RIGHT] = false; break;
+						case SDL.Input.Scancode.UP: 	dir[Direction.UP] = false; break;
+						case SDL.Input.Scancode.DOWN: 	dir[Direction.DOWN] = false; break;
+					}
 					if (_evt.key.keysym.sym < 0 || _evt.key.keysym.sym > 255) break;
 					keys[_evt.key.keysym.sym] = 0;
 					break;
@@ -182,7 +207,7 @@ namespace sdx {
 	}
 	
 	void begin() {
-		renderer.set_draw_color(0, 0, 0, 0);
+		renderer.set_draw_color(bgdColor.r, bgdColor.g, bgdColor.b, bgdColor.a);
 		renderer.clear();
 	}
 

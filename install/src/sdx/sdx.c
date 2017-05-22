@@ -4,13 +4,14 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <SDL2/SDL_rect.h>
 #include <SDL2/SDL_render.h>
+#include <string.h>
 #include <SDL2/SDL_pixels.h>
 #include <float.h>
 #include <math.h>
 #include <SDL2/SDL_events.h>
 #include <stdlib.h>
-#include <string.h>
 #include <SDL2/SDL_video.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
@@ -19,9 +20,12 @@
 #include <SDL2/SDL_timer.h>
 #include "mt19937ar.h"
 #include <SDL2/SDL_surface.h>
-#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_scancode.h>
 #include <SDL2/SDL_keyboard.h>
 
+
+#define SDX_TYPE_BLIT (sdx_blit_get_type ())
+typedef struct _sdxBlit sdxBlit;
 
 #define SDX_TYPE_FONT (sdx_font_get_type ())
 #define SDX_FONT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SDX_TYPE_FONT, sdxFont))
@@ -42,6 +46,8 @@ typedef struct _sdxFontClass sdxFontClass;
 
 typedef struct _sdxgraphicsSprite sdxgraphicsSprite;
 typedef struct _sdxgraphicsSpriteClass sdxgraphicsSpriteClass;
+
+#define SDX_TYPE_DIRECTION (sdx_direction_get_type ())
 #define _SDL_DestroyWindow0(var) ((var == NULL) ? NULL : (var = (SDL_DestroyWindow (var), NULL)))
 #define _SDL_DestroyRenderer0(var) ((var == NULL) ? NULL : (var = (SDL_DestroyRenderer (var), NULL)))
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
@@ -60,6 +66,21 @@ typedef enum  {
 	SDX_SDL_EXCEPTION_CreateRenderer
 } sdxSdlException;
 #define SDX_SDL_EXCEPTION sdx_sdl_exception_quark ()
+struct _sdxBlit {
+	SDL_Rect source;
+	SDL_Rect dest;
+	SDL_RendererFlip flip;
+};
+
+typedef sdxBlit* (*sdxCompositor) (gint x, gint y, int* result_length1, void* user_data);
+typedef enum  {
+	SDX_DIRECTION_NONE,
+	SDX_DIRECTION_LEFT,
+	SDX_DIRECTION_RIGHT,
+	SDX_DIRECTION_UP,
+	SDX_DIRECTION_DOWN
+} sdxDirection;
+
 struct _sdxgraphicsScale {
 	gdouble x;
 	gdouble y;
@@ -100,6 +121,8 @@ extern sdxgraphicsSprite* sdx_fpsSprite;
 sdxgraphicsSprite* sdx_fpsSprite = NULL;
 extern SDL_Color sdx_fpsColor;
 SDL_Color sdx_fpsColor = {0};
+extern SDL_Color sdx_bgdColor;
+SDL_Color sdx_bgdColor = {0};
 extern gboolean sdx_showFps;
 gboolean sdx_showFps = FALSE;
 extern gdouble sdx_fps;
@@ -119,6 +142,11 @@ extern gint sdx_keys_length1;
 guint8* sdx_keys = NULL;
 gint sdx_keys_length1 = 0;
 static gint _sdx_keys_size_ = 0;
+extern gboolean* sdx_dir;
+extern gint sdx_dir_length1;
+gboolean* sdx_dir = NULL;
+gint sdx_dir_length1 = 0;
+static gint _sdx_dir_size_ = 0;
 extern gint sdx__frames;
 gint sdx__frames = 0;
 extern SDL_Event sdx__evt;
@@ -137,8 +165,12 @@ extern gint sdx__height;
 gint sdx__height = 0;
 
 GQuark sdx_sdl_exception_quark (void);
+GType sdx_blit_get_type (void) G_GNUC_CONST;
+sdxBlit* sdx_blit_dup (const sdxBlit* self);
+void sdx_blit_free (sdxBlit* self);
 GType sdx_font_get_type (void) G_GNUC_CONST;
 GType sdx_graphics_sprite_get_type (void) G_GNUC_CONST;
+GType sdx_direction_get_type (void) G_GNUC_CONST;
 SDL_Window* sdx_initialize (gint width, gint height, const gchar* name);
 gdouble sdx_getRandom (void);
 void sdx_setDefaultFont (const gchar* path, gint size);
@@ -147,14 +179,13 @@ sdxFont* sdx_font_construct (GType object_type, const gchar* path, gint size);
 void sdx_setSmallFont (const gchar* path, gint size);
 void sdx_setLargeFont (const gchar* path, gint size);
 void sdx_setShowFps (gboolean value);
-sdxgraphicsSprite* sdx_graphics_sprite_new (const gchar* path, sdxFont* font, SDL_Color* color);
-sdxgraphicsSprite* sdx_graphics_sprite_construct (GType object_type, const gchar* path, sdxFont* font, SDL_Color* color);
+sdxgraphicsSprite* sdx_graphics_sprite_fromText (const gchar* path, sdxFont* font, SDL_Color color);
 GType sdx_graphics_scale_get_type (void) G_GNUC_CONST;
 sdxgraphicsScale* sdx_graphics_scale_dup (const sdxgraphicsScale* self);
 void sdx_graphics_scale_free (sdxgraphicsScale* self);
 void sdx_drawFps (void);
 void sdx_graphics_sprite_setText (sdxgraphicsSprite* self, const gchar* text, sdxFont* font, SDL_Color color);
-void sdx_graphics_sprite_render (sdxgraphicsSprite* self, SDL_Renderer* renderer, gint x, gint y, SDL_Rect* clip);
+void sdx_graphics_sprite_render (sdxgraphicsSprite* self, gint x, gint y, SDL_Rect* clip);
 gdouble sdx_getNow (void);
 void sdx_start (void);
 void sdx_update (void);
@@ -169,6 +200,42 @@ GQuark sdx_sdl_exception_quark (void) {
 }
 
 
+sdxBlit* sdx_blit_dup (const sdxBlit* self) {
+	sdxBlit* dup;
+	dup = g_new0 (sdxBlit, 1);
+	memcpy (dup, self, sizeof (sdxBlit));
+	return dup;
+}
+
+
+void sdx_blit_free (sdxBlit* self) {
+	g_free (self);
+}
+
+
+GType sdx_blit_get_type (void) {
+	static volatile gsize sdx_blit_type_id__volatile = 0;
+	if (g_once_init_enter (&sdx_blit_type_id__volatile)) {
+		GType sdx_blit_type_id;
+		sdx_blit_type_id = g_boxed_type_register_static ("sdxBlit", (GBoxedCopyFunc) sdx_blit_dup, (GBoxedFreeFunc) sdx_blit_free);
+		g_once_init_leave (&sdx_blit_type_id__volatile, sdx_blit_type_id);
+	}
+	return sdx_blit_type_id__volatile;
+}
+
+
+GType sdx_direction_get_type (void) {
+	static volatile gsize sdx_direction_type_id__volatile = 0;
+	if (g_once_init_enter (&sdx_direction_type_id__volatile)) {
+		static const GEnumValue values[] = {{SDX_DIRECTION_NONE, "SDX_DIRECTION_NONE", "none"}, {SDX_DIRECTION_LEFT, "SDX_DIRECTION_LEFT", "left"}, {SDX_DIRECTION_RIGHT, "SDX_DIRECTION_RIGHT", "right"}, {SDX_DIRECTION_UP, "SDX_DIRECTION_UP", "up"}, {SDX_DIRECTION_DOWN, "SDX_DIRECTION_DOWN", "down"}, {0, NULL, NULL}};
+		GType sdx_direction_type_id;
+		sdx_direction_type_id = g_enum_register_static ("sdxDirection", values);
+		g_once_init_leave (&sdx_direction_type_id__volatile, sdx_direction_type_id);
+	}
+	return sdx_direction_type_id__volatile;
+}
+
+
 /**
  * Initialization
  * 
@@ -178,21 +245,23 @@ SDL_Window* sdx_initialize (gint width, gint height, const gchar* name) {
 	gint _tmp0_ = 0;
 	gint _tmp1_ = 0;
 	guint8* _tmp2_ = NULL;
-	gint _tmp3_ = 0;
-	gint _tmp6_ = 0;
-	gboolean _tmp9_ = FALSE;
-	gint _tmp12_ = 0;
+	gboolean* _tmp3_ = NULL;
+	gint _tmp4_ = 0;
+	gint _tmp7_ = 0;
+	gboolean _tmp10_ = FALSE;
+	gint _tmp13_ = 0;
 	SDL_Window* window = NULL;
-	const gchar* _tmp15_ = NULL;
-	gint _tmp16_ = 0;
+	const gchar* _tmp16_ = NULL;
 	gint _tmp17_ = 0;
-	SDL_Window* _tmp18_ = NULL;
+	gint _tmp18_ = 0;
 	SDL_Window* _tmp19_ = NULL;
-	SDL_Window* _tmp22_ = NULL;
-	SDL_Renderer* _tmp23_ = NULL;
+	SDL_Window* _tmp20_ = NULL;
+	SDL_Window* _tmp23_ = NULL;
 	SDL_Renderer* _tmp24_ = NULL;
-	guint64 _tmp27_ = 0ULL;
+	SDL_Renderer* _tmp25_ = NULL;
 	guint64 _tmp28_ = 0ULL;
+	SDL_Color _tmp29_ = {0};
+	guint64 _tmp30_ = 0ULL;
 	GError * _inner_error_ = NULL;
 	g_return_val_if_fail (name != NULL, NULL);
 	_tmp0_ = width;
@@ -204,88 +273,98 @@ SDL_Window* sdx_initialize (gint width, gint height, const gchar* name) {
 	sdx_keys = _tmp2_;
 	sdx_keys_length1 = 256;
 	_sdx_keys_size_ = sdx_keys_length1;
-	_tmp3_ = SDL_Init ((guint32) ((SDL_INIT_VIDEO | SDL_INIT_TIMER) | SDL_INIT_EVENTS));
-	if (_tmp3_ < 0) {
-		const gchar* _tmp4_ = NULL;
-		GError* _tmp5_ = NULL;
-		_tmp4_ = SDL_GetError ();
-		_tmp5_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_Initialization, _tmp4_);
-		_inner_error_ = _tmp5_;
+	_tmp3_ = g_new0 (gboolean, 5);
+	sdx_dir = (g_free (sdx_dir), NULL);
+	sdx_dir = _tmp3_;
+	sdx_dir_length1 = 5;
+	_sdx_dir_size_ = sdx_dir_length1;
+	_tmp4_ = SDL_Init ((guint32) ((SDL_INIT_VIDEO | SDL_INIT_TIMER) | SDL_INIT_EVENTS));
+	if (_tmp4_ < 0) {
+		const gchar* _tmp5_ = NULL;
+		GError* _tmp6_ = NULL;
+		_tmp5_ = SDL_GetError ();
+		_tmp6_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_Initialization, _tmp5_);
+		_inner_error_ = _tmp6_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp6_ = IMG_Init ((gint) IMG_INIT_PNG);
-	if (_tmp6_ < 0) {
-		const gchar* _tmp7_ = NULL;
-		GError* _tmp8_ = NULL;
-		_tmp7_ = SDL_GetError ();
-		_tmp8_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_ImageInitialization, _tmp7_);
-		_inner_error_ = _tmp8_;
+	_tmp7_ = IMG_Init ((gint) IMG_INIT_PNG);
+	if (_tmp7_ < 0) {
+		const gchar* _tmp8_ = NULL;
+		GError* _tmp9_ = NULL;
+		_tmp8_ = SDL_GetError ();
+		_tmp9_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_ImageInitialization, _tmp8_);
+		_inner_error_ = _tmp9_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp9_ = SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");
-	if (!_tmp9_) {
-		const gchar* _tmp10_ = NULL;
-		GError* _tmp11_ = NULL;
-		_tmp10_ = SDL_GetError ();
-		_tmp11_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TextureFilteringNotEnabled, _tmp10_);
-		_inner_error_ = _tmp11_;
+	_tmp10_ = SDL_SetHint (SDL_HINT_RENDER_SCALE_QUALITY, "1");
+	if (!_tmp10_) {
+		const gchar* _tmp11_ = NULL;
+		GError* _tmp12_ = NULL;
+		_tmp11_ = SDL_GetError ();
+		_tmp12_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TextureFilteringNotEnabled, _tmp11_);
+		_inner_error_ = _tmp12_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp12_ = TTF_Init ();
-	if (_tmp12_ == -1) {
-		const gchar* _tmp13_ = NULL;
-		GError* _tmp14_ = NULL;
-		_tmp13_ = SDL_GetError ();
-		_tmp14_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TtfInitialization, _tmp13_);
-		_inner_error_ = _tmp14_;
+	_tmp13_ = TTF_Init ();
+	if (_tmp13_ == -1) {
+		const gchar* _tmp14_ = NULL;
+		GError* _tmp15_ = NULL;
+		_tmp14_ = SDL_GetError ();
+		_tmp15_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_TtfInitialization, _tmp14_);
+		_inner_error_ = _tmp15_;
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp15_ = name;
-	_tmp16_ = width;
-	_tmp17_ = height;
-	_tmp18_ = SDL_CreateWindow (_tmp15_, (gint) SDL_WINDOWPOS_CENTERED_MASK, (gint) SDL_WINDOWPOS_CENTERED_MASK, _tmp16_, _tmp17_, (guint32) SDL_WINDOW_SHOWN);
-	window = _tmp18_;
-	_tmp19_ = window;
-	if (_tmp19_ == NULL) {
-		const gchar* _tmp20_ = NULL;
-		GError* _tmp21_ = NULL;
-		_tmp20_ = SDL_GetError ();
-		_tmp21_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_OpenWindow, _tmp20_);
-		_inner_error_ = _tmp21_;
+	_tmp16_ = name;
+	_tmp17_ = width;
+	_tmp18_ = height;
+	_tmp19_ = SDL_CreateWindow (_tmp16_, (gint) SDL_WINDOWPOS_CENTERED_MASK, (gint) SDL_WINDOWPOS_CENTERED_MASK, _tmp17_, _tmp18_, (guint32) SDL_WINDOW_SHOWN);
+	window = _tmp19_;
+	_tmp20_ = window;
+	if (_tmp20_ == NULL) {
+		const gchar* _tmp21_ = NULL;
+		GError* _tmp22_ = NULL;
+		_tmp21_ = SDL_GetError ();
+		_tmp22_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_OpenWindow, _tmp21_);
+		_inner_error_ = _tmp22_;
 		_SDL_DestroyWindow0 (window);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp22_ = window;
-	_tmp23_ = SDL_CreateRenderer (_tmp22_, -1, (guint32) (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
+	_tmp23_ = window;
+	_tmp24_ = SDL_CreateRenderer (_tmp23_, -1, (guint32) (SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC));
 	_SDL_DestroyRenderer0 (sdx_renderer);
-	sdx_renderer = _tmp23_;
-	_tmp24_ = sdx_renderer;
-	if (_tmp24_ == NULL) {
-		const gchar* _tmp25_ = NULL;
-		GError* _tmp26_ = NULL;
-		_tmp25_ = SDL_GetError ();
-		_tmp26_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_CreateRenderer, _tmp25_);
-		_inner_error_ = _tmp26_;
+	sdx_renderer = _tmp24_;
+	_tmp25_ = sdx_renderer;
+	if (_tmp25_ == NULL) {
+		const gchar* _tmp26_ = NULL;
+		GError* _tmp27_ = NULL;
+		_tmp26_ = SDL_GetError ();
+		_tmp27_ = g_error_new_literal (SDX_SDL_EXCEPTION, SDX_SDL_EXCEPTION_CreateRenderer, _tmp26_);
+		_inner_error_ = _tmp27_;
 		_SDL_DestroyWindow0 (window);
 		g_critical ("file %s: line %d: uncaught error: %s (%s, %d)", __FILE__, __LINE__, _inner_error_->message, g_quark_to_string (_inner_error_->domain), _inner_error_->code);
 		g_clear_error (&_inner_error_);
 		return NULL;
 	}
-	_tmp27_ = SDL_GetPerformanceFrequency ();
-	sdx__freq = (gdouble) _tmp27_;
+	_tmp28_ = SDL_GetPerformanceFrequency ();
+	sdx__freq = (gdouble) _tmp28_;
 	sdx_fpsColor = SDX_COLOR_AntiqueWhite;
-	_tmp28_ = SDL_GetPerformanceCounter ();
-	init_genrand ((gulong) _tmp28_);
+	_tmp29_.r = (guint8) 0;
+	_tmp29_.g = (guint8) 0;
+	_tmp29_.b = (guint8) 0;
+	_tmp29_.a = (guint8) 0;
+	sdx_bgdColor = _tmp29_;
+	_tmp30_ = SDL_GetPerformanceCounter ();
+	init_genrand ((gulong) _tmp30_);
 	result = window;
 	return result;
 }
@@ -356,7 +435,7 @@ void sdx_setShowFps (gboolean value) {
 		_tmp3_ = _tmp2_;
 		_tmp4_ = sdx_font;
 		_tmp5_ = sdx_fpsColor;
-		_tmp6_ = sdx_graphics_sprite_new (_tmp3_, _tmp4_, &_tmp5_);
+		_tmp6_ = sdx_graphics_sprite_fromText (_tmp3_, _tmp4_, _tmp5_);
 		_g_object_unref0 (sdx_fpsSprite);
 		sdx_fpsSprite = _tmp6_;
 		_g_free0 (_tmp3_);
@@ -380,7 +459,6 @@ void sdx_drawFps (void) {
 		sdxFont* _tmp5_ = NULL;
 		SDL_Color _tmp6_ = {0};
 		sdxgraphicsSprite* _tmp7_ = NULL;
-		SDL_Renderer* _tmp8_ = NULL;
 		_tmp1_ = sdx_fpsSprite;
 		_tmp2_ = sdx_fps;
 		_tmp3_ = g_strdup_printf ("%2.2f", _tmp2_);
@@ -390,8 +468,7 @@ void sdx_drawFps (void) {
 		sdx_graphics_sprite_setText (_tmp1_, _tmp4_, _tmp5_, _tmp6_);
 		_g_free0 (_tmp4_);
 		_tmp7_ = sdx_fpsSprite;
-		_tmp8_ = sdx_renderer;
-		sdx_graphics_sprite_render (_tmp7_, _tmp8_, 0, 0, NULL);
+		sdx_graphics_sprite_render (_tmp7_, 0, 0, NULL);
 	}
 }
 
@@ -475,108 +552,220 @@ void sdx_processEvents (void) {
 			}
 			case SDL_KEYDOWN:
 			{
-				gboolean _tmp4_ = FALSE;
-				SDL_Event _tmp5_ = {0};
-				SDL_KeyboardEvent _tmp6_ = {0};
-				SDL_Keysym _tmp7_ = {0};
-				SDL_Keycode _tmp8_ = 0;
-				guint8* _tmp13_ = NULL;
-				gint _tmp13__length1 = 0;
-				SDL_Event _tmp14_ = {0};
-				SDL_KeyboardEvent _tmp15_ = {0};
-				SDL_Keysym _tmp16_ = {0};
-				SDL_Keycode _tmp17_ = 0;
-				guint8 _tmp18_ = 0U;
-				_tmp5_ = sdx__evt;
-				_tmp6_ = _tmp5_.key;
-				_tmp7_ = _tmp6_.keysym;
-				_tmp8_ = _tmp7_.sym;
-				if (_tmp8_ < 0) {
-					_tmp4_ = TRUE;
-				} else {
-					SDL_Event _tmp9_ = {0};
-					SDL_KeyboardEvent _tmp10_ = {0};
-					SDL_Keysym _tmp11_ = {0};
-					SDL_Keycode _tmp12_ = 0;
-					_tmp9_ = sdx__evt;
-					_tmp10_ = _tmp9_.key;
-					_tmp11_ = _tmp10_.keysym;
-					_tmp12_ = _tmp11_.sym;
-					_tmp4_ = _tmp12_ > 255;
-				}
-				if (_tmp4_) {
+				SDL_Event _tmp4_ = {0};
+				SDL_KeyboardEvent _tmp5_ = {0};
+				SDL_Keysym _tmp6_ = {0};
+				SDL_Scancode _tmp7_ = 0;
+				gboolean _tmp16_ = FALSE;
+				SDL_Event _tmp17_ = {0};
+				SDL_KeyboardEvent _tmp18_ = {0};
+				SDL_Keysym _tmp19_ = {0};
+				SDL_Keycode _tmp20_ = 0;
+				guint8* _tmp25_ = NULL;
+				gint _tmp25__length1 = 0;
+				SDL_Event _tmp26_ = {0};
+				SDL_KeyboardEvent _tmp27_ = {0};
+				SDL_Keysym _tmp28_ = {0};
+				SDL_Keycode _tmp29_ = 0;
+				guint8 _tmp30_ = 0U;
+				_tmp4_ = sdx__evt;
+				_tmp5_ = _tmp4_.key;
+				_tmp6_ = _tmp5_.keysym;
+				_tmp7_ = _tmp6_.scancode;
+				switch (_tmp7_) {
+					case SDL_SCANCODE_LEFT:
+					{
+						gboolean* _tmp8_ = NULL;
+						gint _tmp8__length1 = 0;
+						gboolean _tmp9_ = FALSE;
+						_tmp8_ = sdx_dir;
+						_tmp8__length1 = sdx_dir_length1;
+						_tmp8_[SDX_DIRECTION_LEFT] = TRUE;
+						_tmp9_ = _tmp8_[SDX_DIRECTION_LEFT];
+						break;
+					}
+					case SDL_SCANCODE_RIGHT:
+					{
+						gboolean* _tmp10_ = NULL;
+						gint _tmp10__length1 = 0;
+						gboolean _tmp11_ = FALSE;
+						_tmp10_ = sdx_dir;
+						_tmp10__length1 = sdx_dir_length1;
+						_tmp10_[SDX_DIRECTION_RIGHT] = TRUE;
+						_tmp11_ = _tmp10_[SDX_DIRECTION_RIGHT];
+						break;
+					}
+					case SDL_SCANCODE_UP:
+					{
+						gboolean* _tmp12_ = NULL;
+						gint _tmp12__length1 = 0;
+						gboolean _tmp13_ = FALSE;
+						_tmp12_ = sdx_dir;
+						_tmp12__length1 = sdx_dir_length1;
+						_tmp12_[SDX_DIRECTION_UP] = TRUE;
+						_tmp13_ = _tmp12_[SDX_DIRECTION_UP];
+						break;
+					}
+					case SDL_SCANCODE_DOWN:
+					{
+						gboolean* _tmp14_ = NULL;
+						gint _tmp14__length1 = 0;
+						gboolean _tmp15_ = FALSE;
+						_tmp14_ = sdx_dir;
+						_tmp14__length1 = sdx_dir_length1;
+						_tmp14_[SDX_DIRECTION_DOWN] = TRUE;
+						_tmp15_ = _tmp14_[SDX_DIRECTION_DOWN];
+						break;
+					}
+					default:
 					break;
 				}
-				_tmp13_ = sdx_keys;
-				_tmp13__length1 = sdx_keys_length1;
-				_tmp14_ = sdx__evt;
-				_tmp15_ = _tmp14_.key;
-				_tmp16_ = _tmp15_.keysym;
-				_tmp17_ = _tmp16_.sym;
-				_tmp13_[_tmp17_] = (guint8) 1;
-				_tmp18_ = _tmp13_[_tmp17_];
+				_tmp17_ = sdx__evt;
+				_tmp18_ = _tmp17_.key;
+				_tmp19_ = _tmp18_.keysym;
+				_tmp20_ = _tmp19_.sym;
+				if (_tmp20_ < 0) {
+					_tmp16_ = TRUE;
+				} else {
+					SDL_Event _tmp21_ = {0};
+					SDL_KeyboardEvent _tmp22_ = {0};
+					SDL_Keysym _tmp23_ = {0};
+					SDL_Keycode _tmp24_ = 0;
+					_tmp21_ = sdx__evt;
+					_tmp22_ = _tmp21_.key;
+					_tmp23_ = _tmp22_.keysym;
+					_tmp24_ = _tmp23_.sym;
+					_tmp16_ = _tmp24_ > 255;
+				}
+				if (_tmp16_) {
+					break;
+				}
+				_tmp25_ = sdx_keys;
+				_tmp25__length1 = sdx_keys_length1;
+				_tmp26_ = sdx__evt;
+				_tmp27_ = _tmp26_.key;
+				_tmp28_ = _tmp27_.keysym;
+				_tmp29_ = _tmp28_.sym;
+				_tmp25_[_tmp29_] = (guint8) 1;
+				_tmp30_ = _tmp25_[_tmp29_];
 				break;
 			}
 			case SDL_KEYUP:
 			{
-				gboolean _tmp19_ = FALSE;
-				SDL_Event _tmp20_ = {0};
-				SDL_KeyboardEvent _tmp21_ = {0};
-				SDL_Keysym _tmp22_ = {0};
-				SDL_Keycode _tmp23_ = 0;
-				guint8* _tmp28_ = NULL;
-				gint _tmp28__length1 = 0;
-				SDL_Event _tmp29_ = {0};
-				SDL_KeyboardEvent _tmp30_ = {0};
-				SDL_Keysym _tmp31_ = {0};
-				SDL_Keycode _tmp32_ = 0;
-				guint8 _tmp33_ = 0U;
-				_tmp20_ = sdx__evt;
-				_tmp21_ = _tmp20_.key;
-				_tmp22_ = _tmp21_.keysym;
-				_tmp23_ = _tmp22_.sym;
-				if (_tmp23_ < 0) {
-					_tmp19_ = TRUE;
-				} else {
-					SDL_Event _tmp24_ = {0};
-					SDL_KeyboardEvent _tmp25_ = {0};
-					SDL_Keysym _tmp26_ = {0};
-					SDL_Keycode _tmp27_ = 0;
-					_tmp24_ = sdx__evt;
-					_tmp25_ = _tmp24_.key;
-					_tmp26_ = _tmp25_.keysym;
-					_tmp27_ = _tmp26_.sym;
-					_tmp19_ = _tmp27_ > 255;
-				}
-				if (_tmp19_) {
+				SDL_Event _tmp31_ = {0};
+				SDL_KeyboardEvent _tmp32_ = {0};
+				SDL_Keysym _tmp33_ = {0};
+				SDL_Scancode _tmp34_ = 0;
+				gboolean _tmp43_ = FALSE;
+				SDL_Event _tmp44_ = {0};
+				SDL_KeyboardEvent _tmp45_ = {0};
+				SDL_Keysym _tmp46_ = {0};
+				SDL_Keycode _tmp47_ = 0;
+				guint8* _tmp52_ = NULL;
+				gint _tmp52__length1 = 0;
+				SDL_Event _tmp53_ = {0};
+				SDL_KeyboardEvent _tmp54_ = {0};
+				SDL_Keysym _tmp55_ = {0};
+				SDL_Keycode _tmp56_ = 0;
+				guint8 _tmp57_ = 0U;
+				_tmp31_ = sdx__evt;
+				_tmp32_ = _tmp31_.key;
+				_tmp33_ = _tmp32_.keysym;
+				_tmp34_ = _tmp33_.scancode;
+				switch (_tmp34_) {
+					case SDL_SCANCODE_LEFT:
+					{
+						gboolean* _tmp35_ = NULL;
+						gint _tmp35__length1 = 0;
+						gboolean _tmp36_ = FALSE;
+						_tmp35_ = sdx_dir;
+						_tmp35__length1 = sdx_dir_length1;
+						_tmp35_[SDX_DIRECTION_LEFT] = FALSE;
+						_tmp36_ = _tmp35_[SDX_DIRECTION_LEFT];
+						break;
+					}
+					case SDL_SCANCODE_RIGHT:
+					{
+						gboolean* _tmp37_ = NULL;
+						gint _tmp37__length1 = 0;
+						gboolean _tmp38_ = FALSE;
+						_tmp37_ = sdx_dir;
+						_tmp37__length1 = sdx_dir_length1;
+						_tmp37_[SDX_DIRECTION_RIGHT] = FALSE;
+						_tmp38_ = _tmp37_[SDX_DIRECTION_RIGHT];
+						break;
+					}
+					case SDL_SCANCODE_UP:
+					{
+						gboolean* _tmp39_ = NULL;
+						gint _tmp39__length1 = 0;
+						gboolean _tmp40_ = FALSE;
+						_tmp39_ = sdx_dir;
+						_tmp39__length1 = sdx_dir_length1;
+						_tmp39_[SDX_DIRECTION_UP] = FALSE;
+						_tmp40_ = _tmp39_[SDX_DIRECTION_UP];
+						break;
+					}
+					case SDL_SCANCODE_DOWN:
+					{
+						gboolean* _tmp41_ = NULL;
+						gint _tmp41__length1 = 0;
+						gboolean _tmp42_ = FALSE;
+						_tmp41_ = sdx_dir;
+						_tmp41__length1 = sdx_dir_length1;
+						_tmp41_[SDX_DIRECTION_DOWN] = FALSE;
+						_tmp42_ = _tmp41_[SDX_DIRECTION_DOWN];
+						break;
+					}
+					default:
 					break;
 				}
-				_tmp28_ = sdx_keys;
-				_tmp28__length1 = sdx_keys_length1;
-				_tmp29_ = sdx__evt;
-				_tmp30_ = _tmp29_.key;
-				_tmp31_ = _tmp30_.keysym;
-				_tmp32_ = _tmp31_.sym;
-				_tmp28_[_tmp32_] = (guint8) 0;
-				_tmp33_ = _tmp28_[_tmp32_];
+				_tmp44_ = sdx__evt;
+				_tmp45_ = _tmp44_.key;
+				_tmp46_ = _tmp45_.keysym;
+				_tmp47_ = _tmp46_.sym;
+				if (_tmp47_ < 0) {
+					_tmp43_ = TRUE;
+				} else {
+					SDL_Event _tmp48_ = {0};
+					SDL_KeyboardEvent _tmp49_ = {0};
+					SDL_Keysym _tmp50_ = {0};
+					SDL_Keycode _tmp51_ = 0;
+					_tmp48_ = sdx__evt;
+					_tmp49_ = _tmp48_.key;
+					_tmp50_ = _tmp49_.keysym;
+					_tmp51_ = _tmp50_.sym;
+					_tmp43_ = _tmp51_ > 255;
+				}
+				if (_tmp43_) {
+					break;
+				}
+				_tmp52_ = sdx_keys;
+				_tmp52__length1 = sdx_keys_length1;
+				_tmp53_ = sdx__evt;
+				_tmp54_ = _tmp53_.key;
+				_tmp55_ = _tmp54_.keysym;
+				_tmp56_ = _tmp55_.sym;
+				_tmp52_[_tmp56_] = (guint8) 0;
+				_tmp57_ = _tmp52_[_tmp56_];
 				break;
 			}
 			case SDL_MOUSEMOTION:
 			{
-				SDL_Event _tmp34_ = {0};
-				SDL_MouseMotionEvent _tmp35_ = {0};
-				gint32 _tmp36_ = 0;
-				SDL_Event _tmp37_ = {0};
-				SDL_MouseMotionEvent _tmp38_ = {0};
-				gint32 _tmp39_ = 0;
-				_tmp34_ = sdx__evt;
-				_tmp35_ = _tmp34_.motion;
-				_tmp36_ = _tmp35_.x;
-				sdx_mouseX = (gdouble) _tmp36_;
-				_tmp37_ = sdx__evt;
-				_tmp38_ = _tmp37_.motion;
-				_tmp39_ = _tmp38_.y;
-				sdx_mouseY = (gdouble) _tmp39_;
+				SDL_Event _tmp58_ = {0};
+				SDL_MouseMotionEvent _tmp59_ = {0};
+				gint32 _tmp60_ = 0;
+				SDL_Event _tmp61_ = {0};
+				SDL_MouseMotionEvent _tmp62_ = {0};
+				gint32 _tmp63_ = 0;
+				_tmp58_ = sdx__evt;
+				_tmp59_ = _tmp58_.motion;
+				_tmp60_ = _tmp59_.x;
+				sdx_mouseX = (gdouble) _tmp60_;
+				_tmp61_ = sdx__evt;
+				_tmp62_ = _tmp61_.motion;
+				_tmp63_ = _tmp62_.y;
+				sdx_mouseY = (gdouble) _tmp63_;
 				break;
 			}
 			case SDL_MOUSEBUTTONDOWN:
@@ -591,20 +780,20 @@ void sdx_processEvents (void) {
 			}
 			case SDL_FINGERMOTION:
 			{
-				SDL_Event _tmp40_ = {0};
-				SDL_TouchFingerEvent _tmp41_ = {0};
-				gfloat _tmp42_ = 0.0F;
-				SDL_Event _tmp43_ = {0};
-				SDL_TouchFingerEvent _tmp44_ = {0};
-				gfloat _tmp45_ = 0.0F;
-				_tmp40_ = sdx__evt;
-				_tmp41_ = _tmp40_.tfinger;
-				_tmp42_ = _tmp41_.x;
-				sdx_mouseX = (gdouble) _tmp42_;
-				_tmp43_ = sdx__evt;
-				_tmp44_ = _tmp43_.tfinger;
-				_tmp45_ = _tmp44_.y;
-				sdx_mouseY = (gdouble) _tmp45_;
+				SDL_Event _tmp64_ = {0};
+				SDL_TouchFingerEvent _tmp65_ = {0};
+				gfloat _tmp66_ = 0.0F;
+				SDL_Event _tmp67_ = {0};
+				SDL_TouchFingerEvent _tmp68_ = {0};
+				gfloat _tmp69_ = 0.0F;
+				_tmp64_ = sdx__evt;
+				_tmp65_ = _tmp64_.tfinger;
+				_tmp66_ = _tmp65_.x;
+				sdx_mouseX = (gdouble) _tmp66_;
+				_tmp67_ = sdx__evt;
+				_tmp68_ = _tmp67_.tfinger;
+				_tmp69_ = _tmp68_.y;
+				sdx_mouseY = (gdouble) _tmp69_;
 				break;
 			}
 			case SDL_FINGERDOWN:
@@ -626,11 +815,27 @@ void sdx_processEvents (void) {
 
 void sdx_begin (void) {
 	SDL_Renderer* _tmp0_ = NULL;
-	SDL_Renderer* _tmp1_ = NULL;
+	SDL_Color _tmp1_ = {0};
+	guint8 _tmp2_ = 0U;
+	SDL_Color _tmp3_ = {0};
+	guint8 _tmp4_ = 0U;
+	SDL_Color _tmp5_ = {0};
+	guint8 _tmp6_ = 0U;
+	SDL_Color _tmp7_ = {0};
+	guint8 _tmp8_ = 0U;
+	SDL_Renderer* _tmp9_ = NULL;
 	_tmp0_ = sdx_renderer;
-	SDL_SetRenderDrawColor (_tmp0_, (guint8) 0, (guint8) 0, (guint8) 0, (guint8) 0);
-	_tmp1_ = sdx_renderer;
-	SDL_RenderClear (_tmp1_);
+	_tmp1_ = sdx_bgdColor;
+	_tmp2_ = _tmp1_.r;
+	_tmp3_ = sdx_bgdColor;
+	_tmp4_ = _tmp3_.g;
+	_tmp5_ = sdx_bgdColor;
+	_tmp6_ = _tmp5_.b;
+	_tmp7_ = sdx_bgdColor;
+	_tmp8_ = _tmp7_.a;
+	SDL_SetRenderDrawColor (_tmp0_, _tmp2_, _tmp4_, _tmp6_, _tmp8_);
+	_tmp9_ = sdx_renderer;
+	SDL_RenderClear (_tmp9_);
 }
 
 

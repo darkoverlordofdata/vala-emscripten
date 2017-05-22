@@ -33,6 +33,8 @@ src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Sprite.c.o: src/sdx/graphics/Spr
 
 src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o: src/sdx/graphics/Surface.c
 
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o: src/sdx/graphics/TextureAtlas.c
+
 src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o: ../src/include/mt19937ar.h
 src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o: src/sdx/sdx.c
 
@@ -57,6 +59,10 @@ src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o: src/systems/SpawnSys
 src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o: src/util/Cache.c
 
 src/CMakeFiles/vala-emscripten.dir/util/File.c.o: src/util/File.c
+
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o: src/util/JsVariant.c
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o: src/util/Json.c
 
 src/CMakeFiles/vala-emscripten.dir/util/String.c.o: src/util/String.c
 

@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
+#    -X -I/home/bruce/.local/include/ \
 
 
-./valac2/valac2  \
-    --plugin ./valac2 \
-    --builddir build \
+emvalac --builddir build \
     --cc=emcc \
     --define PROFILING \
     --vapidir src/vapis \
@@ -13,9 +12,9 @@
     --pkg posix \
     --pkg mt19937ar \
     --pkg emscripten \
-    -X -Iinclude \
     -X -O2 \
     -o web/shmupwarz.html  \
+    build/src/Test.vala \
     build/src/Factory.vala\
     build/src/Game.vala \
     build/src/components.gs \
@@ -31,6 +30,7 @@
     build/src/sdx/files/FileHandle.vala \
     build/src/sdx/graphics/Sprite.vala \
     build/src/sdx/graphics/Surface.vala \
+    build/src/sdx/graphics/TextureAtlas.vala \
     build/src/sdx/sdx.vala \
     build/src/systems/AnimationSystem.vala \
     build/src/systems/CollisionSystem.vala \
@@ -43,6 +43,8 @@
     build/src/systems/SpawnSystem.vala \
     build/src/util/Cache.vala \
     build/src/util/File.vala \
+    build/src/util/Json.vala \
+    build/src/util/JsVariant.vala \
     build/src/util/String.vala \
     build/src/vala-emscripten.vala
 

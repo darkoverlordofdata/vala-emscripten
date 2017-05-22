@@ -33,6 +33,8 @@ src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Sprite.c.o
  /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/Sprite.c
 src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o
  /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/Surface.c
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o
+ /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/TextureAtlas.c
 src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o
  ../src/include/mt19937ar.h
  /home/bruce/Git/vala-emscripten/install/src/sdx/sdx.c
@@ -58,6 +60,10 @@ src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o
  /home/bruce/Git/vala-emscripten/install/src/util/Cache.c
 src/CMakeFiles/vala-emscripten.dir/util/File.c.o
  /home/bruce/Git/vala-emscripten/install/src/util/File.c
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o
+ /home/bruce/Git/vala-emscripten/install/src/util/JsVariant.c
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o
+ /home/bruce/Git/vala-emscripten/install/src/util/Json.c
 src/CMakeFiles/vala-emscripten.dir/util/String.c.o
  /home/bruce/Git/vala-emscripten/install/src/util/String.c
 src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o

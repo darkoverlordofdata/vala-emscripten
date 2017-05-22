@@ -13,6 +13,7 @@ set(CMAKE_MAKEFILE_DEPENDS
   "../cmake/Translations.cmake"
   "../cmake/ValaPrecompile.cmake"
   "../cmake/ValaVersion.cmake"
+  "../data/CMakeLists.txt"
   "CMakeFiles/3.5.1/CMakeCCompiler.cmake"
   "CMakeFiles/3.5.1/CMakeCXXCompiler.cmake"
   "CMakeFiles/3.5.1/CMakeSystem.cmake"
@@ -63,6 +64,7 @@ set(CMAKE_MAKEFILE_PRODUCTS
   "po/CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/util/CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/sdx/graphics/CMakeFiles/CMakeDirectoryInformation.cmake"
+  "data/CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/entitas/CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/sdx/CMakeFiles/CMakeDirectoryInformation.cmake"
   "src/sdx/files/CMakeFiles/CMakeDirectoryInformation.cmake"
@@ -73,5 +75,6 @@ set(CMAKE_MAKEFILE_PRODUCTS
 set(CMAKE_DEPEND_INFO_FILES
   "po/CMakeFiles/i18n.dir/DependInfo.cmake"
   "po/CMakeFiles/pot.dir/DependInfo.cmake"
+  "data/CMakeFiles/resources_gresource_xml.dir/DependInfo.cmake"
   "src/CMakeFiles/vala-emscripten.dir/DependInfo.cmake"
   )

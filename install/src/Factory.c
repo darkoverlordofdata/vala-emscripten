@@ -9,9 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <SDL2/SDL_rect.h>
-#include <SDL2/SDL_pixels.h>
 #include <SDL2/SDL_render.h>
 #include <SDL2/SDL_surface.h>
+#include <SDL2/SDL_pixels.h>
 #include <stdio.h>
 
 
@@ -138,6 +138,11 @@ typedef struct _entitasBuffer entitasBuffer;
 
 typedef struct _sdxgraphicsSurface sdxgraphicsSurface;
 typedef struct _sdxgraphicsSurfaceClass sdxgraphicsSurfaceClass;
+typedef struct _sdxgraphicsSpritePrivate sdxgraphicsSpritePrivate;
+
+#define SDX_GRAPHICS_TYPE_SCALE (sdx_graphics_scale_get_type ())
+typedef struct _sdxgraphicsScale sdxgraphicsScale;
+#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 #define SDX_TYPE_FONT (sdx_font_get_type ())
 #define SDX_FONT(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SDX_TYPE_FONT, sdxFont))
@@ -148,11 +153,6 @@ typedef struct _sdxgraphicsSurfaceClass sdxgraphicsSurfaceClass;
 
 typedef struct _sdxFont sdxFont;
 typedef struct _sdxFontClass sdxFontClass;
-typedef struct _sdxgraphicsSpritePrivate sdxgraphicsSpritePrivate;
-
-#define SDX_GRAPHICS_TYPE_SCALE (sdx_graphics_scale_get_type ())
-typedef struct _sdxgraphicsScale sdxgraphicsScale;
-#define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
 
 typedef enum  {
 	POOL_BACKGROUND,
@@ -444,6 +444,7 @@ void entitas_buffer_destroy (entitasBuffer* self);
 void entitas_world_setPool (entitasWorld* self, gint size, gint count, entitasBuffer* buffers, int buffers_length1);
 entitasEntity* factory_createBullet (Factory* self);
 static entitasEntity* _factory_createBullet_entitas_factory (gpointer self);
+void entitas_buffer_init (entitasBuffer *self, gint pool, gint size, entitasFactory factory, void* factory_target);
 entitasEntity* factory_createEnemy1 (Factory* self);
 static entitasEntity* _factory_createEnemy1_entitas_factory (gpointer self);
 entitasEntity* factory_createEnemy2 (Factory* self);
@@ -460,9 +461,8 @@ static void _vala_entitasBuffer_array_free (entitasBuffer* array, gint array_len
 entitasEntity* factory_createBase (Factory* self, const gchar* name, const gchar* path, gint pool, gdouble scale, gboolean active);
 GType sdx_graphics_surface_get_type (void) G_GNUC_CONST;
 void sdx_graphics_sprite_initialize (gint length);
-GType sdx_font_get_type (void) G_GNUC_CONST;
-sdxgraphicsSprite* sdx_graphics_sprite_new (const gchar* path, sdxFont* font, SDL_Color* color);
-sdxgraphicsSprite* sdx_graphics_sprite_construct (GType object_type, const gchar* path, sdxFont* font, SDL_Color* color);
+sdxgraphicsSprite* sdx_graphics_sprite_new (const gchar* path);
+sdxgraphicsSprite* sdx_graphics_sprite_construct (GType object_type, const gchar* path);
 entitasEntity* entitas_world_createEntity (entitasWorld* self, const gchar* name, gint pool, gboolean active);
 entitasEntity* entitas_entity_addPosition (entitasEntity *self, gdouble x, gdouble y);
 entitasEntity* entitas_entity_addLayer (entitasEntity *self, gint value);
@@ -481,6 +481,8 @@ entitasEntity* entitas_entity_addHealth (entitasEntity *self, gdouble current, g
 entitasEntity* entitas_entity_addVelocity (entitasEntity *self, gdouble x, gdouble y);
 entitasEntity* entitas_entity_setBullet (entitasEntity *self, gboolean value);
 entitasEntity* entitas_entity_addText (entitasEntity *self, const gchar* text, sdxgraphicsSprite* texture);
+GType sdx_font_get_type (void) G_GNUC_CONST;
+sdxgraphicsSprite* sdx_graphics_sprite_fromText (const gchar* path, sdxFont* font, SDL_Color color);
 entitasEntity* entitas_entity_setEnemy1 (entitasEntity *self, gboolean value);
 entitasEntity* entitas_entity_setEnemy2 (entitasEntity *self, gboolean value);
 entitasEntity* entitas_entity_setEnemy3 (entitasEntity *self, gboolean value);
@@ -592,76 +594,13 @@ Factory* factory_construct (GType object_type) {
 	entitasBuffer* _tmp8_ = NULL;
 	gint _tmp8__length1 = 0;
 	self = (Factory*) entitas_world_construct (object_type);
-	memset (&_tmp0_, 0, sizeof (entitasBuffer));
-	_tmp0_.pool = (gint) POOL_BULLET;
-	_tmp0_.size = 20;
-	(_tmp0_.factory_target_destroy_notify == NULL) ? NULL : (_tmp0_.factory_target_destroy_notify (_tmp0_.factory_target), NULL);
-	_tmp0_.factory = NULL;
-	_tmp0_.factory_target = NULL;
-	_tmp0_.factory_target_destroy_notify = NULL;
-	_tmp0_.factory = _factory_createBullet_entitas_factory;
-	_tmp0_.factory_target = g_object_ref (self);
-	_tmp0_.factory_target_destroy_notify = g_object_unref;
-	memset (&_tmp1_, 0, sizeof (entitasBuffer));
-	_tmp1_.pool = (gint) POOL_ENEMY1;
-	_tmp1_.size = 15;
-	(_tmp1_.factory_target_destroy_notify == NULL) ? NULL : (_tmp1_.factory_target_destroy_notify (_tmp1_.factory_target), NULL);
-	_tmp1_.factory = NULL;
-	_tmp1_.factory_target = NULL;
-	_tmp1_.factory_target_destroy_notify = NULL;
-	_tmp1_.factory = _factory_createEnemy1_entitas_factory;
-	_tmp1_.factory_target = g_object_ref (self);
-	_tmp1_.factory_target_destroy_notify = g_object_unref;
-	memset (&_tmp2_, 0, sizeof (entitasBuffer));
-	_tmp2_.pool = (gint) POOL_ENEMY2;
-	_tmp2_.size = 5;
-	(_tmp2_.factory_target_destroy_notify == NULL) ? NULL : (_tmp2_.factory_target_destroy_notify (_tmp2_.factory_target), NULL);
-	_tmp2_.factory = NULL;
-	_tmp2_.factory_target = NULL;
-	_tmp2_.factory_target_destroy_notify = NULL;
-	_tmp2_.factory = _factory_createEnemy2_entitas_factory;
-	_tmp2_.factory_target = g_object_ref (self);
-	_tmp2_.factory_target_destroy_notify = g_object_unref;
-	memset (&_tmp3_, 0, sizeof (entitasBuffer));
-	_tmp3_.pool = (gint) POOL_ENEMY3;
-	_tmp3_.size = 4;
-	(_tmp3_.factory_target_destroy_notify == NULL) ? NULL : (_tmp3_.factory_target_destroy_notify (_tmp3_.factory_target), NULL);
-	_tmp3_.factory = NULL;
-	_tmp3_.factory_target = NULL;
-	_tmp3_.factory_target_destroy_notify = NULL;
-	_tmp3_.factory = _factory_createEnemy3_entitas_factory;
-	_tmp3_.factory_target = g_object_ref (self);
-	_tmp3_.factory_target_destroy_notify = g_object_unref;
-	memset (&_tmp4_, 0, sizeof (entitasBuffer));
-	_tmp4_.pool = (gint) POOL_EXPLOSION;
-	_tmp4_.size = 10;
-	(_tmp4_.factory_target_destroy_notify == NULL) ? NULL : (_tmp4_.factory_target_destroy_notify (_tmp4_.factory_target), NULL);
-	_tmp4_.factory = NULL;
-	_tmp4_.factory_target = NULL;
-	_tmp4_.factory_target_destroy_notify = NULL;
-	_tmp4_.factory = _factory_createExplosion_entitas_factory;
-	_tmp4_.factory_target = g_object_ref (self);
-	_tmp4_.factory_target_destroy_notify = g_object_unref;
-	memset (&_tmp5_, 0, sizeof (entitasBuffer));
-	_tmp5_.pool = (gint) POOL_BANG;
-	_tmp5_.size = 12;
-	(_tmp5_.factory_target_destroy_notify == NULL) ? NULL : (_tmp5_.factory_target_destroy_notify (_tmp5_.factory_target), NULL);
-	_tmp5_.factory = NULL;
-	_tmp5_.factory_target = NULL;
-	_tmp5_.factory_target_destroy_notify = NULL;
-	_tmp5_.factory = _factory_createBang_entitas_factory;
-	_tmp5_.factory_target = g_object_ref (self);
-	_tmp5_.factory_target_destroy_notify = g_object_unref;
-	memset (&_tmp6_, 0, sizeof (entitasBuffer));
-	_tmp6_.pool = (gint) POOL_PARTICLE;
-	_tmp6_.size = 100;
-	(_tmp6_.factory_target_destroy_notify == NULL) ? NULL : (_tmp6_.factory_target_destroy_notify (_tmp6_.factory_target), NULL);
-	_tmp6_.factory = NULL;
-	_tmp6_.factory_target = NULL;
-	_tmp6_.factory_target_destroy_notify = NULL;
-	_tmp6_.factory = _factory_createParticle_entitas_factory;
-	_tmp6_.factory_target = g_object_ref (self);
-	_tmp6_.factory_target_destroy_notify = g_object_unref;
+	entitas_buffer_init (&_tmp0_, (gint) POOL_BULLET, 20, _factory_createBullet_entitas_factory, self);
+	entitas_buffer_init (&_tmp1_, (gint) POOL_ENEMY1, 15, _factory_createEnemy1_entitas_factory, self);
+	entitas_buffer_init (&_tmp2_, (gint) POOL_ENEMY2, 5, _factory_createEnemy2_entitas_factory, self);
+	entitas_buffer_init (&_tmp3_, (gint) POOL_ENEMY3, 4, _factory_createEnemy3_entitas_factory, self);
+	entitas_buffer_init (&_tmp4_, (gint) POOL_EXPLOSION, 10, _factory_createExplosion_entitas_factory, self);
+	entitas_buffer_init (&_tmp5_, (gint) POOL_BANG, 12, _factory_createBang_entitas_factory, self);
+	entitas_buffer_init (&_tmp6_, (gint) POOL_PARTICLE, 100, _factory_createParticle_entitas_factory, self);
 	_tmp7_ = g_new0 (entitasBuffer, 7);
 	_tmp7_[0] = _tmp0_;
 	_tmp7_[1] = _tmp1_;
@@ -718,7 +657,7 @@ entitasEntity* factory_createBase (Factory* self, const gchar* name, const gchar
 		sdx_graphics_sprite_initialize ((gint) POOL_Count);
 	}
 	_tmp1_ = path;
-	_tmp2_ = sdx_graphics_sprite_new (_tmp1_, NULL, NULL);
+	_tmp2_ = sdx_graphics_sprite_new (_tmp1_);
 	sprite = _tmp2_;
 	_tmp3_ = name;
 	_tmp4_ = pool;
@@ -795,25 +734,23 @@ entitasEntity* factory_createEnemy1 (Factory* self) {
 	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	sdxFont* _tmp3_ = NULL;
-	SDL_Color _tmp4_ = {0};
+	sdxgraphicsSprite* _tmp4_ = NULL;
 	sdxgraphicsSprite* _tmp5_ = NULL;
-	sdxgraphicsSprite* _tmp6_ = NULL;
+	entitasEntity* _tmp6_ = NULL;
 	entitasEntity* _tmp7_ = NULL;
 	entitasEntity* _tmp8_ = NULL;
-	entitasEntity* _tmp9_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
 	_tmp0_ = factory_createBase (self, "enemy1", "assets/images/enemy1.png", (gint) POOL_ENEMY1, 1.0, FALSE);
 	_tmp1_ = entitas_entity_addHealth (_tmp0_, (gdouble) 10, (gdouble) 10);
 	_tmp2_ = entitas_entity_addVelocity (_tmp1_, (gdouble) 0, (gdouble) 40);
 	_tmp3_ = sdx_smallFont;
-	_tmp4_ = SDX_COLOR_LimeGreen;
-	_tmp5_ = sdx_graphics_sprite_new ("100%", _tmp3_, &_tmp4_);
-	_tmp6_ = _tmp5_;
-	_tmp7_ = entitas_entity_addText (_tmp2_, "100%", _tmp6_);
-	_tmp8_ = entitas_entity_setEnemy1 (_tmp7_, TRUE);
-	_tmp9_ = _tmp8_;
-	_g_object_unref0 (_tmp6_);
-	result = _tmp9_;
+	_tmp4_ = sdx_graphics_sprite_fromText ("100%", _tmp3_, SDX_COLOR_LimeGreen);
+	_tmp5_ = _tmp4_;
+	_tmp6_ = entitas_entity_addText (_tmp2_, "100%", _tmp5_);
+	_tmp7_ = entitas_entity_setEnemy1 (_tmp6_, TRUE);
+	_tmp8_ = _tmp7_;
+	_g_object_unref0 (_tmp5_);
+	result = _tmp8_;
 	return result;
 }
 
@@ -824,25 +761,23 @@ entitasEntity* factory_createEnemy2 (Factory* self) {
 	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	sdxFont* _tmp3_ = NULL;
-	SDL_Color _tmp4_ = {0};
+	sdxgraphicsSprite* _tmp4_ = NULL;
 	sdxgraphicsSprite* _tmp5_ = NULL;
-	sdxgraphicsSprite* _tmp6_ = NULL;
+	entitasEntity* _tmp6_ = NULL;
 	entitasEntity* _tmp7_ = NULL;
 	entitasEntity* _tmp8_ = NULL;
-	entitasEntity* _tmp9_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
 	_tmp0_ = factory_createBase (self, "enemy2", "assets/images/enemy2.png", (gint) POOL_ENEMY2, 1.0, FALSE);
 	_tmp1_ = entitas_entity_addHealth (_tmp0_, (gdouble) 20, (gdouble) 20);
 	_tmp2_ = entitas_entity_addVelocity (_tmp1_, (gdouble) 0, (gdouble) 30);
 	_tmp3_ = sdx_smallFont;
-	_tmp4_ = SDX_COLOR_LimeGreen;
-	_tmp5_ = sdx_graphics_sprite_new ("100%", _tmp3_, &_tmp4_);
-	_tmp6_ = _tmp5_;
-	_tmp7_ = entitas_entity_addText (_tmp2_, "100%", _tmp6_);
-	_tmp8_ = entitas_entity_setEnemy2 (_tmp7_, TRUE);
-	_tmp9_ = _tmp8_;
-	_g_object_unref0 (_tmp6_);
-	result = _tmp9_;
+	_tmp4_ = sdx_graphics_sprite_fromText ("100%", _tmp3_, SDX_COLOR_LimeGreen);
+	_tmp5_ = _tmp4_;
+	_tmp6_ = entitas_entity_addText (_tmp2_, "100%", _tmp5_);
+	_tmp7_ = entitas_entity_setEnemy2 (_tmp6_, TRUE);
+	_tmp8_ = _tmp7_;
+	_g_object_unref0 (_tmp5_);
+	result = _tmp8_;
 	return result;
 }
 
@@ -853,25 +788,23 @@ entitasEntity* factory_createEnemy3 (Factory* self) {
 	entitasEntity* _tmp1_ = NULL;
 	entitasEntity* _tmp2_ = NULL;
 	sdxFont* _tmp3_ = NULL;
-	SDL_Color _tmp4_ = {0};
+	sdxgraphicsSprite* _tmp4_ = NULL;
 	sdxgraphicsSprite* _tmp5_ = NULL;
-	sdxgraphicsSprite* _tmp6_ = NULL;
+	entitasEntity* _tmp6_ = NULL;
 	entitasEntity* _tmp7_ = NULL;
 	entitasEntity* _tmp8_ = NULL;
-	entitasEntity* _tmp9_ = NULL;
 	g_return_val_if_fail (self != NULL, NULL);
 	_tmp0_ = factory_createBase (self, "enemy3", "assets/images/enemy3.png", (gint) POOL_ENEMY3, 1.0, FALSE);
 	_tmp1_ = entitas_entity_addHealth (_tmp0_, (gdouble) 60, (gdouble) 60);
 	_tmp2_ = entitas_entity_addVelocity (_tmp1_, (gdouble) 0, (gdouble) 20);
 	_tmp3_ = sdx_smallFont;
-	_tmp4_ = SDX_COLOR_LimeGreen;
-	_tmp5_ = sdx_graphics_sprite_new ("100%", _tmp3_, &_tmp4_);
-	_tmp6_ = _tmp5_;
-	_tmp7_ = entitas_entity_addText (_tmp2_, "100%", _tmp6_);
-	_tmp8_ = entitas_entity_setEnemy3 (_tmp7_, TRUE);
-	_tmp9_ = _tmp8_;
-	_g_object_unref0 (_tmp6_);
-	result = _tmp9_;
+	_tmp4_ = sdx_graphics_sprite_fromText ("100%", _tmp3_, SDX_COLOR_LimeGreen);
+	_tmp5_ = _tmp4_;
+	_tmp6_ = entitas_entity_addText (_tmp2_, "100%", _tmp5_);
+	_tmp7_ = entitas_entity_setEnemy3 (_tmp6_, TRUE);
+	_tmp8_ = _tmp7_;
+	_g_object_unref0 (_tmp5_);
+	result = _tmp8_;
 	return result;
 }
 

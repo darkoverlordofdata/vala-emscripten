@@ -134,6 +134,26 @@ typedef struct _systemsDisplaySystemClass systemsDisplaySystemClass;
 typedef struct _systemsScoreSystem systemsScoreSystem;
 typedef struct _systemsScoreSystemClass systemsScoreSystemClass;
 
+#define SDX_GRAPHICS_TYPE_TEXTURE_ATLAS (sdx_graphics_texture_atlas_get_type ())
+#define SDX_GRAPHICS_TEXTURE_ATLAS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS, sdxgraphicsTextureAtlas))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS, sdxgraphicsTextureAtlasClass))
+#define SDX_GRAPHICS_IS_TEXTURE_ATLAS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS))
+#define SDX_GRAPHICS_IS_TEXTURE_ATLAS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS, sdxgraphicsTextureAtlasClass))
+
+typedef struct _sdxgraphicsTextureAtlas sdxgraphicsTextureAtlas;
+typedef struct _sdxgraphicsTextureAtlasClass sdxgraphicsTextureAtlasClass;
+
+#define SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS (sdx_graphics_texture_atlas_innerclass_get_type ())
+#define SDX_GRAPHICS_TEXTURE_ATLAS_INNERCLASS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS, sdxgraphicsTextureAtlasInnerClass))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_INNERCLASS_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS, sdxgraphicsTextureAtlasInnerClassClass))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_IS_INNERCLASS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_IS_INNERCLASS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_INNERCLASS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS, sdxgraphicsTextureAtlasInnerClassClass))
+
+typedef struct _sdxgraphicsTextureAtlasInnerClass sdxgraphicsTextureAtlasInnerClass;
+typedef struct _sdxgraphicsTextureAtlasInnerClassClass sdxgraphicsTextureAtlasInnerClassClass;
+
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
 
 #define ENTITAS_TYPE_BACKGROUND (entitas_background_get_type ())
@@ -230,6 +250,8 @@ struct _Game {
 	systemsAnimationSystem* animate;
 	systemsDisplaySystem* display;
 	systemsScoreSystem* score;
+	sdxgraphicsTextureAtlas* z;
+	sdxgraphicsTextureAtlasInnerClass* x;
 };
 
 struct _GameClass {
@@ -378,6 +400,8 @@ GType systems_remove_system_get_type (void) G_GNUC_CONST;
 GType systems_animation_system_get_type (void) G_GNUC_CONST;
 GType systems_display_system_get_type (void) G_GNUC_CONST;
 GType systems_score_system_get_type (void) G_GNUC_CONST;
+GType sdx_graphics_texture_atlas_get_type (void) G_GNUC_CONST;
+GType sdx_graphics_texture_atlas_innerclass_get_type (void) G_GNUC_CONST;
 GType entitas_entity_get_type (void) G_GNUC_CONST;
 GType entitas_background_get_type (void) G_GNUC_CONST;
 entitasBackground* entitas_background_dup (const entitasBackground* self);

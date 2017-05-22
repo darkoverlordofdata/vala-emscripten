@@ -612,6 +612,33 @@ sdx/graphics/Surface.c.s:
 	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.s
 .PHONY : sdx/graphics/Surface.c.s
 
+sdx/graphics/TextureAtlas.o: sdx/graphics/TextureAtlas.c.o
+
+.PHONY : sdx/graphics/TextureAtlas.o
+
+# target to build an object file
+sdx/graphics/TextureAtlas.c.o:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o
+.PHONY : sdx/graphics/TextureAtlas.c.o
+
+sdx/graphics/TextureAtlas.i: sdx/graphics/TextureAtlas.c.i
+
+.PHONY : sdx/graphics/TextureAtlas.i
+
+# target to preprocess a source file
+sdx/graphics/TextureAtlas.c.i:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.i
+.PHONY : sdx/graphics/TextureAtlas.c.i
+
+sdx/graphics/TextureAtlas.s: sdx/graphics/TextureAtlas.c.s
+
+.PHONY : sdx/graphics/TextureAtlas.s
+
+# target to generate assembly for a file
+sdx/graphics/TextureAtlas.c.s:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.s
+.PHONY : sdx/graphics/TextureAtlas.c.s
+
 sdx/sdx.o: sdx/sdx.c.o
 
 .PHONY : sdx/sdx.o
@@ -936,6 +963,60 @@ util/File.c.s:
 	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/File.c.s
 .PHONY : util/File.c.s
 
+util/JsVariant.o: util/JsVariant.c.o
+
+.PHONY : util/JsVariant.o
+
+# target to build an object file
+util/JsVariant.c.o:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o
+.PHONY : util/JsVariant.c.o
+
+util/JsVariant.i: util/JsVariant.c.i
+
+.PHONY : util/JsVariant.i
+
+# target to preprocess a source file
+util/JsVariant.c.i:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.i
+.PHONY : util/JsVariant.c.i
+
+util/JsVariant.s: util/JsVariant.c.s
+
+.PHONY : util/JsVariant.s
+
+# target to generate assembly for a file
+util/JsVariant.c.s:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.s
+.PHONY : util/JsVariant.c.s
+
+util/Json.o: util/Json.c.o
+
+.PHONY : util/Json.o
+
+# target to build an object file
+util/Json.c.o:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/Json.c.o
+.PHONY : util/Json.c.o
+
+util/Json.i: util/Json.c.i
+
+.PHONY : util/Json.i
+
+# target to preprocess a source file
+util/Json.c.i:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/Json.c.i
+.PHONY : util/Json.c.i
+
+util/Json.s: util/Json.c.s
+
+.PHONY : util/Json.s
+
+# target to generate assembly for a file
+util/Json.c.s:
+	cd /home/bruce/Git/vala-emscripten/install && $(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/Json.c.s
+.PHONY : util/Json.c.s
+
 util/String.o: util/String.c.o
 
 .PHONY : util/String.o
@@ -1052,6 +1133,9 @@ help:
 	@echo "... sdx/graphics/Surface.o"
 	@echo "... sdx/graphics/Surface.i"
 	@echo "... sdx/graphics/Surface.s"
+	@echo "... sdx/graphics/TextureAtlas.o"
+	@echo "... sdx/graphics/TextureAtlas.i"
+	@echo "... sdx/graphics/TextureAtlas.s"
 	@echo "... sdx/sdx.o"
 	@echo "... sdx/sdx.i"
 	@echo "... sdx/sdx.s"
@@ -1088,6 +1172,12 @@ help:
 	@echo "... util/File.o"
 	@echo "... util/File.i"
 	@echo "... util/File.s"
+	@echo "... util/JsVariant.o"
+	@echo "... util/JsVariant.i"
+	@echo "... util/JsVariant.s"
+	@echo "... util/Json.o"
+	@echo "... util/Json.i"
+	@echo "... util/Json.s"
 	@echo "... util/String.o"
 	@echo "... util/String.i"
 	@echo "... util/String.s"

@@ -11,15 +11,7 @@
         {
             "isBuildCommand": true,
             "taskName": "build",
-            "args": ["cd install && make"]
-        },
-        {
-            "taskName": "clean",
-            "args": ["rm -r ${workspaceRoot}/install && mkdir ${workspaceRoot}/install"]
-        },
-        {
-            "taskName": "update",
-            "args": ["autovala update && cd install && cmake .."]
+            "args": ["./build.sh"]
         }        
     ]
 }

@@ -13,6 +13,7 @@ src/sdx/Font.vala
 src/sdx/files/FileHandle.vala
 src/sdx/graphics/Sprite.vala
 src/sdx/graphics/Surface.vala
+src/sdx/graphics/TextureAtlas.vala
 src/sdx/sdx.vala
 src/systems/AnimationSystem.vala
 src/systems/CollisionSystem.vala
@@ -25,5 +26,7 @@ src/systems/ScoreSystem.vala
 src/systems/SpawnSystem.vala
 src/util/Cache.vala
 src/util/File.vala
+src/util/JsVariant.vala
+src/util/Json.vala
 src/util/String.vala
 src/vala-emscripten.vala

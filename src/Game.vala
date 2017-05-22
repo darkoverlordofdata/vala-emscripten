@@ -21,15 +21,25 @@ public class Game : Object {
 	public AnimationSystem animate;
 	public DisplaySystem display;
 	public ScoreSystem score;
+	public sdx.graphics.TextureAtlas z;
+	public sdx.graphics.TextureAtlas.InnerClass x;
+	public TestClass test;
 
 	public Game(int width, int height) {
 		instance = this;
 		this.width = width;
 		this.height = height;
+		var z = new sdx.graphics.TextureAtlas();
+		x = z.createInner();
+		test = new TestClass();
+
 	}
 
 	public void initialize() {
 
+		//  print("Inner: %s\n", z.x.name);
+		print("Inner: %s\n", x.name);
+		print("Test : %s\n", test.name);
 		sdx.setSmallFont("assets/fonts/OpenDyslexic-Bold.otf", 16);
 		sdx.setDefaultFont("assets/fonts/OpenDyslexic-Bold.otf", 24);
 		sdx.setShowFps(true);

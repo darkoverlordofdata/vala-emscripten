@@ -1,3 +1,5 @@
 # Hashes of file build rules.
+a6c36d2fc6a440d6dd4095d11f7d0de3 data/CMakeFiles/resources_gresource_xml
+83286471211ce973bb7f16ace7582e9f data/resources.gresource.xml.c
 e14b1386b4f7a73025d3704cf19ef60a src/Config.c
-2b8b66606d933208bdb72b114d4dad34 src/vala-emscripten_valac.stamp
+822b7df8ce61bbc720e28d2cd8c3eedb src/vala-emscripten_valac.stamp

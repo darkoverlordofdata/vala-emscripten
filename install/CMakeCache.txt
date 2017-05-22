@@ -226,10 +226,13 @@ MSGFMT_EXECUTABLE:FILEPATH=/usr/bin/msgfmt
 PKG_CONFIG_EXECUTABLE:FILEPATH=/usr/bin/pkg-config
 
 //PROFILING
-PROFILING:BOOL=OFF
+PROFILING:BOOL=ON
 
 //Path to a program.
 VALA_EXECUTABLE:FILEPATH=/usr/bin/valac
+
+//Path to a program.
+WHERE_GRESOURCE:FILEPATH=/usr/bin/glib-compile-resources
 
 //Path to a program.
 XGETTEXT_EXECUTABLE:FILEPATH=/usr/bin/xgettext
@@ -361,7 +364,7 @@ CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_NM
 CMAKE_NM-ADVANCED:INTERNAL=1
 //number of local generators
-CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=10
+CMAKE_NUMBER_OF_MAKEFILES:INTERNAL=11
 //ADVANCED property for variable: CMAKE_OBJCOPY
 CMAKE_OBJCOPY-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: CMAKE_OBJDUMP
@@ -400,16 +403,16 @@ CMAKE_STRIP-ADVANCED:INTERNAL=1
 CMAKE_UNAME:INTERNAL=/bin/uname
 //ADVANCED property for variable: CMAKE_VERBOSE_MAKEFILE
 CMAKE_VERBOSE_MAKEFILE-ADVANCED:INTERNAL=1
-DEPS_CFLAGS:INTERNAL=-D_REENTRANT;-I/usr/local/include/SDL2;-I/usr/include/SDL2;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+DEPS_CFLAGS:INTERNAL=-pthread;-D_REENTRANT;-I/usr/local/include/SDL2;-I/usr/include/SDL2;-I/usr/include/json-glib-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 DEPS_CFLAGS_I:INTERNAL=
-DEPS_CFLAGS_OTHER:INTERNAL=-D_REENTRANT
+DEPS_CFLAGS_OTHER:INTERNAL=-pthread;-D_REENTRANT
 DEPS_FOUND:INTERNAL=1
 DEPS_INCLUDEDIR:INTERNAL=
-DEPS_INCLUDE_DIRS:INTERNAL=/usr/local/include/SDL2;/usr/include/SDL2;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
-DEPS_LDFLAGS:INTERNAL=-L/usr/local/lib;-lSDL2_image;-lSDL2_ttf;-lgobject-2.0;-lglib-2.0;-Wl,-rpath,/usr/local/lib;-Wl,--enable-new-dtags;-lSDL2
+DEPS_INCLUDE_DIRS:INTERNAL=/usr/local/include/SDL2;/usr/include/SDL2;/usr/include/json-glib-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+DEPS_LDFLAGS:INTERNAL=-L/usr/local/lib;-lSDL2_image;-lSDL2_ttf;-ljson-glib-1.0;-lgio-2.0;-lgobject-2.0;-lglib-2.0;-Wl,-rpath,/usr/local/lib;-Wl,--enable-new-dtags;-lSDL2
 DEPS_LDFLAGS_OTHER:INTERNAL=-Wl,-rpath,/usr/local/lib;-Wl,--enable-new-dtags
 DEPS_LIBDIR:INTERNAL=
-DEPS_LIBRARIES:INTERNAL=SDL2_image;SDL2_ttf;gobject-2.0;glib-2.0;SDL2
+DEPS_LIBRARIES:INTERNAL=SDL2_image;SDL2_ttf;json-glib-1.0;gio-2.0;gobject-2.0;glib-2.0;SDL2
 DEPS_LIBRARY_DIRS:INTERNAL=/usr/local/lib
 DEPS_LIBS:INTERNAL=
 DEPS_LIBS_L:INTERNAL=
@@ -424,20 +427,24 @@ DEPS_SDL2_ttf_INCLUDEDIR:INTERNAL=/usr/include
 DEPS_SDL2_ttf_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
 DEPS_SDL2_ttf_PREFIX:INTERNAL=/usr
 DEPS_SDL2_ttf_VERSION:INTERNAL=2.0.14
-DEPS_STATIC_CFLAGS:INTERNAL=-D_REENTRANT;-I/usr/local/include/SDL2;-I/usr/include/SDL2;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
+DEPS_STATIC_CFLAGS:INTERNAL=-pthread;-D_REENTRANT;-I/usr/local/include/SDL2;-I/usr/include/SDL2;-I/usr/include/json-glib-1.0;-I/usr/include/glib-2.0;-I/usr/lib/x86_64-linux-gnu/glib-2.0/include
 DEPS_STATIC_CFLAGS_I:INTERNAL=
-DEPS_STATIC_CFLAGS_OTHER:INTERNAL=-D_REENTRANT
-DEPS_STATIC_INCLUDE_DIRS:INTERNAL=/usr/local/include/SDL2;/usr/include/SDL2;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
-DEPS_STATIC_LDFLAGS:INTERNAL=-L/usr/local/lib;-lSDL2_image;-lSDL2_ttf;-lgobject-2.0;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread;-Wl,-rpath,/usr/local/lib;-Wl,--enable-new-dtags;-lSDL2;-Wl,--no-undefined;-lm;-ldl;-lsndio;-lpthread;-lrt
+DEPS_STATIC_CFLAGS_OTHER:INTERNAL=-pthread;-D_REENTRANT
+DEPS_STATIC_INCLUDE_DIRS:INTERNAL=/usr/local/include/SDL2;/usr/include/SDL2;/usr/include/json-glib-1.0;/usr/include/glib-2.0;/usr/lib/x86_64-linux-gnu/glib-2.0/include
+DEPS_STATIC_LDFLAGS:INTERNAL=-L/usr/local/lib;-lSDL2_image;-lSDL2_ttf;-ljson-glib-1.0;-lgio-2.0;-lz;-lresolv;-lselinux;-lgmodule-2.0;-pthread;-ldl;-lgobject-2.0;-lffi;-lglib-2.0;-pthread;-lpcre;-pthread;-Wl,-rpath,/usr/local/lib;-Wl,--enable-new-dtags;-lSDL2;-Wl,--no-undefined;-lm;-ldl;-lsndio;-lpthread;-lrt
 DEPS_STATIC_LDFLAGS_OTHER:INTERNAL=-pthread;-Wl,-rpath,/usr/local/lib;-Wl,--enable-new-dtags;-Wl,--no-undefined
 DEPS_STATIC_LIBDIR:INTERNAL=
-DEPS_STATIC_LIBRARIES:INTERNAL=SDL2_image;SDL2_ttf;gobject-2.0;ffi;glib-2.0;pcre;SDL2;m;dl;sndio;pthread;rt
+DEPS_STATIC_LIBRARIES:INTERNAL=SDL2_image;SDL2_ttf;json-glib-1.0;gio-2.0;z;resolv;selinux;gmodule-2.0;dl;gobject-2.0;ffi;glib-2.0;pcre;SDL2;m;dl;sndio;pthread;rt
 DEPS_STATIC_LIBRARY_DIRS:INTERNAL=/usr/local/lib
 DEPS_STATIC_LIBS:INTERNAL=
 DEPS_STATIC_LIBS_L:INTERNAL=
 DEPS_STATIC_LIBS_OTHER:INTERNAL=
 DEPS_STATIC_LIBS_PATHS:INTERNAL=
 DEPS_VERSION:INTERNAL=
+DEPS_gio-2.0_INCLUDEDIR:INTERNAL=/usr/include
+DEPS_gio-2.0_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+DEPS_gio-2.0_PREFIX:INTERNAL=/usr
+DEPS_gio-2.0_VERSION:INTERNAL=2.48.2
 DEPS_glib-2.0_INCLUDEDIR:INTERNAL=/usr/include
 DEPS_glib-2.0_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
 DEPS_glib-2.0_PREFIX:INTERNAL=/usr
@@ -446,6 +453,10 @@ DEPS_gobject-2.0_INCLUDEDIR:INTERNAL=/usr/include
 DEPS_gobject-2.0_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
 DEPS_gobject-2.0_PREFIX:INTERNAL=/usr
 DEPS_gobject-2.0_VERSION:INTERNAL=2.48.2
+DEPS_json-glib-1.0_INCLUDEDIR:INTERNAL=/usr/include
+DEPS_json-glib-1.0_LIBDIR:INTERNAL=/usr/lib/x86_64-linux-gnu
+DEPS_json-glib-1.0_PREFIX:INTERNAL=/usr
+DEPS_json-glib-1.0_VERSION:INTERNAL=1.1.2
 DEPS_sdl2_INCLUDEDIR:INTERNAL=/usr/local/include
 DEPS_sdl2_LIBDIR:INTERNAL=/usr/local/lib
 DEPS_sdl2_PREFIX:INTERNAL=/usr/local

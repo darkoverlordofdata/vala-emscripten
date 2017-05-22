@@ -131,7 +131,28 @@ typedef struct _systemsDisplaySystemClass systemsDisplaySystemClass;
 
 typedef struct _systemsScoreSystem systemsScoreSystem;
 typedef struct _systemsScoreSystemClass systemsScoreSystemClass;
+
+#define SDX_GRAPHICS_TYPE_TEXTURE_ATLAS (sdx_graphics_texture_atlas_get_type ())
+#define SDX_GRAPHICS_TEXTURE_ATLAS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS, sdxgraphicsTextureAtlas))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS, sdxgraphicsTextureAtlasClass))
+#define SDX_GRAPHICS_IS_TEXTURE_ATLAS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS))
+#define SDX_GRAPHICS_IS_TEXTURE_ATLAS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), SDX_GRAPHICS_TYPE_TEXTURE_ATLAS, sdxgraphicsTextureAtlasClass))
+
+typedef struct _sdxgraphicsTextureAtlas sdxgraphicsTextureAtlas;
+typedef struct _sdxgraphicsTextureAtlasClass sdxgraphicsTextureAtlasClass;
+
+#define SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS (sdx_graphics_texture_atlas_innerclass_get_type ())
+#define SDX_GRAPHICS_TEXTURE_ATLAS_INNERCLASS(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS, sdxgraphicsTextureAtlasInnerClass))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_INNERCLASS_CLASS(klass) (G_TYPE_CHECK_CLASS_CAST ((klass), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS, sdxgraphicsTextureAtlasInnerClassClass))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_IS_INNERCLASS(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_IS_INNERCLASS_CLASS(klass) (G_TYPE_CHECK_CLASS_TYPE ((klass), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS))
+#define SDX_GRAPHICS_TEXTURE_ATLAS_INNERCLASS_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), SDX_GRAPHICS_TEXTURE_ATLAS_TYPE_INNERCLASS, sdxgraphicsTextureAtlasInnerClassClass))
+
+typedef struct _sdxgraphicsTextureAtlasInnerClass sdxgraphicsTextureAtlasInnerClass;
+typedef struct _sdxgraphicsTextureAtlasInnerClassClass sdxgraphicsTextureAtlasInnerClassClass;
 #define _g_object_unref0(var) ((var == NULL) ? NULL : (var = (g_object_unref (var), NULL)))
+typedef struct _sdxgraphicsTextureAtlasInnerClassPrivate sdxgraphicsTextureAtlasInnerClassPrivate;
 
 #define ENTITAS_TYPE_ENTITY (entitas_entity_get_type ())
 
@@ -216,9 +237,21 @@ struct _Game {
 	systemsAnimationSystem* animate;
 	systemsDisplaySystem* display;
 	systemsScoreSystem* score;
+	sdxgraphicsTextureAtlas* z;
+	sdxgraphicsTextureAtlasInnerClass* x;
 };
 
 struct _GameClass {
+	GObjectClass parent_class;
+};
+
+struct _sdxgraphicsTextureAtlasInnerClass {
+	GObject parent_instance;
+	sdxgraphicsTextureAtlasInnerClassPrivate * priv;
+	gchar* name;
+};
+
+struct _sdxgraphicsTextureAtlasInnerClassClass {
 	GObjectClass parent_class;
 };
 
@@ -371,11 +404,16 @@ GType systems_spawn_system_get_type (void) G_GNUC_CONST;
 GType systems_animation_system_get_type (void) G_GNUC_CONST;
 GType systems_display_system_get_type (void) G_GNUC_CONST;
 GType systems_score_system_get_type (void) G_GNUC_CONST;
+GType sdx_graphics_texture_atlas_get_type (void) G_GNUC_CONST;
+GType sdx_graphics_texture_atlas_innerclass_get_type (void) G_GNUC_CONST;
 enum  {
 	GAME_DUMMY_PROPERTY
 };
 Game* game_new (gint width, gint height);
 Game* game_construct (GType object_type, gint width, gint height);
+sdxgraphicsTextureAtlas* sdx_graphics_texture_atlas_new (void);
+sdxgraphicsTextureAtlas* sdx_graphics_texture_atlas_construct (GType object_type);
+sdxgraphicsTextureAtlasInnerClass* sdx_graphics_texture_atlas_createInner (sdxgraphicsTextureAtlas* self);
 void game_initialize (Game* self);
 void sdx_setSmallFont (const gchar* path, gint size);
 void sdx_setDefaultFont (const gchar* path, gint size);
@@ -504,6 +542,9 @@ Game* game_construct (GType object_type, gint width, gint height) {
 	Game* _tmp0_ = NULL;
 	gint _tmp1_ = 0;
 	gint _tmp2_ = 0;
+	sdxgraphicsTextureAtlas* z = NULL;
+	sdxgraphicsTextureAtlas* _tmp3_ = NULL;
+	sdxgraphicsTextureAtlasInnerClass* _tmp4_ = NULL;
 	self = (Game*) g_object_new (object_type, NULL);
 	_tmp0_ = _g_object_ref0 (self);
 	_g_object_unref0 (game_instance);
@@ -512,6 +553,12 @@ Game* game_construct (GType object_type, gint width, gint height) {
 	self->width = _tmp1_;
 	_tmp2_ = height;
 	self->height = _tmp2_;
+	_tmp3_ = sdx_graphics_texture_atlas_new ();
+	z = _tmp3_;
+	_tmp4_ = sdx_graphics_texture_atlas_createInner (z);
+	_g_object_unref0 (self->x);
+	self->x = _tmp4_;
+	_g_object_unref0 (z);
 	return self;
 }
 
@@ -529,158 +576,163 @@ static entitasEntity* _entityRemoved_entitas_entity_removed_listener (entitasEnt
 
 
 void game_initialize (Game* self) {
-	Factory* _tmp0_ = NULL;
-	Factory* _tmp1_ = NULL;
+	sdxgraphicsTextureAtlasInnerClass* _tmp0_ = NULL;
+	const gchar* _tmp1_ = NULL;
 	Factory* _tmp2_ = NULL;
-	systemsSpawnSystem* _tmp3_ = NULL;
+	Factory* _tmp3_ = NULL;
 	Factory* _tmp4_ = NULL;
-	systemsInputSystem* _tmp5_ = NULL;
+	systemsSpawnSystem* _tmp5_ = NULL;
 	Factory* _tmp6_ = NULL;
-	systemsCollisionSystem* _tmp7_ = NULL;
+	systemsInputSystem* _tmp7_ = NULL;
 	Factory* _tmp8_ = NULL;
-	systemsPhysicsSystem* _tmp9_ = NULL;
+	systemsCollisionSystem* _tmp9_ = NULL;
 	Factory* _tmp10_ = NULL;
-	systemsExpireSystem* _tmp11_ = NULL;
+	systemsPhysicsSystem* _tmp11_ = NULL;
 	Factory* _tmp12_ = NULL;
-	systemsRemoveSystem* _tmp13_ = NULL;
+	systemsExpireSystem* _tmp13_ = NULL;
 	Factory* _tmp14_ = NULL;
-	systemsAnimationSystem* _tmp15_ = NULL;
+	systemsRemoveSystem* _tmp15_ = NULL;
 	Factory* _tmp16_ = NULL;
-	systemsDisplaySystem* _tmp17_ = NULL;
+	systemsAnimationSystem* _tmp17_ = NULL;
 	Factory* _tmp18_ = NULL;
-	systemsScoreSystem* _tmp19_ = NULL;
+	systemsDisplaySystem* _tmp19_ = NULL;
 	Factory* _tmp20_ = NULL;
-	systemsSpawnSystem* _tmp21_ = NULL;
-	entitasISystem _tmp22_ = {0};
-	entitasISystem _tmp23_ = {0};
-	Factory* _tmp24_ = NULL;
-	systemsInputSystem* _tmp25_ = NULL;
-	entitasISystem _tmp26_ = {0};
-	entitasISystem _tmp27_ = {0};
-	Factory* _tmp28_ = NULL;
-	systemsPhysicsSystem* _tmp29_ = NULL;
-	entitasISystem _tmp30_ = {0};
-	entitasISystem _tmp31_ = {0};
-	Factory* _tmp32_ = NULL;
-	systemsCollisionSystem* _tmp33_ = NULL;
-	entitasISystem _tmp34_ = {0};
-	entitasISystem _tmp35_ = {0};
-	Factory* _tmp36_ = NULL;
-	systemsAnimationSystem* _tmp37_ = NULL;
-	entitasISystem _tmp38_ = {0};
-	entitasISystem _tmp39_ = {0};
-	Factory* _tmp40_ = NULL;
-	systemsExpireSystem* _tmp41_ = NULL;
-	entitasISystem _tmp42_ = {0};
-	entitasISystem _tmp43_ = {0};
-	Factory* _tmp44_ = NULL;
-	systemsRemoveSystem* _tmp45_ = NULL;
-	entitasISystem _tmp46_ = {0};
-	entitasISystem _tmp47_ = {0};
-	Factory* _tmp48_ = NULL;
-	systemsScoreSystem* _tmp49_ = NULL;
-	entitasISystem _tmp50_ = {0};
-	entitasISystem _tmp51_ = {0};
-	Factory* _tmp52_ = NULL;
-	systemsDisplaySystem* _tmp53_ = NULL;
-	entitasISystem _tmp54_ = {0};
-	entitasISystem _tmp55_ = {0};
-	Factory* _tmp56_ = NULL;
-	Factory* _tmp57_ = NULL;
+	systemsScoreSystem* _tmp21_ = NULL;
+	Factory* _tmp22_ = NULL;
+	systemsSpawnSystem* _tmp23_ = NULL;
+	entitasISystem _tmp24_ = {0};
+	entitasISystem _tmp25_ = {0};
+	Factory* _tmp26_ = NULL;
+	systemsInputSystem* _tmp27_ = NULL;
+	entitasISystem _tmp28_ = {0};
+	entitasISystem _tmp29_ = {0};
+	Factory* _tmp30_ = NULL;
+	systemsPhysicsSystem* _tmp31_ = NULL;
+	entitasISystem _tmp32_ = {0};
+	entitasISystem _tmp33_ = {0};
+	Factory* _tmp34_ = NULL;
+	systemsCollisionSystem* _tmp35_ = NULL;
+	entitasISystem _tmp36_ = {0};
+	entitasISystem _tmp37_ = {0};
+	Factory* _tmp38_ = NULL;
+	systemsAnimationSystem* _tmp39_ = NULL;
+	entitasISystem _tmp40_ = {0};
+	entitasISystem _tmp41_ = {0};
+	Factory* _tmp42_ = NULL;
+	systemsExpireSystem* _tmp43_ = NULL;
+	entitasISystem _tmp44_ = {0};
+	entitasISystem _tmp45_ = {0};
+	Factory* _tmp46_ = NULL;
+	systemsRemoveSystem* _tmp47_ = NULL;
+	entitasISystem _tmp48_ = {0};
+	entitasISystem _tmp49_ = {0};
+	Factory* _tmp50_ = NULL;
+	systemsScoreSystem* _tmp51_ = NULL;
+	entitasISystem _tmp52_ = {0};
+	entitasISystem _tmp53_ = {0};
+	Factory* _tmp54_ = NULL;
+	systemsDisplaySystem* _tmp55_ = NULL;
+	entitasISystem _tmp56_ = {0};
+	entitasISystem _tmp57_ = {0};
+	Factory* _tmp58_ = NULL;
+	Factory* _tmp59_ = NULL;
 	g_return_if_fail (self != NULL);
+	_tmp0_ = self->x;
+	_tmp1_ = _tmp0_->name;
+	g_print ("Inner: %s\n", _tmp1_);
 	sdx_setSmallFont ("assets/fonts/OpenDyslexic-Bold.otf", 16);
 	sdx_setDefaultFont ("assets/fonts/OpenDyslexic-Bold.otf", 24);
 	sdx_setShowFps (TRUE);
-	_tmp0_ = factory_new ();
+	_tmp2_ = factory_new ();
 	_g_object_unref0 (self->world);
-	self->world = _tmp0_;
-	_tmp1_ = self->world;
-	entitas_world_setEntityRemovedListener ((entitasWorld*) _tmp1_, _entityRemoved_entitas_entity_removed_listener, NULL);
-	_tmp2_ = self->world;
-	_tmp3_ = systems_spawn_system_new (self, _tmp2_);
-	_g_object_unref0 (self->spawn);
-	self->spawn = _tmp3_;
+	self->world = _tmp2_;
+	_tmp3_ = self->world;
+	entitas_world_setEntityRemovedListener ((entitasWorld*) _tmp3_, _entityRemoved_entitas_entity_removed_listener, NULL);
 	_tmp4_ = self->world;
-	_tmp5_ = systems_input_system_new (self, _tmp4_);
-	_g_object_unref0 (self->input);
-	self->input = _tmp5_;
+	_tmp5_ = systems_spawn_system_new (self, _tmp4_);
+	_g_object_unref0 (self->spawn);
+	self->spawn = _tmp5_;
 	_tmp6_ = self->world;
-	_tmp7_ = systems_collision_system_new (self, _tmp6_);
-	_g_object_unref0 (self->collision);
-	self->collision = _tmp7_;
+	_tmp7_ = systems_input_system_new (self, _tmp6_);
+	_g_object_unref0 (self->input);
+	self->input = _tmp7_;
 	_tmp8_ = self->world;
-	_tmp9_ = systems_physics_system_new (self, _tmp8_);
-	_g_object_unref0 (self->physics);
-	self->physics = _tmp9_;
+	_tmp9_ = systems_collision_system_new (self, _tmp8_);
+	_g_object_unref0 (self->collision);
+	self->collision = _tmp9_;
 	_tmp10_ = self->world;
-	_tmp11_ = systems_expire_system_new (self, _tmp10_);
-	_g_object_unref0 (self->expire);
-	self->expire = _tmp11_;
+	_tmp11_ = systems_physics_system_new (self, _tmp10_);
+	_g_object_unref0 (self->physics);
+	self->physics = _tmp11_;
 	_tmp12_ = self->world;
-	_tmp13_ = systems_remove_system_new (self, _tmp12_);
-	_g_object_unref0 (self->remove);
-	self->remove = _tmp13_;
+	_tmp13_ = systems_expire_system_new (self, _tmp12_);
+	_g_object_unref0 (self->expire);
+	self->expire = _tmp13_;
 	_tmp14_ = self->world;
-	_tmp15_ = systems_animation_system_new (self, _tmp14_);
-	_g_object_unref0 (self->animate);
-	self->animate = _tmp15_;
+	_tmp15_ = systems_remove_system_new (self, _tmp14_);
+	_g_object_unref0 (self->remove);
+	self->remove = _tmp15_;
 	_tmp16_ = self->world;
-	_tmp17_ = systems_display_system_new (self, _tmp16_);
-	_g_object_unref0 (self->display);
-	self->display = _tmp17_;
+	_tmp17_ = systems_animation_system_new (self, _tmp16_);
+	_g_object_unref0 (self->animate);
+	self->animate = _tmp17_;
 	_tmp18_ = self->world;
-	_tmp19_ = systems_score_system_new (self, _tmp18_);
-	_g_object_unref0 (self->score);
-	self->score = _tmp19_;
+	_tmp19_ = systems_display_system_new (self, _tmp18_);
+	_g_object_unref0 (self->display);
+	self->display = _tmp19_;
 	_tmp20_ = self->world;
-	_tmp21_ = self->spawn;
-	_tmp22_ = systems_spawn_system_get__ISystem (_tmp21_);
-	_tmp23_ = _tmp22_;
-	entitas_world_addSystem ((entitasWorld*) _tmp20_, _tmp23_);
-	_tmp24_ = self->world;
-	_tmp25_ = self->input;
-	_tmp26_ = systems_input_system_get__ISystem (_tmp25_);
-	_tmp27_ = _tmp26_;
-	entitas_world_addSystem ((entitasWorld*) _tmp24_, _tmp27_);
-	_tmp28_ = self->world;
-	_tmp29_ = self->physics;
-	_tmp30_ = systems_physics_system_get__ISystem (_tmp29_);
-	_tmp31_ = _tmp30_;
-	entitas_world_addSystem ((entitasWorld*) _tmp28_, _tmp31_);
-	_tmp32_ = self->world;
-	_tmp33_ = self->collision;
-	_tmp34_ = systems_collision_system_get__ISystem (_tmp33_);
-	_tmp35_ = _tmp34_;
-	entitas_world_addSystem ((entitasWorld*) _tmp32_, _tmp35_);
-	_tmp36_ = self->world;
-	_tmp37_ = self->animate;
-	_tmp38_ = systems_animation_system_get__ISystem (_tmp37_);
-	_tmp39_ = _tmp38_;
-	entitas_world_addSystem ((entitasWorld*) _tmp36_, _tmp39_);
-	_tmp40_ = self->world;
-	_tmp41_ = self->expire;
-	_tmp42_ = systems_expire_system_get__ISystem (_tmp41_);
-	_tmp43_ = _tmp42_;
-	entitas_world_addSystem ((entitasWorld*) _tmp40_, _tmp43_);
-	_tmp44_ = self->world;
-	_tmp45_ = self->remove;
-	_tmp46_ = systems_remove_system_get__ISystem (_tmp45_);
-	_tmp47_ = _tmp46_;
-	entitas_world_addSystem ((entitasWorld*) _tmp44_, _tmp47_);
-	_tmp48_ = self->world;
-	_tmp49_ = self->score;
-	_tmp50_ = systems_score_system_get__ISystem (_tmp49_);
-	_tmp51_ = _tmp50_;
-	entitas_world_addSystem ((entitasWorld*) _tmp48_, _tmp51_);
-	_tmp52_ = self->world;
-	_tmp53_ = self->display;
-	_tmp54_ = systems_display_system_get__ISystem (_tmp53_);
-	_tmp55_ = _tmp54_;
-	entitas_world_addSystem ((entitasWorld*) _tmp52_, _tmp55_);
-	_tmp56_ = self->world;
-	entitas_world_initialize ((entitasWorld*) _tmp56_);
-	_tmp57_ = self->world;
-	factory_createBackground (_tmp57_);
+	_tmp21_ = systems_score_system_new (self, _tmp20_);
+	_g_object_unref0 (self->score);
+	self->score = _tmp21_;
+	_tmp22_ = self->world;
+	_tmp23_ = self->spawn;
+	_tmp24_ = systems_spawn_system_get__ISystem (_tmp23_);
+	_tmp25_ = _tmp24_;
+	entitas_world_addSystem ((entitasWorld*) _tmp22_, _tmp25_);
+	_tmp26_ = self->world;
+	_tmp27_ = self->input;
+	_tmp28_ = systems_input_system_get__ISystem (_tmp27_);
+	_tmp29_ = _tmp28_;
+	entitas_world_addSystem ((entitasWorld*) _tmp26_, _tmp29_);
+	_tmp30_ = self->world;
+	_tmp31_ = self->physics;
+	_tmp32_ = systems_physics_system_get__ISystem (_tmp31_);
+	_tmp33_ = _tmp32_;
+	entitas_world_addSystem ((entitasWorld*) _tmp30_, _tmp33_);
+	_tmp34_ = self->world;
+	_tmp35_ = self->collision;
+	_tmp36_ = systems_collision_system_get__ISystem (_tmp35_);
+	_tmp37_ = _tmp36_;
+	entitas_world_addSystem ((entitasWorld*) _tmp34_, _tmp37_);
+	_tmp38_ = self->world;
+	_tmp39_ = self->animate;
+	_tmp40_ = systems_animation_system_get__ISystem (_tmp39_);
+	_tmp41_ = _tmp40_;
+	entitas_world_addSystem ((entitasWorld*) _tmp38_, _tmp41_);
+	_tmp42_ = self->world;
+	_tmp43_ = self->expire;
+	_tmp44_ = systems_expire_system_get__ISystem (_tmp43_);
+	_tmp45_ = _tmp44_;
+	entitas_world_addSystem ((entitasWorld*) _tmp42_, _tmp45_);
+	_tmp46_ = self->world;
+	_tmp47_ = self->remove;
+	_tmp48_ = systems_remove_system_get__ISystem (_tmp47_);
+	_tmp49_ = _tmp48_;
+	entitas_world_addSystem ((entitasWorld*) _tmp46_, _tmp49_);
+	_tmp50_ = self->world;
+	_tmp51_ = self->score;
+	_tmp52_ = systems_score_system_get__ISystem (_tmp51_);
+	_tmp53_ = _tmp52_;
+	entitas_world_addSystem ((entitasWorld*) _tmp50_, _tmp53_);
+	_tmp54_ = self->world;
+	_tmp55_ = self->display;
+	_tmp56_ = systems_display_system_get__ISystem (_tmp55_);
+	_tmp57_ = _tmp56_;
+	entitas_world_addSystem ((entitasWorld*) _tmp54_, _tmp57_);
+	_tmp58_ = self->world;
+	entitas_world_initialize ((entitasWorld*) _tmp58_);
+	_tmp59_ = self->world;
+	factory_createBackground (_tmp59_);
 }
 
 
@@ -757,6 +809,8 @@ static void game_finalize (GObject* obj) {
 	_g_object_unref0 (self->animate);
 	_g_object_unref0 (self->display);
 	_g_object_unref0 (self->score);
+	_g_object_unref0 (self->z);
+	_g_object_unref0 (self->x);
 	G_OBJECT_CLASS (game_parent_class)->finalize (obj);
 }
 

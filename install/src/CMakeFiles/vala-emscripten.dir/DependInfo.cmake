@@ -20,6 +20,7 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/bruce/Git/vala-emscripten/install/src/sdx/files/FileHandle.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/sdx/files/FileHandle.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/sdx/graphics/Sprite.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Sprite.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/sdx/graphics/Surface.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o"
+  "/home/bruce/Git/vala-emscripten/install/src/sdx/graphics/TextureAtlas.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/sdx/sdx.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/systems/AnimationSystem.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/systems/CollisionSystem.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o"
@@ -32,6 +33,8 @@ set(CMAKE_DEPENDS_CHECK_C
   "/home/bruce/Git/vala-emscripten/install/src/systems/SpawnSystem.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/util/Cache.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/util/File.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/util/File.c.o"
+  "/home/bruce/Git/vala-emscripten/install/src/util/JsVariant.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o"
+  "/home/bruce/Git/vala-emscripten/install/src/util/Json.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/util/Json.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/util/String.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/util/String.c.o"
   "/home/bruce/Git/vala-emscripten/install/src/vala-emscripten.c" "/home/bruce/Git/vala-emscripten/install/src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o"
   )
@@ -66,6 +69,7 @@ set(CMAKE_MULTIPLE_OUTPUT_PAIRS
   "/home/bruce/Git/vala-emscripten/install/src/sdx/files/FileHandle.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/sdx/graphics/Sprite.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/sdx/graphics/Surface.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
+  "/home/bruce/Git/vala-emscripten/install/src/sdx/graphics/TextureAtlas.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/sdx/sdx.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/systems/AnimationSystem.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/systems/CollisionSystem.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
@@ -78,6 +82,8 @@ set(CMAKE_MULTIPLE_OUTPUT_PAIRS
   "/home/bruce/Git/vala-emscripten/install/src/systems/SpawnSystem.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/util/Cache.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/util/File.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
+  "/home/bruce/Git/vala-emscripten/install/src/util/JsVariant.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
+  "/home/bruce/Git/vala-emscripten/install/src/util/Json.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/util/String.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   "/home/bruce/Git/vala-emscripten/install/src/vala-emscripten.c" "/home/bruce/Git/vala-emscripten/install/src/Config.c"
   )

@@ -105,6 +105,9 @@ src/sdx/graphics/Sprite.c: src/Config.c
 src/sdx/graphics/Surface.c: src/Config.c
 	@$(CMAKE_COMMAND) -E touch_nocreate src/sdx/graphics/Surface.c
 
+src/sdx/graphics/TextureAtlas.c: src/Config.c
+	@$(CMAKE_COMMAND) -E touch_nocreate src/sdx/graphics/TextureAtlas.c
+
 src/sdx/sdx.c: src/Config.c
 	@$(CMAKE_COMMAND) -E touch_nocreate src/sdx/sdx.c
 
@@ -141,6 +144,12 @@ src/util/Cache.c: src/Config.c
 src/util/File.c: src/Config.c
 	@$(CMAKE_COMMAND) -E touch_nocreate src/util/File.c
 
+src/util/JsVariant.c: src/Config.c
+	@$(CMAKE_COMMAND) -E touch_nocreate src/util/JsVariant.c
+
+src/util/Json.c: src/Config.c
+	@$(CMAKE_COMMAND) -E touch_nocreate src/util/Json.c
+
 src/util/String.c: src/Config.c
 	@$(CMAKE_COMMAND) -E touch_nocreate src/util/String.c
 
@@ -163,6 +172,7 @@ src/vala-emscripten_valac.stamp: ../src/sdx/Font.vala
 src/vala-emscripten_valac.stamp: ../src/sdx/files/FileHandle.vala
 src/vala-emscripten_valac.stamp: ../src/sdx/graphics/Sprite.vala
 src/vala-emscripten_valac.stamp: ../src/sdx/graphics/Surface.vala
+src/vala-emscripten_valac.stamp: ../src/sdx/graphics/TextureAtlas.vala
 src/vala-emscripten_valac.stamp: ../src/sdx/sdx.vala
 src/vala-emscripten_valac.stamp: ../src/systems/AnimationSystem.vala
 src/vala-emscripten_valac.stamp: ../src/systems/CollisionSystem.vala
@@ -175,13 +185,15 @@ src/vala-emscripten_valac.stamp: ../src/systems/ScoreSystem.vala
 src/vala-emscripten_valac.stamp: ../src/systems/SpawnSystem.vala
 src/vala-emscripten_valac.stamp: ../src/util/Cache.vala
 src/vala-emscripten_valac.stamp: ../src/util/File.vala
+src/vala-emscripten_valac.stamp: ../src/util/JsVariant.vala
+src/vala-emscripten_valac.stamp: ../src/util/Json.vala
 src/vala-emscripten_valac.stamp: ../src/util/String.vala
 src/vala-emscripten_valac.stamp: ../src/vala-emscripten.vala
 src/vala-emscripten_valac.stamp: ../src/vapis/emscripten.vapi
 src/vala-emscripten_valac.stamp: ../src/vapis/mt19937ar.vapi
 src/vala-emscripten_valac.stamp: ../src/vapis/posix.vapi
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating /home/bruce/Git/vala-emscripten/install/src/Config.c;Factory.c;Game.c;components.c;entitas/Cache.c;entitas/Group.c;entitas/Matcher.c;entitas/World.c;entitas/entitas.c;main.c;sdx/Color.c;sdx/Files.c;sdx/Font.c;sdx/files/FileHandle.c;sdx/graphics/Sprite.c;sdx/graphics/Surface.c;sdx/sdx.c;systems/AnimationSystem.c;systems/CollisionSystem.c;systems/DisplaySystem.c;systems/ExpireSystem.c;systems/InputSystem.c;systems/PhysicsSystem.c;systems/RemoveSystem.c;systems/ScoreSystem.c;systems/SpawnSystem.c;util/Cache.c;util/File.c;util/String.c;vala-emscripten.c"
-	cd /home/bruce/Git/vala-emscripten/install/src && valac-0.34 -C -b /home/bruce/Git/vala-emscripten/src -d /home/bruce/Git/vala-emscripten/install/src --pkg=SDL2_image --pkg=SDL2_ttf --pkg=glib-2.0 --pkg=gobject-2.0 --pkg=sdl2 -D DESKTOP --vapidir=/home/bruce/Git/vala-emscripten/src/vapis --disable-warnings --cc=clang /home/bruce/Git/vala-emscripten/install/src/Config.vala /home/bruce/Git/vala-emscripten/src/Factory.vala /home/bruce/Git/vala-emscripten/src/Game.vala /home/bruce/Git/vala-emscripten/src/components.gs /home/bruce/Git/vala-emscripten/src/entitas/Cache.vala /home/bruce/Git/vala-emscripten/src/entitas/Group.vala /home/bruce/Git/vala-emscripten/src/entitas/Matcher.vala /home/bruce/Git/vala-emscripten/src/entitas/World.vala /home/bruce/Git/vala-emscripten/src/entitas/entitas.vala /home/bruce/Git/vala-emscripten/src/main.vala /home/bruce/Git/vala-emscripten/src/sdx/Color.gs /home/bruce/Git/vala-emscripten/src/sdx/Files.vala /home/bruce/Git/vala-emscripten/src/sdx/Font.vala /home/bruce/Git/vala-emscripten/src/sdx/files/FileHandle.vala /home/bruce/Git/vala-emscripten/src/sdx/graphics/Sprite.vala /home/bruce/Git/vala-emscripten/src/sdx/graphics/Surface.vala /home/bruce/Git/vala-emscripten/src/sdx/sdx.vala /home/bruce/Git/vala-emscripten/src/systems/AnimationSystem.vala /home/bruce/Git/vala-emscripten/src/systems/CollisionSystem.vala /home/bruce/Git/vala-emscripten/src/systems/DisplaySystem.vala /home/bruce/Git/vala-emscripten/src/systems/ExpireSystem.vala /home/bruce/Git/vala-emscripten/src/systems/InputSystem.vala /home/bruce/Git/vala-emscripten/src/systems/PhysicsSystem.vala /home/bruce/Git/vala-emscripten/src/systems/RemoveSystem.vala /home/bruce/Git/vala-emscripten/src/systems/ScoreSystem.vala /home/bruce/Git/vala-emscripten/src/systems/SpawnSystem.vala /home/bruce/Git/vala-emscripten/src/util/Cache.vala /home/bruce/Git/vala-emscripten/src/util/File.vala /home/bruce/Git/vala-emscripten/src/util/String.vala /home/bruce/Git/vala-emscripten/src/vala-emscripten.vala /home/bruce/Git/vala-emscripten/src/vapis/emscripten.vapi /home/bruce/Git/vala-emscripten/src/vapis/mt19937ar.vapi /home/bruce/Git/vala-emscripten/src/vapis/posix.vapi
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Generating /home/bruce/Git/vala-emscripten/install/src/Config.c;Factory.c;Game.c;components.c;entitas/Cache.c;entitas/Group.c;entitas/Matcher.c;entitas/World.c;entitas/entitas.c;main.c;sdx/Color.c;sdx/Files.c;sdx/Font.c;sdx/files/FileHandle.c;sdx/graphics/Sprite.c;sdx/graphics/Surface.c;sdx/graphics/TextureAtlas.c;sdx/sdx.c;systems/AnimationSystem.c;systems/CollisionSystem.c;systems/DisplaySystem.c;systems/ExpireSystem.c;systems/InputSystem.c;systems/PhysicsSystem.c;systems/RemoveSystem.c;systems/ScoreSystem.c;systems/SpawnSystem.c;util/Cache.c;util/File.c;util/JsVariant.c;util/Json.c;util/String.c;vala-emscripten.c"
+	cd /home/bruce/Git/vala-emscripten/install/src && valac-0.34 -C -b /home/bruce/Git/vala-emscripten/src -d /home/bruce/Git/vala-emscripten/install/src --pkg=SDL2_image --pkg=SDL2_ttf --pkg=gio-2.0 --pkg=glib-2.0 --pkg=gobject-2.0 --pkg=json-glib-1.0 --pkg=sdl2 -D PROFILING -D DESKTOP --vapidir=/home/bruce/Git/vala-emscripten/src/vapis --disable-warnings --cc=clang /home/bruce/Git/vala-emscripten/install/src/Config.vala /home/bruce/Git/vala-emscripten/src/Factory.vala /home/bruce/Git/vala-emscripten/src/Game.vala /home/bruce/Git/vala-emscripten/src/components.gs /home/bruce/Git/vala-emscripten/src/entitas/Cache.vala /home/bruce/Git/vala-emscripten/src/entitas/Group.vala /home/bruce/Git/vala-emscripten/src/entitas/Matcher.vala /home/bruce/Git/vala-emscripten/src/entitas/World.vala /home/bruce/Git/vala-emscripten/src/entitas/entitas.vala /home/bruce/Git/vala-emscripten/src/main.vala /home/bruce/Git/vala-emscripten/src/sdx/Color.gs /home/bruce/Git/vala-emscripten/src/sdx/Files.vala /home/bruce/Git/vala-emscripten/src/sdx/Font.vala /home/bruce/Git/vala-emscripten/src/sdx/files/FileHandle.vala /home/bruce/Git/vala-emscripten/src/sdx/graphics/Sprite.vala /home/bruce/Git/vala-emscripten/src/sdx/graphics/Surface.vala /home/bruce/Git/vala-emscripten/src/sdx/graphics/TextureAtlas.vala /home/bruce/Git/vala-emscripten/src/sdx/sdx.vala /home/bruce/Git/vala-emscripten/src/systems/AnimationSystem.vala /home/bruce/Git/vala-emscripten/src/systems/CollisionSystem.vala /home/bruce/Git/vala-emscripten/src/systems/DisplaySystem.vala /home/bruce/Git/vala-emscripten/src/systems/ExpireSystem.vala /home/bruce/Git/vala-emscripten/src/systems/InputSystem.vala /home/bruce/Git/vala-emscripten/src/systems/PhysicsSystem.vala /home/bruce/Git/vala-emscripten/src/systems/RemoveSystem.vala /home/bruce/Git/vala-emscripten/src/systems/ScoreSystem.vala /home/bruce/Git/vala-emscripten/src/systems/SpawnSystem.vala /home/bruce/Git/vala-emscripten/src/util/Cache.vala /home/bruce/Git/vala-emscripten/src/util/File.vala /home/bruce/Git/vala-emscripten/src/util/JsVariant.vala /home/bruce/Git/vala-emscripten/src/util/Json.vala /home/bruce/Git/vala-emscripten/src/util/String.vala /home/bruce/Git/vala-emscripten/src/vala-emscripten.vala /home/bruce/Git/vala-emscripten/src/vapis/emscripten.vapi /home/bruce/Git/vala-emscripten/src/vapis/mt19937ar.vapi /home/bruce/Git/vala-emscripten/src/vapis/posix.vapi
 	cd /home/bruce/Git/vala-emscripten/install/src && touch /home/bruce/Git/vala-emscripten/install/src/vala-emscripten_valac.stamp
 
 src/CMakeFiles/vala-emscripten.dir/Config.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
@@ -568,9 +580,33 @@ src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o.provides: src/CMakeF
 src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o.provides.build: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o
 
 
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o: src/sdx/graphics/TextureAtlas.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o   -c /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/TextureAtlas.c
+
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.i"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/TextureAtlas.c > CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.i
+
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.s"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/TextureAtlas.c -o CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.s
+
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.requires:
+
+.PHONY : src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.requires
+
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.provides: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.requires
+	$(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.provides.build
+.PHONY : src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.provides
+
+src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.provides.build: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o
+
+
 src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o: src/sdx/sdx.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_18) "Building C object src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o   -c /home/bruce/Git/vala-emscripten/install/src/sdx/sdx.c
 
 src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.i: cmake_force
@@ -594,7 +630,7 @@ src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o.provides.build: src/CMakeFiles/va
 
 src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o: src/systems/AnimationSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_19) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/AnimationSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.i: cmake_force
@@ -618,7 +654,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o.provides.build: s
 
 src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o: src/systems/CollisionSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_20) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/CollisionSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.i: cmake_force
@@ -642,7 +678,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o.provides.build: s
 
 src/CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.o: src/systems/DisplaySystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_21) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/DisplaySystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.i: cmake_force
@@ -666,7 +702,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/DisplaySystem.c.o.provides.build: src
 
 src/CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.o: src/systems/ExpireSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_22) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/ExpireSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.i: cmake_force
@@ -690,7 +726,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/ExpireSystem.c.o.provides.build: src/
 
 src/CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.o: src/systems/InputSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_23) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/InputSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.i: cmake_force
@@ -714,7 +750,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/InputSystem.c.o.provides.build: src/C
 
 src/CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.o: src/systems/PhysicsSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_24) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/PhysicsSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.i: cmake_force
@@ -738,7 +774,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/PhysicsSystem.c.o.provides.build: src
 
 src/CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.o: src/systems/RemoveSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_25) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/RemoveSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.i: cmake_force
@@ -762,7 +798,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/RemoveSystem.c.o.provides.build: src/
 
 src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o: src/systems/ScoreSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_26) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/ScoreSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.i: cmake_force
@@ -786,7 +822,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o.provides.build: src/C
 
 src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o: src/systems/SpawnSystem.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_27) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o   -c /home/bruce/Git/vala-emscripten/install/src/systems/SpawnSystem.c
 
 src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.i: cmake_force
@@ -810,7 +846,7 @@ src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o.provides.build: src/C
 
 src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o: src/util/Cache.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_28) "Building C object src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/util/Cache.c.o   -c /home/bruce/Git/vala-emscripten/install/src/util/Cache.c
 
 src/CMakeFiles/vala-emscripten.dir/util/Cache.c.i: cmake_force
@@ -834,7 +870,7 @@ src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o.provides.build: src/CMakeFiles
 
 src/CMakeFiles/vala-emscripten.dir/util/File.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/util/File.c.o: src/util/File.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_29) "Building C object src/CMakeFiles/vala-emscripten.dir/util/File.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object src/CMakeFiles/vala-emscripten.dir/util/File.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/util/File.c.o   -c /home/bruce/Git/vala-emscripten/install/src/util/File.c
 
 src/CMakeFiles/vala-emscripten.dir/util/File.c.i: cmake_force
@@ -856,9 +892,57 @@ src/CMakeFiles/vala-emscripten.dir/util/File.c.o.provides: src/CMakeFiles/vala-e
 src/CMakeFiles/vala-emscripten.dir/util/File.c.o.provides.build: src/CMakeFiles/vala-emscripten.dir/util/File.c.o
 
 
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o: src/util/JsVariant.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o   -c /home/bruce/Git/vala-emscripten/install/src/util/JsVariant.c
+
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/vala-emscripten.dir/util/JsVariant.c.i"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bruce/Git/vala-emscripten/install/src/util/JsVariant.c > CMakeFiles/vala-emscripten.dir/util/JsVariant.c.i
+
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/vala-emscripten.dir/util/JsVariant.c.s"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bruce/Git/vala-emscripten/install/src/util/JsVariant.c -o CMakeFiles/vala-emscripten.dir/util/JsVariant.c.s
+
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.requires:
+
+.PHONY : src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.requires
+
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.provides: src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.requires
+	$(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.provides.build
+.PHONY : src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.provides
+
+src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.provides.build: src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o
+
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o: src/util/Json.c
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Building C object src/CMakeFiles/vala-emscripten.dir/util/Json.c.o"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/util/Json.c.o   -c /home/bruce/Git/vala-emscripten/install/src/util/Json.c
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing C source to CMakeFiles/vala-emscripten.dir/util/Json.c.i"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -E /home/bruce/Git/vala-emscripten/install/src/util/Json.c > CMakeFiles/vala-emscripten.dir/util/Json.c.i
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling C source to assembly CMakeFiles/vala-emscripten.dir/util/Json.c.s"
+	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -S /home/bruce/Git/vala-emscripten/install/src/util/Json.c -o CMakeFiles/vala-emscripten.dir/util/Json.c.s
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.requires:
+
+.PHONY : src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.requires
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.provides: src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.requires
+	$(MAKE) -f src/CMakeFiles/vala-emscripten.dir/build.make src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.provides.build
+.PHONY : src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.provides
+
+src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.provides.build: src/CMakeFiles/vala-emscripten.dir/util/Json.c.o
+
+
 src/CMakeFiles/vala-emscripten.dir/util/String.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/util/String.c.o: src/util/String.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_30) "Building C object src/CMakeFiles/vala-emscripten.dir/util/String.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_33) "Building C object src/CMakeFiles/vala-emscripten.dir/util/String.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/util/String.c.o   -c /home/bruce/Git/vala-emscripten/install/src/util/String.c
 
 src/CMakeFiles/vala-emscripten.dir/util/String.c.i: cmake_force
@@ -882,7 +966,7 @@ src/CMakeFiles/vala-emscripten.dir/util/String.c.o.provides.build: src/CMakeFile
 
 src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o: src/CMakeFiles/vala-emscripten.dir/flags.make
 src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o: src/vala-emscripten.c
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_31) "Building C object src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_34) "Building C object src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o"
 	cd /home/bruce/Git/vala-emscripten/install/src && /usr/bin/cc  $(C_DEFINES) $(C_INCLUDES) $(C_FLAGS) -o CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o   -c /home/bruce/Git/vala-emscripten/install/src/vala-emscripten.c
 
 src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.i: cmake_force
@@ -922,6 +1006,7 @@ vala__emscripten_OBJECTS = \
 "CMakeFiles/vala-emscripten.dir/sdx/files/FileHandle.c.o" \
 "CMakeFiles/vala-emscripten.dir/sdx/graphics/Sprite.c.o" \
 "CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o" \
+"CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o" \
 "CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o" \
 "CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o" \
 "CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o" \
@@ -934,6 +1019,8 @@ vala__emscripten_OBJECTS = \
 "CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o" \
 "CMakeFiles/vala-emscripten.dir/util/Cache.c.o" \
 "CMakeFiles/vala-emscripten.dir/util/File.c.o" \
+"CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o" \
+"CMakeFiles/vala-emscripten.dir/util/Json.c.o" \
 "CMakeFiles/vala-emscripten.dir/util/String.c.o" \
 "CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o"
 
@@ -956,6 +1043,7 @@ src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/sdx/Font.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/sdx/files/FileHandle.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Sprite.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o
+src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o
@@ -968,11 +1056,13 @@ src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/systems/ScoreSystem.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/util/File.c.o
+src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o
+src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/util/Json.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/util/String.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/build.make
 src/vala-emscripten: src/CMakeFiles/vala-emscripten.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_32) "Linking C executable vala-emscripten"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/bruce/Git/vala-emscripten/install/CMakeFiles --progress-num=$(CMAKE_PROGRESS_35) "Linking C executable vala-emscripten"
 	cd /home/bruce/Git/vala-emscripten/install/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/vala-emscripten.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -996,6 +1086,7 @@ src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/sdx/files/FileHandle.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Sprite.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/Surface.c.o.requires
+src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/sdx/graphics/TextureAtlas.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/sdx/sdx.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/systems/AnimationSystem.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/systems/CollisionSystem.c.o.requires
@@ -1008,6 +1099,8 @@ src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/systems/SpawnSystem.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/util/Cache.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/util/File.c.o.requires
+src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/util/JsVariant.c.o.requires
+src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/util/Json.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/util/String.c.o.requires
 src/CMakeFiles/vala-emscripten.dir/requires: src/CMakeFiles/vala-emscripten.dir/vala-emscripten.c.o.requires
 
@@ -1033,6 +1126,7 @@ src/CMakeFiles/vala-emscripten.dir/depend: src/sdx/Font.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/sdx/files/FileHandle.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/sdx/graphics/Sprite.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/sdx/graphics/Surface.c
+src/CMakeFiles/vala-emscripten.dir/depend: src/sdx/graphics/TextureAtlas.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/sdx/sdx.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/systems/AnimationSystem.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/systems/CollisionSystem.c
@@ -1045,6 +1139,8 @@ src/CMakeFiles/vala-emscripten.dir/depend: src/systems/ScoreSystem.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/systems/SpawnSystem.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/util/Cache.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/util/File.c
+src/CMakeFiles/vala-emscripten.dir/depend: src/util/JsVariant.c
+src/CMakeFiles/vala-emscripten.dir/depend: src/util/Json.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/util/String.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/vala-emscripten.c
 src/CMakeFiles/vala-emscripten.dir/depend: src/vala-emscripten_valac.stamp

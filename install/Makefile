@@ -192,6 +192,19 @@ pot/fast:
 .PHONY : pot/fast
 
 #=============================================================================
+# Target rules for targets named resources_gresource_xml
+
+# Build rule for target.
+resources_gresource_xml: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 resources_gresource_xml
+.PHONY : resources_gresource_xml
+
+# fast build rule for target.
+resources_gresource_xml/fast:
+	$(MAKE) -f data/CMakeFiles/resources_gresource_xml.dir/build.make data/CMakeFiles/resources_gresource_xml.dir/build
+.PHONY : resources_gresource_xml/fast
+
+#=============================================================================
 # Target rules for targets named vala-emscripten
 
 # Build rule for target.
@@ -219,6 +232,7 @@ help:
 	@echo "... edit_cache"
 	@echo "... i18n"
 	@echo "... pot"
+	@echo "... resources_gresource_xml"
 	@echo "... vala-emscripten"
 .PHONY : help
 

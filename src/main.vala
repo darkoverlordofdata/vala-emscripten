@@ -1,11 +1,28 @@
 /**
  *	profiling data
+
+find `pwd` -type f -regex ".*.vala\|.*.gs" -exec grep -Hn -E  'class|namespace' {}  \;
+
+
+find `pwd` -type f -name "*.vala" -exec grep -E  'class|namespace' {}
+ \;
  */
 public int k;
 public double t;
 public double t1;
 public double t2;
 public double t3;
+
+[Compact]
+public class TestClass {
+	public string name;
+
+	public TestClass() {
+		print("this is a test class\n");
+		name = "frodo";
+	}
+	
+}
 /**
  * gameloop
  * 
@@ -37,9 +54,6 @@ public void gameloop(Game game) {
 
 #if (DESKTOP)
 
-// hide GLib.Object
-//public class Object {}
-
 /**
  * Start the game
  *
@@ -67,7 +81,8 @@ public int main(string args[]) {
  *
  */
 public void game() {
-	
+	var x = new Test.MyClass();
+	print("%s\n", x.getTest());
 	var window = sdx.initialize(720, 512, "Shmupwarz");
 	var game = new Game(720, 512);
 	game.initialize();

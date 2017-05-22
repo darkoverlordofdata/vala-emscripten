@@ -42,6 +42,14 @@
 /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/CMakeFiles/install/local.dir
 /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/CMakeFiles/test.dir
 /home/bruce/Git/vala-emscripten/install/src/sdx/graphics/CMakeFiles/edit_cache.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/list_install_components.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/install.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/edit_cache.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/rebuild_cache.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/resources_gresource_xml.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/install/strip.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/install/local.dir
+/home/bruce/Git/vala-emscripten/install/data/CMakeFiles/test.dir
 /home/bruce/Git/vala-emscripten/install/src/entitas/CMakeFiles/list_install_components.dir
 /home/bruce/Git/vala-emscripten/install/src/entitas/CMakeFiles/install.dir
 /home/bruce/Git/vala-emscripten/install/src/entitas/CMakeFiles/rebuild_cache.dir

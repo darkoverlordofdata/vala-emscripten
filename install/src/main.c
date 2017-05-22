@@ -6,6 +6,7 @@
 #include <glib-object.h>
 #include <float.h>
 #include <math.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <SDL2/SDL_video.h>
@@ -38,6 +39,7 @@ extern gboolean sdx_running;
 
 GType game_get_type (void) G_GNUC_CONST;
 void gameloop (Game* game);
+gdouble sdx_getNow (void);
 void game_update (Game* self);
 void game_draw (Game* self);
 gint _vala_main (const gchar* args, int args_length1);
@@ -57,13 +59,46 @@ void game_start (Game* self);
  * 
  */
 void gameloop (Game* game) {
-	Game* _tmp0_ = NULL;
+	gdouble _tmp0_ = 0.0;
 	Game* _tmp1_ = NULL;
+	gdouble _tmp2_ = 0.0;
+	gdouble _tmp3_ = 0.0;
+	gdouble _tmp4_ = 0.0;
+	gdouble _tmp5_ = 0.0;
+	gdouble _tmp6_ = 0.0;
+	gint _tmp7_ = 0;
+	gint _tmp8_ = 0;
+	Game* _tmp12_ = NULL;
 	g_return_if_fail (game != NULL);
-	_tmp0_ = game;
-	game_update (_tmp0_);
+	_tmp0_ = sdx_getNow ();
+	t1 = _tmp0_;
 	_tmp1_ = game;
-	game_draw (_tmp1_);
+	game_update (_tmp1_);
+	_tmp2_ = sdx_getNow ();
+	t2 = _tmp2_;
+	_tmp3_ = t2;
+	_tmp4_ = t1;
+	t3 = _tmp3_ - _tmp4_;
+	_tmp5_ = t;
+	_tmp6_ = t3;
+	t = _tmp5_ + _tmp6_;
+	_tmp7_ = k;
+	k = _tmp7_ + 1;
+	_tmp8_ = k;
+	if (_tmp8_ == 1000) {
+		gdouble _tmp9_ = 0.0;
+		FILE* _tmp10_ = NULL;
+		gdouble _tmp11_ = 0.0;
+		k = 0;
+		_tmp9_ = t;
+		t = _tmp9_ / 1000.0;
+		_tmp10_ = stdout;
+		_tmp11_ = t;
+		fprintf (_tmp10_, "%f\n", _tmp11_);
+		t = (gdouble) 0;
+	}
+	_tmp12_ = game;
+	game_draw (_tmp12_);
 }
 
 

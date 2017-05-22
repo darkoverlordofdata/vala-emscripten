@@ -28,14 +28,23 @@ public class Factory : World {
 	public Factory() {
 		base();
 		setPool(256, Pool.Count, {
-			Buffer() { pool = Pool.BULLET,      size = 20,  factory = createBullet },
-			Buffer() { pool = Pool.ENEMY1,      size = 15,  factory = createEnemy1 },
-			Buffer() { pool = Pool.ENEMY2,      size = 5,   factory = createEnemy2 },
-			Buffer() { pool = Pool.ENEMY3,      size = 4,   factory = createEnemy3 },
-			Buffer() { pool = Pool.EXPLOSION,   size = 10,  factory = createExplosion },
-			Buffer() { pool = Pool.BANG,        size = 12,  factory = createBang },
-			Buffer() { pool = Pool.PARTICLE,    size = 100, factory = createParticle }
+			Buffer(Pool.BULLET, 	 20, createBullet),
+			Buffer(Pool.ENEMY1, 	 15, createEnemy1),
+			Buffer(Pool.ENEMY2,  	  5, createEnemy2),
+			Buffer(Pool.ENEMY3,  	  4, createEnemy3),
+			Buffer(Pool.EXPLOSION, 	 10, createExplosion),
+			Buffer(Pool.BANG,      	 12, createBang),
+			Buffer(Pool.PARTICLE,  	100, createParticle)
 		});
+		//  setPool(256, Pool.Count, {
+		//  	Buffer() { pool = Pool.BULLET,      size = 20,  factory = createBullet },
+		//  	Buffer() { pool = Pool.ENEMY1,      size = 15,  factory = createEnemy1 },
+		//  	Buffer() { pool = Pool.ENEMY2,      size = 5,   factory = createEnemy2 },
+		//  	Buffer() { pool = Pool.ENEMY3,      size = 4,   factory = createEnemy3 },
+		//  	Buffer() { pool = Pool.EXPLOSION,   size = 10,  factory = createExplosion },
+		//  	Buffer() { pool = Pool.BANG,        size = 12,  factory = createBang },
+		//  	Buffer() { pool = Pool.PARTICLE,    size = 100, factory = createParticle }
+		//  });
 	}
 
 	/**
@@ -78,7 +87,7 @@ public class Factory : World {
 		return createBase("enemy1", "assets/images/enemy1.png", Pool.ENEMY1)
 			.addHealth(10, 10)
 			.addVelocity(0, 40)
-			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
+			.addText("100%", sdx.graphics.Sprite.fromText("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy1(true);
 	}
 
@@ -86,7 +95,7 @@ public class Factory : World {
 		return createBase("enemy2", "assets/images/enemy2.png", Pool.ENEMY2)
 			.addHealth(20, 20)
 			.addVelocity(0, 30)
-			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
+			.addText("100%", sdx.graphics.Sprite.fromText("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy2(true);
 	}
 
@@ -94,7 +103,7 @@ public class Factory : World {
 		return createBase("enemy3", "assets/images/enemy3.png", Pool.ENEMY3)
 			.addHealth(60, 60)
 			.addVelocity(0, 20)
-			.addText("100%", new sdx.graphics.Sprite("100%", sdx.smallFont, sdx.Color.LimeGreen))
+			.addText("100%", sdx.graphics.Sprite.fromText("100%", sdx.smallFont, sdx.Color.LimeGreen))
 			.setEnemy3(true);
 	}
 
@@ -209,7 +218,6 @@ public class Factory : World {
 		var velocityX = magnitude * Math.cos(radians);
 		var velocityY = magnitude * Math.sin(radians);
 		var scale = sdx.getRandom();
-
 
 		var entity = cache[Pool.PARTICLE].deque();
 		entityAdded(entity

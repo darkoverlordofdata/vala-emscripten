@@ -5,6 +5,7 @@ namespace sdx.files {
 		public string path;
 		public FileType type;
 
+
 		public FileHandle(string path, FileType type) {
 			this.path = path;
 			this.type = type;
